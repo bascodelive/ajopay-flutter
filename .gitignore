@@ -1,0 +1,70 @@
+# ==========================================
+# System & IDEs
+# ==========================================
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+#.vscode/
+
+# ==========================================
+# Security & Secrets
+# ==========================================
+*.keystore
+*.jks
+*.p12
+*.pem
+.env
+.env.*
+local.properties
+
+# ==========================================
+# Flutter / Dart / Pub
+# ==========================================
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# ==========================================
+# Platform Specific Generated Files
+# ==========================================
+# Android
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS & CocoaPods
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+
+# Web & Desktop
+flutter_export_environment.sh
+/windows/flutter/ephemeral/
+/linux/flutter/ephemeral/

@@ -1,0 +1,77 @@
+name: ajopay
+description: Ajopay — AJO/ESUSU-style rotating savings groups, Flutter client.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State management (blueprint Section 1.1) ---
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+
+  # --- HTTP + networking (blueprint Section 1: Dio for interceptor support) ---
+  dio: ^5.4.3
+
+  # --- Models / JSON (blueprint Section 1: Freezed, generated from API.md) ---
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.9.0
+
+  # --- Routing (blueprint Section 1: go_router for auth-gated redirects) ---
+  go_router: ^14.2.0
+
+  # --- Secure token storage (blueprint Section 5.1 — never SharedPreferences) ---
+  flutter_secure_storage: ^9.2.2
+
+  # --- SSE client for live messages (blueprint Section 6 — Dio can't do SSE) ---
+  flutter_client_sse: ^2.0.1
+
+  # --- Small, genuinely needed utilities ---
+  intl: ^0.19.0 # cycleDate (YYYY-MM-DD) formatting per API.md conventions
+
+  # --- Typography ---
+  # Deliberate two-font pairing: Sora for headlines/titles (more
+  # character, used with restraint), Inter for body/labels (dense
+  # legibility). BRAND.md locks colors only, not typefaces — this is a
+  # considered choice on top of that, not a placeholder default.
+  google_fonts: ^6.2.1
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  build_runner: ^2.4.11
+  riverpod_generator: ^2.4.0
+  freezed: ^2.5.2
+  json_serializable: ^6.8.0
+  custom_lint: ^0.6.4
+  riverpod_lint: ^2.3.10
+
+  # --- App icon generation (blueprint Section 7) ---
+  # Sources are 1024px, color-corrected to BRAND.md's exact locked
+  # Primary Dark (#0B6B48) — see BUILD_PHASES.md Phase 0 for how these
+  # were derived from the original IconKitchen export.
+  flutter_launcher_icons: ^0.14.2
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon/
+
+# Run: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#0B6B48" # exact locked hex, solid color, no upscale artifact possible
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  adaptive_icon_monochrome: "assets/icon/icon_monochrome.png"
+  remove_alpha_ios: true
