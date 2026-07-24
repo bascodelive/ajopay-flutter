@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/widgets/premium_badge.dart';
 import '../../../auth/application/auth_controller.dart';
 import '../../application/account_controller.dart';
@@ -55,14 +56,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
     if (!ok) {
       final message = ref.read(accountControllerProvider.notifier).lastError;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(message ?? 'Could not save changes. Try again.')),
-      );
+      AppFeedback.showError(
+          context, message ?? 'Could not save changes. Try again.');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated')),
-      );
+      AppFeedback.showSuccess(context, 'Profile updated');
     }
   }
 
@@ -92,6 +89,44 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  Future<void> _confirmLogoutAll() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log out of all devices?'),
+        content: const Text(
+          'This signs out every device where you\'re logged in — not just '
+          'this one. Use this if you think your account may have been '
+          'accessed somewhere you don\'t recognize.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Log out everywhere',
+                style: TextStyle(color: AjopayColors.error)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    final ok = await ref.read(authControllerProvider.notifier).logoutAll();
+    if (!mounted) return;
+    if (!ok) {
+      final message = ref.read(authControllerProvider).errorMessage;
+      AppFeedback.showError(
+          context, message ?? 'Could not log out of all devices. Try again.');
+    }
+    // On success, the router redirect handles navigation back to /login
+    // on its own, same as regular logout.
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(accountControllerProvider);
@@ -119,8 +154,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
-                    size: 48, color: AjopayColors.error),
+                Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
                 const SizedBox(height: 12),
                 const Text('Could not load your profile.'),
                 const SizedBox(height: 16),
@@ -154,7 +188,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 else ...[
                   _InfoCard(profile: profile),
                   const SizedBox(height: 24),
-                  _ActionsCard(onLogout: _confirmLogout),
+                  _ActionsCard(
+                      onLogout: _confirmLogout, onLogoutAll: _confirmLogoutAll),
                 ],
               ],
             ),
@@ -337,9 +372,10 @@ class _VerifiedChip extends StatelessWidget {
 }
 
 class _ActionsCard extends StatelessWidget {
-  const _ActionsCard({required this.onLogout});
+  const _ActionsCard({required this.onLogout, required this.onLogoutAll});
 
   final VoidCallback onLogout;
+  final VoidCallback onLogoutAll;
 
   @override
   Widget build(BuildContext context) {
@@ -354,10 +390,16 @@ class _ActionsCard extends StatelessWidget {
           ),
           const Divider(height: 1),
           ListTile(
-            leading: const Icon(Icons.logout, color: AjopayColors.error),
-            title: const Text('Log out',
-                style: TextStyle(color: AjopayColors.error)),
+            leading: Icon(Icons.logout, color: AjopayColors.error),
+            title: Text('Log out', style: TextStyle(color: AjopayColors.error)),
             onTap: onLogout,
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: Icon(Icons.phonelink_erase, color: AjopayColors.error),
+            title: Text('Log out of all devices',
+                style: TextStyle(color: AjopayColors.error)),
+            onTap: onLogoutAll,
           ),
         ],
       ),

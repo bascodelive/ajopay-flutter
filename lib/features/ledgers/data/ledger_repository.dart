@@ -77,8 +77,9 @@ class LedgerRepository {
     }
   }
 
-  /// ADMIN-only server-side — every active member, not paginated (API.md:
-  /// bounded list, realistically dozens of rows).
+  /// Any active member can call this now (API.md updated — used to be
+  /// ADMIN-only). Every active member of the ledger, not paginated
+  /// (API.md: bounded list, realistically dozens of rows).
   Future<List<LedgerMemberResponse>> getMembers(String ledgerId) async {
     try {
       final response = await _dio.get('/api/ledgers/$ledgerId/members');

@@ -10,6 +10,13 @@ import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
+import '../../features/circles/presentation/screens/assign_rotation_screen.dart';
+import '../../features/circles/presentation/screens/circle_history_screen.dart';
+import '../../features/circles/presentation/screens/circle_home_screen.dart';
+import '../../features/circles/presentation/screens/circle_participants_screen.dart';
+import '../../features/circles/presentation/screens/create_circle_screen.dart';
+import '../../features/circles/presentation/screens/current_payout_screen.dart';
+import '../../features/circles/presentation/screens/rotation_queue_screen.dart';
 import '../../features/ledgers/presentation/screens/create_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/edit_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/join_ledger_screen.dart';
@@ -32,13 +39,7 @@ class _GoRouterRefreshNotifier extends ChangeNotifier {
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _GoRouterRefreshNotifier(ref);
 
-  const authRoutes = {
-    '/login',
-    '/register',
-    '/verify-email',
-    '/forgot-password',
-    '/reset-password'
-  };
+  const authRoutes = {'/login', '/register', '/verify-email', '/forgot-password', '/reset-password'};
 
   return GoRouter(
     initialLocation: '/login',
@@ -125,6 +126,55 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ledgerId: state.pathParameters['id']!,
         ),
       ),
+      // Protected — Circles (nested under a ledger).
+      GoRoute(
+        path: '/ledgers/:id/circle',
+        builder: (context, state) => CircleHomeScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/create',
+        builder: (context, state) => CreateCircleScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/participants',
+        builder: (context, state) => CircleParticipantsScreen(
+          ledgerId: state.pathParameters['id']!,
+          circleId: state.pathParameters['circleId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/rotation/assign',
+        builder: (context, state) => AssignRotationScreen(
+          ledgerId: state.pathParameters['id']!,
+          circleId: state.pathParameters['circleId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/rotation',
+        builder: (context, state) => RotationQueueScreen(
+          ledgerId: state.pathParameters['id']!,
+          circleId: state.pathParameters['circleId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/current-payout',
+        builder: (context, state) => CurrentPayoutScreen(
+          ledgerId: state.pathParameters['id']!,
+          circleId: state.pathParameters['circleId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/history',
+        builder: (context, state) => CircleHistoryScreen(
+          ledgerId: state.pathParameters['id']!,
+          circleId: state.pathParameters['circleId']!,
+        ),
+      ),
     ],
   );
 });
+

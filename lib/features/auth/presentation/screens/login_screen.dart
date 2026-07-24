@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/brand_underline.dart';
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -48,18 +49,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final email = _emailController.text.trim();
       final isUnverified = message?.toLowerCase().contains('verif') ?? false;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message ?? 'Login failed. Please try again.'),
-          action: isUnverified
-              ? SnackBarAction(
-                  label: 'Verify',
-                  onPressed: () => context.go(
-                    '/verify-email?email=${Uri.encodeComponent(email)}',
-                  ),
-                )
-              : null,
-        ),
+      AppFeedback.showError(
+        context,
+        message ?? 'Login failed. Please try again.',
+        action: isUnverified
+            ? SnackBarAction(
+                label: 'Verify',
+                textColor: Colors.white,
+                onPressed: () => context.go(
+                  '/verify-email?email=${Uri.encodeComponent(email)}',
+                ),
+              )
+            : null,
       );
     }
   }
@@ -108,9 +109,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? 'Password is required'
-                      : null,
+                  validator: (value) =>
+                      (value == null || value.isEmpty) ? 'Password is required' : null,
                 ),
                 Align(
                   alignment: Alignment.centerRight,
@@ -137,8 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 TextButton(
-                  onPressed:
-                      _isSubmitting ? null : () => context.go('/register'),
+                  onPressed: _isSubmitting ? null : () => context.go('/register'),
                   child: const Text("Don't have an account? Create one"),
                 ),
               ],

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/brand_underline.dart';
+import '../../../../core/theme/app_feedback.dart';
 
 import '../../application/auth_controller.dart';
 
@@ -75,10 +76,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       context.go('/verify-email?email=${Uri.encodeComponent(email)}');
     } else {
       final message = ref.read(authControllerProvider).errorMessage;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(message ?? 'Registration failed. Please try again.')),
-      );
+      AppFeedback.showError(
+          context, message ?? 'Registration failed. Please try again.');
     }
   }
 

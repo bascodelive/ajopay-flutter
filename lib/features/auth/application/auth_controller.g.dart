@@ -6,7 +6,7 @@ part of 'auth_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$authControllerHash() => r'dcd78d57f79da2555cd9617cfa43970603d06401';
+String _$authControllerHash() => r'11ab95b0be480287b7c1f1df48e47fee6f73301b';
 
 /// Drives two things at once:
 ///  - screens call login/register/verifyEmail/logout on this

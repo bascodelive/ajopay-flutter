@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -76,16 +77,12 @@ class _EditLedgerScreenState extends ConsumerState<EditLedgerScreen> {
       ref.invalidate(ledgerDetailProvider(widget.ledger.id));
       ref.invalidate(myLedgersProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ledger updated')),
-      );
+      AppFeedback.showSuccess(context, 'Ledger updated');
       context.pop();
     } else {
       final message = ref.read(ledgerControllerProvider.notifier).lastError;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(message ?? 'Could not update ledger. Try again.')),
-      );
+      AppFeedback.showError(
+          context, message ?? 'Could not update ledger. Try again.');
     }
   }
 
@@ -118,7 +115,7 @@ class _EditLedgerScreenState extends ConsumerState<EditLedgerScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  initialValue: _frequency,
+                  value: _frequency,
                   decoration: const InputDecoration(
                       labelText: 'Contribution frequency'),
                   items: _frequencies

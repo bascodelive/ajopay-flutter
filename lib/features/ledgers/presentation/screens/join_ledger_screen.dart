@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/ledger_controller.dart';
 
 class JoinLedgerScreen extends ConsumerStatefulWidget {
@@ -40,8 +41,9 @@ class _JoinLedgerScreenState extends ConsumerState<JoinLedgerScreen> {
       context.pushReplacement('/ledgers/${ledger.id}');
     } else {
       final message = ref.read(ledgerControllerProvider.notifier).lastError;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message ?? 'Could not join ledger. Check the code and try again.')),
+      AppFeedback.showError(
+        context,
+        message ?? 'Could not join ledger. Check the code and try again.',
       );
     }
   }

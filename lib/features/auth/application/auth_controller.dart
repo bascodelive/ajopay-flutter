@@ -1,20 +1,30 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/session/session_reset.dart';
 import '../../../core/storage/secure_token_storage.dart';
 import '../data/auth_repository.dart';
 import '../data/models/auth_models.dart';
 
+part 'auth_controller.freezed.dart';
 part 'auth_controller.g.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
-class AuthState {
-  const AuthState({required this.status, this.errorMessage, this.infoMessage});
-
-  final AuthStatus status;
-  final String? errorMessage;
-  final String? infoMessage;
+/// Freezed, like every other model in this codebase — was previously
+/// hand-written with no `==`/`hashCode` override, meaning every
+/// reassignment (even to identical values) was treated as "changed" by
+/// Riverpod, causing redundant notifications to anything listening (the
+/// router's redirect logic, chiefly). Fixed for consistency and
+/// correctness, not just style.
+@freezed
+class AuthState with _$AuthState {
+  const factory AuthState({
+    required AuthStatus status,
+    String? errorMessage,
+    String? infoMessage,
+  }) = _AuthState;
 
   static const initial = AuthState(status: AuthStatus.unknown);
 }
@@ -125,9 +135,39 @@ class AuthController extends _$AuthController {
     }
     await storage.clear();
     state = const AuthState(status: AuthStatus.unauthenticated);
+    // Bug fix: token clearing alone left every OTHER feature's cached
+    // fetch results (ledgers, profile, roles) sitting in memory — the
+    // next user to log in on the same app session would see the
+    // previous user's data until explicitly invalidated. See
+    // core/session/session_reset.dart.
+    resetAllSessionProviders(ref);
+  }
+
+  /// API.md: revokes EVERY active refresh token for the caller — every
+  /// device/session signed out at once, not just this one. Requires a
+  /// valid access token server-side (unlike single-device logout, which
+  /// is public since the refresh token itself proves identity there).
+  ///
+  /// Was fully built at the repository layer from Phase 1a but never
+  /// wrapped up here or exposed in any screen — a real gap, not a design
+  /// choice. Fixed alongside the observation that flagged it.
+  Future<bool> logoutAll() async {
+    final repository = ref.read(authRepositoryProvider);
+    final storage = ref.read(secureTokenStorageProvider);
+    try {
+      await repository.logoutAll();
+    } on ApiException catch (e) {
+      state = AuthState(status: state.status, errorMessage: e.message);
+      return false;
+    }
+    await storage.clear();
+    state = const AuthState(status: AuthStatus.unauthenticated);
+    resetAllSessionProviders(ref);
+    return true;
   }
 
   void forceLogout() {
     state = const AuthState(status: AuthStatus.unauthenticated);
+    resetAllSessionProviders(ref);
   }
 }

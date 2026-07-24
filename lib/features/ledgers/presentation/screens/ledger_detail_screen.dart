@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -39,8 +40,7 @@ class LedgerDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
-                    size: 48, color: AjopayColors.error),
+                Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
                 const SizedBox(height: 12),
                 const Text('Could not load this ledger.'),
                 const SizedBox(height: 16),
@@ -71,6 +71,16 @@ class LedgerDetailScreen extends ConsumerWidget {
                     title: const Text('Members'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/ledgers/$ledgerId/members'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.autorenew),
+                    title: const Text('Circle'),
+                    subtitle: const Text('Payout rotation for this ledger'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/ledgers/$ledgerId/circle'),
                   ),
                 ),
               ],
@@ -222,13 +232,10 @@ class _InviteCodeCard extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.copy_outlined,
-                  color: AjopayColors.primaryDark),
+              icon: Icon(Icons.copy_outlined, color: AjopayColors.primaryDark),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: ledger.inviteCode));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Invite code copied')),
-                );
+                AppFeedback.showSuccess(context, 'Invite code copied');
               },
             ),
           ],
