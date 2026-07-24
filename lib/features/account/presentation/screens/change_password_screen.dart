@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/account_controller.dart';
 
 final _strongPasswordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
@@ -69,10 +70,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     if (!ok) {
       setState(() => _isSubmitting = false);
       final message = ref.read(accountControllerProvider.notifier).lastError;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(message ?? 'Could not change password. Try again.')),
-      );
+      AppFeedback.showError(
+          context, message ?? 'Could not change password. Try again.');
     }
     // On success, AccountController already called AuthController.forceLogout()
     // — app_router's redirect (blueprint Section 5.3) handles navigation

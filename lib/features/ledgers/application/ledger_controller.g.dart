@@ -6,7 +6,7 @@ part of 'ledger_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$ledgerControllerHash() => r'531565b1bb3000d8f89841e8d3144d57f8bae29b';
+String _$ledgerControllerHash() => r'299389697c69b79e62c47f57cffde9417c91707f';
 
 /// Holds the ledger currently being created/joined/viewed/edited.
 ///
@@ -19,7 +19,7 @@ String _$ledgerControllerHash() => r'531565b1bb3000d8f89841e8d3144d57f8bae29b';
 /// Copied from [LedgerController].
 @ProviderFor(LedgerController)
 final ledgerControllerProvider =
-    AutoDisposeNotifierProvider<LedgerController, LedgerResponse?>.internal(
+    NotifierProvider<LedgerController, LedgerResponse?>.internal(
   LedgerController.new,
   name: r'ledgerControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -29,6 +29,6 @@ final ledgerControllerProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$LedgerController = AutoDisposeNotifier<LedgerResponse?>;
+typedef _$LedgerController = Notifier<LedgerResponse?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

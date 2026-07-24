@@ -6,12 +6,12 @@ part of 'account_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$accountControllerHash() => r'b8c3f131ca73a9b4de95167c577ad0fbe99d6df4';
+String _$accountControllerHash() => r'908c056000d205433a3b022507767c9110dc5734';
 
 /// See also [AccountController].
 @ProviderFor(AccountController)
-final accountControllerProvider = AutoDisposeAsyncNotifierProvider<
-    AccountController, ProfileResponse>.internal(
+final accountControllerProvider =
+    AsyncNotifierProvider<AccountController, ProfileResponse>.internal(
   AccountController.new,
   name: r'accountControllerProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
@@ -21,6 +21,6 @@ final accountControllerProvider = AutoDisposeAsyncNotifierProvider<
   allTransitiveDependencies: null,
 );
 
-typedef _$AccountController = AutoDisposeAsyncNotifier<ProfileResponse>;
+typedef _$AccountController = AsyncNotifier<ProfileResponse>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

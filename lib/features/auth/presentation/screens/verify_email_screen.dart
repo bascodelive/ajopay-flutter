@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/auth_controller.dart';
 
 final _sixDigitRegex = RegExp(r'^\d{6}$');
@@ -46,25 +47,19 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
 
     if (ok) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email verified — you can log in now.')),
-      );
+      AppFeedback.showSuccess(context, 'Email verified — you can log in now.');
       context.go('/login');
     } else {
       final message = ref.read(authControllerProvider).errorMessage;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(message ?? 'Verification failed. Please try again.')),
-      );
+      AppFeedback.showError(
+          context, message ?? 'Verification failed. Please try again.');
     }
   }
 
   Future<void> _resend() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email first')),
-      );
+      AppFeedback.showInfo(context, 'Enter your email first');
       return;
     }
 
@@ -74,14 +69,11 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     setState(() => _isResending = false);
 
     final state = ref.read(authControllerProvider);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          state.infoMessage ??
-              state.errorMessage ??
-              'If needed, a new code was sent.',
-        ),
-      ),
+    AppFeedback.showInfo(
+      context,
+      state.infoMessage ??
+          state.errorMessage ??
+          'If needed, a new code was sent.',
     );
   }
 
@@ -130,9 +122,8 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   validator: (value) {
                     final v = value?.trim() ?? '';
                     if (v.isEmpty) return 'Code is required';
-                    if (!_sixDigitRegex.hasMatch(v)) {
+                    if (!_sixDigitRegex.hasMatch(v))
                       return 'Enter all 6 digits';
-                    }
                     return null;
                   },
                 ),

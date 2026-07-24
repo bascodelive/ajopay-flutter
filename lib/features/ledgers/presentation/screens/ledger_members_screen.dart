@@ -20,10 +20,14 @@ class LedgerMembersScreen extends ConsumerWidget {
       body: membersAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) {
-          // API.md: 403 for a non-Admin caller — a real, expected outcome
-          // here, not just a generic failure, worth its own message.
+          // API.md (updated): any active member can view the full list now
+          // — this used to be Admin-only, and a 403 here specifically
+          // meant "you're not an Admin." Now a 403 only means "you're not
+          // an active member of this ledger at all," so a generic message
+          // is the honest one rather than asserting a reason that's no
+          // longer true.
           final message = error is ApiException && error.isForbidden
-              ? 'Only ledger Admins can view the full member list.'
+              ? 'You need to be a member of this ledger to view its members.'
               : 'Could not load members.';
           return Center(
             child: Padding(

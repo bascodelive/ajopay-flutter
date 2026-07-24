@@ -1,20 +1,29 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/session/require_authenticated.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/account_repository.dart';
 import '../data/models/account_models.dart';
 
 part 'account_controller.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true) // bug fix — see BUILD_PHASES.md Bug 5
 class AccountController extends _$AccountController {
   String? _lastError;
   String? get lastError => _lastError;
 
   @override
   Future<ProfileResponse> build() {
-    return ref.read(accountRepositoryProvider).getProfile();
+    // Bug fix (BUILD_PHASES.md Bug 2): without this guard, invalidating
+    // this provider while ProfileScreen is still mid-teardown (the exact
+    // moment logout() runs) caused an immediate rebuild that fired a real
+    // getProfile() call with already-cleared tokens — 401, which
+    // triggered a refresh-then-forceLogout loop that invalidated this
+    // same provider again. The guard means a rebuild while unauthenticated
+    // never makes the network call at all.
+    return requireAuthenticated(
+        ref, () => ref.read(accountRepositoryProvider).getProfile());
   }
 
   Future<bool> updateProfile({required String fullName, String? phone}) async {

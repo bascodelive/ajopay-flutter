@@ -32,6 +32,7 @@ dependencies:
 
   # --- Small, genuinely needed utilities ---
   intl: ^0.19.0 # cycleDate (YYYY-MM-DD) formatting per API.md conventions
+  connectivity_plus: ^6.1.0 # global offline awareness — see blueprint Section 8
 
   # --- Typography ---
   # Deliberate two-font pairing: Sora for headlines/titles (more
@@ -60,6 +61,14 @@ dev_dependencies:
   # were derived from the original IconKitchen export.
   flutter_launcher_icons: ^0.14.2
 
+  # --- Splash/launch screen ---
+  # Separate concern from the app icon above — without this, Android shows
+  # its own default black/white splash before Flutter's first frame,
+  # which is what you're seeing. Reuses the same brand-correct foreground
+  # mark + locked Primary Dark background, so the icon and splash feel
+  # like one continuous brand moment instead of two different colors.
+  flutter_native_splash: ^2.4.1
+
 flutter:
   uses-material-design: true
   assets:
@@ -75,3 +84,23 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   adaptive_icon_monochrome: "assets/icon/icon_monochrome.png"
   remove_alpha_ios: true
+
+# Run: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#0B6B48" # locked Primary Dark, matches the app icon's own background exactly
+  image: assets/icon/icon_foreground.png # same transparent AJP mark used as the adaptive icon foreground
+  # Single palette today — app_theme.dart has no dark-mode variant yet
+  # either (BRAND.md defines no dark-mode colors), so dark and light
+  # splash configs are deliberately identical rather than guessed at.
+  color_dark: "#0B6B48"
+  image_dark: assets/icon/icon_foreground.png
+  # Android 12+ uses a different, stricter splash API (icon must sit
+  # within a circular safe zone) — configured separately, same assets.
+  android_12:
+    image: assets/icon/icon_foreground.png
+    icon_background_color: "#0B6B48"
+    image_dark: assets/icon/icon_foreground.png
+    icon_background_color_dark: "#0B6B48"
+  # Not generating a web splash — blueprint Section 7 decided Android-first
+  # launch, Web was never a shipping target.
+  web: false

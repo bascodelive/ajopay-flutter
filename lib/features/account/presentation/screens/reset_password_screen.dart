@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_feedback.dart';
 import '../../application/account_controller.dart';
 
 final _strongPasswordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
@@ -52,17 +53,13 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     setState(() => _isSubmitting = false);
 
     if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Password reset — log in with your new password.')),
-      );
+      AppFeedback.showSuccess(
+          context, 'Password reset — log in with your new password.');
       context.go('/login');
     } else {
       final message = ref.read(accountControllerProvider.notifier).lastError;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(message ?? 'Could not reset password. Try again.')),
-      );
+      AppFeedback.showError(
+          context, message ?? 'Could not reset password. Try again.');
     }
   }
 
@@ -110,9 +107,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   validator: (value) {
                     final v = value?.trim() ?? '';
                     if (v.isEmpty) return 'Code is required';
-                    if (!_sixDigitRegex.hasMatch(v)) {
+                    if (!_sixDigitRegex.hasMatch(v))
                       return 'Enter all 6 digits';
-                    }
                     return null;
                   },
                 ),
