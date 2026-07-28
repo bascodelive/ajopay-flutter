@@ -26,7 +26,14 @@ mixin _$ProfileResponse {
   String get fullName => throw _privateConstructorUsedError;
   bool get emailVerified => throw _privateConstructorUsedError;
   bool get phoneVerified => throw _privateConstructorUsedError;
-  String get subscriptionTier => throw _privateConstructorUsedError;
+  String get subscriptionTier =>
+      throw _privateConstructorUsedError; // FREE | PREMIUM
+  /// One of AVATAR_1..AVATAR_8 — a fixed preset, never a real photo
+  /// (out of scope for this version). Assigned automatically at
+  /// registration, changeable anytime via updateAvatar. What each
+  /// preset actually looks like (icon/color) is purely a client-side
+  /// decision — see core/widgets/avatar_display.dart.
+  String get avatarId => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -47,7 +54,8 @@ abstract class $ProfileResponseCopyWith<$Res> {
       String fullName,
       bool emailVerified,
       bool phoneVerified,
-      String subscriptionTier});
+      String subscriptionTier,
+      String avatarId});
 }
 
 /// @nodoc
@@ -70,6 +78,7 @@ class _$ProfileResponseCopyWithImpl<$Res, $Val extends ProfileResponse>
     Object? emailVerified = null,
     Object? phoneVerified = null,
     Object? subscriptionTier = null,
+    Object? avatarId = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -100,6 +109,10 @@ class _$ProfileResponseCopyWithImpl<$Res, $Val extends ProfileResponse>
           ? _value.subscriptionTier
           : subscriptionTier // ignore: cast_nullable_to_non_nullable
               as String,
+      avatarId: null == avatarId
+          ? _value.avatarId
+          : avatarId // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -119,7 +132,8 @@ abstract class _$$ProfileResponseImplCopyWith<$Res>
       String fullName,
       bool emailVerified,
       bool phoneVerified,
-      String subscriptionTier});
+      String subscriptionTier,
+      String avatarId});
 }
 
 /// @nodoc
@@ -140,6 +154,7 @@ class __$$ProfileResponseImplCopyWithImpl<$Res>
     Object? emailVerified = null,
     Object? phoneVerified = null,
     Object? subscriptionTier = null,
+    Object? avatarId = null,
   }) {
     return _then(_$ProfileResponseImpl(
       id: null == id
@@ -170,6 +185,10 @@ class __$$ProfileResponseImplCopyWithImpl<$Res>
           ? _value.subscriptionTier
           : subscriptionTier // ignore: cast_nullable_to_non_nullable
               as String,
+      avatarId: null == avatarId
+          ? _value.avatarId
+          : avatarId // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -184,7 +203,8 @@ class _$ProfileResponseImpl implements _ProfileResponse {
       required this.fullName,
       required this.emailVerified,
       required this.phoneVerified,
-      required this.subscriptionTier});
+      required this.subscriptionTier,
+      required this.avatarId});
 
   factory _$ProfileResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProfileResponseImplFromJson(json);
@@ -203,10 +223,18 @@ class _$ProfileResponseImpl implements _ProfileResponse {
   final bool phoneVerified;
   @override
   final String subscriptionTier;
+// FREE | PREMIUM
+  /// One of AVATAR_1..AVATAR_8 — a fixed preset, never a real photo
+  /// (out of scope for this version). Assigned automatically at
+  /// registration, changeable anytime via updateAvatar. What each
+  /// preset actually looks like (icon/color) is purely a client-side
+  /// decision — see core/widgets/avatar_display.dart.
+  @override
+  final String avatarId;
 
   @override
   String toString() {
-    return 'ProfileResponse(id: $id, email: $email, phone: $phone, fullName: $fullName, emailVerified: $emailVerified, phoneVerified: $phoneVerified, subscriptionTier: $subscriptionTier)';
+    return 'ProfileResponse(id: $id, email: $email, phone: $phone, fullName: $fullName, emailVerified: $emailVerified, phoneVerified: $phoneVerified, subscriptionTier: $subscriptionTier, avatarId: $avatarId)';
   }
 
   @override
@@ -224,13 +252,15 @@ class _$ProfileResponseImpl implements _ProfileResponse {
             (identical(other.phoneVerified, phoneVerified) ||
                 other.phoneVerified == phoneVerified) &&
             (identical(other.subscriptionTier, subscriptionTier) ||
-                other.subscriptionTier == subscriptionTier));
+                other.subscriptionTier == subscriptionTier) &&
+            (identical(other.avatarId, avatarId) ||
+                other.avatarId == avatarId));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, id, email, phone, fullName,
-      emailVerified, phoneVerified, subscriptionTier);
+      emailVerified, phoneVerified, subscriptionTier, avatarId);
 
   @JsonKey(ignore: true)
   @override
@@ -255,7 +285,8 @@ abstract class _ProfileResponse implements ProfileResponse {
       required final String fullName,
       required final bool emailVerified,
       required final bool phoneVerified,
-      required final String subscriptionTier}) = _$ProfileResponseImpl;
+      required final String subscriptionTier,
+      required final String avatarId}) = _$ProfileResponseImpl;
 
   factory _ProfileResponse.fromJson(Map<String, dynamic> json) =
       _$ProfileResponseImpl.fromJson;
@@ -274,6 +305,13 @@ abstract class _ProfileResponse implements ProfileResponse {
   bool get phoneVerified;
   @override
   String get subscriptionTier;
+  @override // FREE | PREMIUM
+  /// One of AVATAR_1..AVATAR_8 — a fixed preset, never a real photo
+  /// (out of scope for this version). Assigned automatically at
+  /// registration, changeable anytime via updateAvatar. What each
+  /// preset actually looks like (icon/color) is purely a client-side
+  /// decision — see core/widgets/avatar_display.dart.
+  String get avatarId;
   @override
   @JsonKey(ignore: true)
   _$$ProfileResponseImplCopyWith<_$ProfileResponseImpl> get copyWith =>
@@ -436,6 +474,145 @@ abstract class _UpdateProfileRequest implements UpdateProfileRequest {
   @JsonKey(ignore: true)
   _$$UpdateProfileRequestImplCopyWith<_$UpdateProfileRequestImpl>
       get copyWith => throw _privateConstructorUsedError;
+}
+
+UpdateAvatarRequest _$UpdateAvatarRequestFromJson(Map<String, dynamic> json) {
+  return _UpdateAvatarRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$UpdateAvatarRequest {
+  String get avatarId => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $UpdateAvatarRequestCopyWith<UpdateAvatarRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $UpdateAvatarRequestCopyWith<$Res> {
+  factory $UpdateAvatarRequestCopyWith(
+          UpdateAvatarRequest value, $Res Function(UpdateAvatarRequest) then) =
+      _$UpdateAvatarRequestCopyWithImpl<$Res, UpdateAvatarRequest>;
+  @useResult
+  $Res call({String avatarId});
+}
+
+/// @nodoc
+class _$UpdateAvatarRequestCopyWithImpl<$Res, $Val extends UpdateAvatarRequest>
+    implements $UpdateAvatarRequestCopyWith<$Res> {
+  _$UpdateAvatarRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? avatarId = null,
+  }) {
+    return _then(_value.copyWith(
+      avatarId: null == avatarId
+          ? _value.avatarId
+          : avatarId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$UpdateAvatarRequestImplCopyWith<$Res>
+    implements $UpdateAvatarRequestCopyWith<$Res> {
+  factory _$$UpdateAvatarRequestImplCopyWith(_$UpdateAvatarRequestImpl value,
+          $Res Function(_$UpdateAvatarRequestImpl) then) =
+      __$$UpdateAvatarRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String avatarId});
+}
+
+/// @nodoc
+class __$$UpdateAvatarRequestImplCopyWithImpl<$Res>
+    extends _$UpdateAvatarRequestCopyWithImpl<$Res, _$UpdateAvatarRequestImpl>
+    implements _$$UpdateAvatarRequestImplCopyWith<$Res> {
+  __$$UpdateAvatarRequestImplCopyWithImpl(_$UpdateAvatarRequestImpl _value,
+      $Res Function(_$UpdateAvatarRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? avatarId = null,
+  }) {
+    return _then(_$UpdateAvatarRequestImpl(
+      avatarId: null == avatarId
+          ? _value.avatarId
+          : avatarId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$UpdateAvatarRequestImpl implements _UpdateAvatarRequest {
+  const _$UpdateAvatarRequestImpl({required this.avatarId});
+
+  factory _$UpdateAvatarRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdateAvatarRequestImplFromJson(json);
+
+  @override
+  final String avatarId;
+
+  @override
+  String toString() {
+    return 'UpdateAvatarRequest(avatarId: $avatarId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateAvatarRequestImpl &&
+            (identical(other.avatarId, avatarId) ||
+                other.avatarId == avatarId));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, avatarId);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateAvatarRequestImplCopyWith<_$UpdateAvatarRequestImpl> get copyWith =>
+      __$$UpdateAvatarRequestImplCopyWithImpl<_$UpdateAvatarRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UpdateAvatarRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _UpdateAvatarRequest implements UpdateAvatarRequest {
+  const factory _UpdateAvatarRequest({required final String avatarId}) =
+      _$UpdateAvatarRequestImpl;
+
+  factory _UpdateAvatarRequest.fromJson(Map<String, dynamic> json) =
+      _$UpdateAvatarRequestImpl.fromJson;
+
+  @override
+  String get avatarId;
+  @override
+  @JsonKey(ignore: true)
+  _$$UpdateAvatarRequestImplCopyWith<_$UpdateAvatarRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 ChangePasswordRequest _$ChangePasswordRequestFromJson(

@@ -13,6 +13,12 @@ class ProfileResponse with _$ProfileResponse {
     required bool emailVerified,
     required bool phoneVerified,
     required String subscriptionTier, // FREE | PREMIUM
+    /// One of AVATAR_1..AVATAR_8 — a fixed preset, never a real photo
+    /// (out of scope for this version). Assigned automatically at
+    /// registration, changeable anytime via updateAvatar. What each
+    /// preset actually looks like (icon/color) is purely a client-side
+    /// decision — see core/widgets/avatar_display.dart.
+    required String avatarId,
   }) = _ProfileResponse;
 
   factory ProfileResponse.fromJson(Map<String, dynamic> json) =>
@@ -28,6 +34,20 @@ class UpdateProfileRequest with _$UpdateProfileRequest {
 
   factory UpdateProfileRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateProfileRequestFromJson(json);
+}
+
+/// Its own request type, its own endpoint (`PATCH .../profile/avatar`) —
+/// deliberately not folded into UpdateProfileRequest, same "one distinct
+/// action per endpoint" convention this app already uses elsewhere
+/// (Contribution's five separate action verbs rather than one generic
+/// status setter; Circle's confirm-payout vs confirm-received).
+@freezed
+class UpdateAvatarRequest with _$UpdateAvatarRequest {
+  const factory UpdateAvatarRequest({required String avatarId}) =
+      _UpdateAvatarRequest;
+
+  factory UpdateAvatarRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateAvatarRequestFromJson(json);
 }
 
 @freezed

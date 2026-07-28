@@ -122,8 +122,9 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                   validator: (value) {
                     final v = value?.trim() ?? '';
                     if (v.isEmpty) return 'Code is required';
-                    if (!_sixDigitRegex.hasMatch(v))
+                    if (!_sixDigitRegex.hasMatch(v)) {
                       return 'Enter all 6 digits';
+                    }
                     return null;
                   },
                 ),

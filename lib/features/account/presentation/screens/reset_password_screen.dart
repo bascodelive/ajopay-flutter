@@ -107,8 +107,9 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   validator: (value) {
                     final v = value?.trim() ?? '';
                     if (v.isEmpty) return 'Code is required';
-                    if (!_sixDigitRegex.hasMatch(v))
+                    if (!_sixDigitRegex.hasMatch(v)) {
                       return 'Enter all 6 digits';
+                    }
                     return null;
                   },
                 ),

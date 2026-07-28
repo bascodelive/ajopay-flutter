@@ -34,6 +34,16 @@ dependencies:
   intl: ^0.19.0 # cycleDate (YYYY-MM-DD) formatting per API.md conventions
   connectivity_plus: ^6.1.0 # global offline awareness — see blueprint Section 8
 
+  # --- CSV export sharing (Circle/Contribution history, added for the
+  # completion-gated CSV export feature) — builds an in-memory XFile
+  # (cross_file, declared explicitly rather than left as a transitive
+  # dependency of share_plus) from the CSV text Dio fetches, then hands
+  # it to the OS share sheet. No path_provider/temp-file/storage
+  # permission handling needed — "Save to Files" is just one of the
+  # share sheet's own options.
+  share_plus: ^10.1.4
+  cross_file: ^0.3.4+2
+
   # --- Typography ---
   # Deliberate two-font pairing: Sora for headlines/titles (more
   # character, used with restraint), Inter for body/labels (dense

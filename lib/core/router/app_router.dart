@@ -17,6 +17,10 @@ import '../../features/circles/presentation/screens/circle_participants_screen.d
 import '../../features/circles/presentation/screens/create_circle_screen.dart';
 import '../../features/circles/presentation/screens/current_payout_screen.dart';
 import '../../features/circles/presentation/screens/rotation_queue_screen.dart';
+import '../../features/contributions/data/models/contribution_models.dart';
+import '../../features/contributions/presentation/screens/contribution_detail_screen.dart';
+import '../../features/contributions/presentation/screens/contributions_list_screen.dart';
+import '../../features/contributions/presentation/screens/schedule_contribution_screen.dart';
 import '../../features/ledgers/presentation/screens/create_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/edit_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/join_ledger_screen.dart';
@@ -173,6 +177,49 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ledgerId: state.pathParameters['id']!,
           circleId: state.pathParameters['circleId']!,
         ),
+      ),
+      // Protected — Contributions.
+      GoRoute(
+        path: '/ledgers/:id/contributions',
+        builder: (context, state) => ContributionsListScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/contributions/schedule',
+        builder: (context, state) => ScheduleContributionScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/contributions/:contributionId',
+        builder: (context, state) {
+          final ledgerId = state.pathParameters['id']!;
+          // No "get contribution by ID" endpoint exists (confirmed
+          // against real backend source) — this screen can only work
+          // when reached from the list, which passes the full object via
+          // `extra`. Defensive handling here, not a bad cast crash, for
+          // the case that's NOT supposed to happen (deep link, hot
+          // reload losing navigation state) — a graceful message rather
+          // than pretending this path is fully supported when it isn't.
+          final extra = state.extra;
+          if (extra is! ContributionResponse) {
+            return Scaffold(
+              appBar: AppBar(title: const Text('Contribution')),
+              body: const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'Open this contribution from the list — direct links '
+                    "aren't supported yet.",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            );
+          }
+          return ContributionDetailScreen(ledgerId: ledgerId, initialContribution: extra);
+        },
       ),
     ],
   );

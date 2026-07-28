@@ -6,7 +6,7 @@ part of 'circle_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$circleControllerHash() => r'75ba33c7d595c11ebf570ca8b5c265bbf91634af';
+String _$circleControllerHash() => r'b9ff1a02beefee746653720329825aab7a1fb591';
 
 /// Holds the circle currently being set up/managed by an Admin — the
 /// multi-step PENDING flow (create → add participants → assign rotation

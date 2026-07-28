@@ -88,7 +88,7 @@ class CurrentPayoutScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.check_circle_outline,
+                    const Icon(Icons.check_circle_outline,
                         size: 56, color: AjopayColors.primary),
                     const SizedBox(height: 16),
                     Text(
@@ -112,7 +112,7 @@ class CurrentPayoutScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline,
+                  const Icon(Icons.error_outline,
                       size: 48, color: AjopayColors.error),
                   const SizedBox(height: 12),
                   const Text('Could not load the current payout.'),

@@ -42,6 +42,21 @@ class AccountController extends _$AccountController {
     }
   }
 
+  /// Self-service — changes the caller's own avatar to any other preset.
+  /// Same "update local state directly from the response, never
+  /// refetch" pattern as updateProfile above.
+  Future<bool> updateAvatar(String avatarId) async {
+    final repository = ref.read(accountRepositoryProvider);
+    try {
+      final updated = await repository.updateAvatar(avatarId);
+      state = AsyncData(updated);
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
   /// API.md: success revokes EVERY refresh token for this user — including
   /// the one this very session is using. There is no valid session left
   /// afterward, so this forces a local logout regardless of how clean the

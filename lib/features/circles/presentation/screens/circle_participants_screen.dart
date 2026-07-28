@@ -38,7 +38,8 @@ class CircleParticipantsScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
+                const Icon(Icons.error_outline,
+                    size: 48, color: AjopayColors.error),
                 const SizedBox(height: 12),
                 const Text('Could not load participants.'),
                 const SizedBox(height: 16),
@@ -110,7 +111,7 @@ class _EmptyParticipants extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.groups_outlined,
+                  const Icon(Icons.groups_outlined,
                       size: 56, color: AjopayColors.primary),
                   const SizedBox(height: 16),
                   Text(
@@ -185,7 +186,8 @@ class _ParticipantTile extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Remove', style: TextStyle(color: AjopayColors.error)),
+            child: const Text('Remove',
+                style: TextStyle(color: AjopayColors.error)),
           ),
         ],
       ),
@@ -211,7 +213,7 @@ class _ParticipantTile extends ConsumerWidget {
           backgroundColor: AjopayColors.primaryTint,
           child: Text(
             participant.handCount.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               color: AjopayColors.primaryDark,
               fontWeight: FontWeight.w700,
             ),
@@ -232,7 +234,8 @@ class _ParticipantTile extends ConsumerWidget {
                     onPressed: () => _editHandCount(context, ref),
                   ),
                   IconButton(
-                    icon: Icon(Icons.delete_outline, color: AjopayColors.error),
+                    icon: const Icon(Icons.delete_outline,
+                        color: AjopayColors.error),
                     onPressed: () => _remove(context, ref),
                   ),
                 ],

@@ -92,7 +92,7 @@ class _CreateLedgerScreenState extends ConsumerState<CreateLedgerScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _frequency,
+                  initialValue: _frequency,
                   decoration: const InputDecoration(
                       labelText: 'Contribution frequency'),
                   items: _frequencies

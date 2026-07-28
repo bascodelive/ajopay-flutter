@@ -31,6 +31,21 @@ class AccountRepository {
     }
   }
 
+  /// Self-service — changes the caller's own avatar to any other preset.
+  /// Always succeeds for a valid avatarId; there's no partial-failure
+  /// case beyond the usual network/auth ones.
+  Future<ProfileResponse> updateAvatar(String avatarId) async {
+    try {
+      final response = await _dio.patch(
+        '/api/account/profile/avatar',
+        data: UpdateAvatarRequest(avatarId: avatarId).toJson(),
+      );
+      return ProfileResponse.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<void> changePassword(ChangePasswordRequest request) async {
     try {
       await _dio.post('/api/account/change-password', data: request.toJson());

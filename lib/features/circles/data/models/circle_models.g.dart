@@ -95,6 +95,7 @@ _$RotationSlotResponseImpl _$$RotationSlotResponseImplFromJson(
       status: json['status'] as String,
       amount: (json['amount'] as num?)?.toDouble(),
       paidAt: json['paidAt'] as String?,
+      recipientConfirmedAt: json['recipientConfirmedAt'] as String?,
     );
 
 Map<String, dynamic> _$$RotationSlotResponseImplToJson(
@@ -109,6 +110,7 @@ Map<String, dynamic> _$$RotationSlotResponseImplToJson(
       'status': instance.status,
       'amount': instance.amount,
       'paidAt': instance.paidAt,
+      'recipientConfirmedAt': instance.recipientConfirmedAt,
     };
 
 _$CurrentPayoutResponseImpl _$$CurrentPayoutResponseImplFromJson(

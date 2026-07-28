@@ -115,7 +115,7 @@ class _EditLedgerScreenState extends ConsumerState<EditLedgerScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _frequency,
+                  initialValue: _frequency,
                   decoration: const InputDecoration(
                       labelText: 'Contribution frequency'),
                   items: _frequencies

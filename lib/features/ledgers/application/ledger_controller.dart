@@ -7,7 +7,8 @@ import '../data/models/ledger_models.dart';
 
 part 'ledger_controller.g.dart';
 
-/// Holds the ledger currently being created/joined/viewed/edited.
+/// Holds the ledger currently being created/joined/viewed/edited, plus
+/// every ledger-membership mutation (create/join/update/approve/reject).
 ///
 /// This is NOT "the user's list of ledgers" — that's `myLedgersProvider`
 /// below, a separate simple FutureProvider, since listing is pure fetch
@@ -22,6 +23,10 @@ class LedgerController extends _$LedgerController {
   @override
   LedgerResponse? build() => null;
 
+  /// Returns the ledger regardless of membershipStatus — callers MUST
+  /// check `result.membershipStatus` themselves before assuming the
+  /// caller has active access (join is no longer instant; see
+  /// JoinLedgerScreen for the screen that actually branches on this).
   Future<LedgerResponse?> create({
     required String name,
     required String contributionFrequency,
@@ -44,6 +49,9 @@ class LedgerController extends _$LedgerController {
     }
   }
 
+  /// A successful call here almost always means membershipStatus is now
+  /// PENDING, not ACTIVE — the caller must branch on that field, not on
+  /// whether this returned non-null. See JoinLedgerScreen.
   Future<LedgerResponse?> join(String inviteCode) async {
     final repository = ref.read(ledgerRepositoryProvider);
     try {
@@ -88,6 +96,36 @@ class LedgerController extends _$LedgerController {
       return false;
     }
   }
+
+  /// ADMIN action — approves a PENDING join request. Refreshes both the
+  /// pending list (this row disappears from it) and the active member
+  /// list (this row appears in it) so the Members screen's two tabs stay
+  /// in sync without a manual pull-to-refresh.
+  Future<bool> approveMember(String ledgerId, String userId) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      await repository.approveMember(ledgerId, userId);
+      ref.invalidate(ledgerPendingMembersProvider(ledgerId));
+      ref.invalidate(ledgerMembersProvider(ledgerId));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
+  /// ADMIN action — declines a PENDING join request (INVALIDATED).
+  Future<bool> rejectMember(String ledgerId, String userId) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      await repository.rejectMember(ledgerId, userId);
+      ref.invalidate(ledgerPendingMembersProvider(ledgerId));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
 }
 
 /// The home/list screen's data source — every ledger the caller belongs
@@ -101,7 +139,9 @@ class LedgerController extends _$LedgerController {
 /// the guard that stops a mid-teardown rebuild from firing a real
 /// network call with no valid token (BUILD_PHASES.md Bug 2).
 /// Screens should `ref.invalidate(myLedgersProvider)` after a successful
-/// create/join so the list picks up the new membership immediately.
+/// create/join so the list picks up the new membership immediately —
+/// note a PENDING join won't actually appear here until approved (see
+/// LedgerRepository.getMyLedgers's Javadoc-equivalent comment).
 final myLedgersProvider =
     FutureProvider.autoDispose<List<LedgerResponse>>((ref) {
   return requireAuthenticated(
@@ -113,6 +153,10 @@ final myLedgersProvider =
 /// interferes with an in-progress create/join/update mutation elsewhere.
 /// `.autoDispose` + `requireAuthenticated` for the same reasons as
 /// myLedgersProvider above.
+///
+/// Server-side this is ACTIVE-membership-gated — a still-PENDING caller
+/// gets a 403 here, by design. Nothing in this app should route a
+/// still-PENDING user into this screen; see JoinLedgerScreen.
 final ledgerDetailProvider =
     FutureProvider.autoDispose.family<LedgerResponse, String>((ref, ledgerId) {
   return requireAuthenticated(
@@ -126,16 +170,31 @@ final ledgerDetailProvider =
 /// `role`, exactly the kind of per-user data that must never survive a
 /// logout or fire while unauthenticated.
 ///
-/// API.md update: this endpoint is no longer ADMIN-only — any active
-/// member of the ledger can view the full member list now. Nothing to
-/// change here client-side beyond this comment; the repository/provider
-/// never gated by role in the first place, only the server did.
+/// Any active member of the ledger can view the full ACTIVE member list.
+/// PENDING/INVALIDATED/REMOVED rows never appear here — see
+/// ledgerPendingMembersProvider below for the Admin-only "who's waiting"
+/// view.
 final ledgerMembersProvider = FutureProvider.autoDispose
     .family<List<LedgerMemberResponse>, String>((ref, ledgerId) {
   return requireAuthenticated(
       ref, () => ref.read(ledgerRepositoryProvider).getMembers(ledgerId));
 });
 
+/// ADMIN-only server-side (403 for anyone else) — everyone currently
+/// waiting to be approved into this ledger. Drives the "Pending" tab on
+/// LedgerMembersScreen; that screen only shows the tab at all once it
+/// already knows the caller is Admin (from ledgerDetailProvider), so in
+/// practice this is never even called for a non-Admin.
+final ledgerPendingMembersProvider = FutureProvider.autoDispose
+    .family<List<LedgerMemberResponse>, String>((ref, ledgerId) {
+  return requireAuthenticated(ref,
+      () => ref.read(ledgerRepositoryProvider).getPendingMembers(ledgerId));
+});
+
+/// The caller's own membership row — deliberately NOT gated to ACTIVE
+/// server-side, so this is the one provider in this file safe to watch
+/// even while the caller is still PENDING (e.g. a "check my request
+/// status" screen, if one gets built later).
 final myMembershipProvider = FutureProvider.autoDispose
     .family<LedgerMemberResponse, String>((ref, ledgerId) {
   return requireAuthenticated(
