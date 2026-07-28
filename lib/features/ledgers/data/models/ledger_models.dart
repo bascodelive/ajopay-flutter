@@ -13,6 +13,15 @@ class LedgerResponse with _$LedgerResponse {
     required double contributionAmount,
     required String status, // ACTIVE | SUSPENDED
     required String callerRole, // ADMIN | PRESIDENT | ASSISTANT | MEMBER
+    /// The CALLER's own membership status on this ledger — NOT the
+    /// ledger's own status (see `status` above for that). Added when
+    /// joining stopped being instant: a join now returns PENDING until
+    /// the ledger's Admin approves it. Every other endpoint that returns
+    /// a LedgerResponse (create/get/update/getMyLedgers) only ever does
+    /// so for an ACTIVE caller server-side, so this is always 'ACTIVE'
+    /// there — only the join response can meaningfully be 'PENDING'.
+    required String
+        membershipStatus, // ACTIVE | PENDING | INVALIDATED | REMOVED
   }) = _LedgerResponse;
 
   factory LedgerResponse.fromJson(Map<String, dynamic> json) =>
@@ -63,7 +72,13 @@ class LedgerMemberResponse with _$LedgerMemberResponse {
     required String userId,
     required String fullName,
     required String role, // ADMIN | PRESIDENT | ASSISTANT | MEMBER
-    required String status, // ACTIVE | REMOVED
+    /// ACTIVE — approved, full access.
+    /// PENDING — requested to join, awaiting Admin approval/rejection.
+    /// INVALIDATED — declined by the Admin, OR auto-invalidated because
+    ///   this user (on a free-tier account) requested to join a
+    ///   different ledger while this request was still pending.
+    /// REMOVED — was ACTIVE, then removed by the Admin.
+    required String status,
     required String joinedAt,
   }) = _LedgerMemberResponse;
 

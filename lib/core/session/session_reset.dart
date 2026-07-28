@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/account/application/account_controller.dart';
 import '../../features/circles/application/circle_controller.dart';
+import '../../features/contributions/application/contribution_action_controller.dart';
+import '../../features/contributions/application/contributions_pager.dart';
 import '../../features/ledgers/application/ledger_controller.dart';
 
 /// The single, explicit place that knows about every session-scoped
@@ -39,6 +41,11 @@ void resetAllSessionProviders(Ref ref) {
   ref.invalidate(currentPayoutProvider);
   ref.invalidate(circleHistoryProvider);
 
-  // TODO: add Contributions/Messages/Subscriptions session-scoped
-  // providers here as each phase ships — see BUILD_PHASES.md.
+  // Contributions
+  ref.invalidate(contributionActionControllerProvider);
+  ref.invalidate(contributionsPagerProvider);
+  ref.invalidate(contributionHistoryProvider);
+
+  // TODO: add Messages/Subscriptions session-scoped providers here as
+  // each phase ships — see BUILD_PHASES.md.
 }

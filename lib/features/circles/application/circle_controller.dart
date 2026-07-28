@@ -2,6 +2,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/session/require_authenticated.dart';
+import '../../contributions/application/contributions_pager.dart';
+import '../../contributions/data/models/contribution_models.dart';
 import '../data/circle_repository.dart';
 import '../data/models/circle_models.dart';
 
@@ -106,6 +108,36 @@ class CircleController extends _$CircleController {
     }
   }
 
+  /// ADMIN action, ACTIVE circles only — generates this cycle's
+  /// Contribution rows (one per hand, every participant) for whichever
+  /// cycle the next pending rotation slot is scheduled for. Returns the
+  /// created rows on success so the caller can show them immediately
+  /// without a second round-trip; returns null on failure (check
+  /// `lastError` — a 400 here most often means this cycle's
+  /// contributions were already generated).
+  ///
+  /// Invalidates BOTH the current-payout view (its confirmedSoFar can
+  /// only ever move once real Contribution rows exist to sum) and the
+  /// ledger-wide contributions pager (the new rows should show up in
+  /// the Contributions tab immediately, not after a manual pull-to-refresh).
+  Future<List<ContributionResponse>?> generateCycleContributions(
+    String ledgerId,
+    String circleId,
+  ) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      final created =
+          await repository.generateCycleContributions(ledgerId, circleId);
+      final key = (ledgerId: ledgerId, circleId: circleId);
+      ref.invalidate(currentPayoutProvider(key));
+      ref.invalidate(contributionsPagerProvider);
+      return created;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return null;
+    }
+  }
+
   Future<bool> confirmPayout(
     String ledgerId,
     String circleId,
@@ -118,6 +150,29 @@ class CircleController extends _$CircleController {
       final key = (ledgerId: ledgerId, circleId: circleId);
       ref.invalidate(circleRotationProvider(key));
       ref.invalidate(currentPayoutProvider(key));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
+  /// The slot's OWN recipient only — self-confirms they actually
+  /// received a payout an Admin already confirmed. Purely a
+  /// transparency layer; only invalidates the rotation list (so the
+  /// "receipt confirmed" indicator refreshes) — doesn't touch
+  /// currentPayoutProvider since this never affects which slot is next
+  /// due.
+  Future<bool> confirmReceived(
+    String ledgerId,
+    String circleId,
+    String slotId,
+  ) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      await repository.confirmReceived(ledgerId, circleId, slotId);
+      ref.invalidate(
+          circleRotationProvider((ledgerId: ledgerId, circleId: circleId)));
       return true;
     } on ApiException catch (e) {
       _lastError = e.message;

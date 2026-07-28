@@ -27,7 +27,16 @@ mixin _$LedgerResponse {
       throw _privateConstructorUsedError; // DAILY | WEEKLY | MONTHLY
   double get contributionAmount => throw _privateConstructorUsedError;
   String get status => throw _privateConstructorUsedError; // ACTIVE | SUSPENDED
-  String get callerRole => throw _privateConstructorUsedError;
+  String get callerRole =>
+      throw _privateConstructorUsedError; // ADMIN | PRESIDENT | ASSISTANT | MEMBER
+  /// The CALLER's own membership status on this ledger — NOT the
+  /// ledger's own status (see `status` above for that). Added when
+  /// joining stopped being instant: a join now returns PENDING until
+  /// the ledger's Admin approves it. Every other endpoint that returns
+  /// a LedgerResponse (create/get/update/getMyLedgers) only ever does
+  /// so for an ACTIVE caller server-side, so this is always 'ACTIVE'
+  /// there — only the join response can meaningfully be 'PENDING'.
+  String get membershipStatus => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -48,7 +57,8 @@ abstract class $LedgerResponseCopyWith<$Res> {
       String contributionFrequency,
       double contributionAmount,
       String status,
-      String callerRole});
+      String callerRole,
+      String membershipStatus});
 }
 
 /// @nodoc
@@ -71,6 +81,7 @@ class _$LedgerResponseCopyWithImpl<$Res, $Val extends LedgerResponse>
     Object? contributionAmount = null,
     Object? status = null,
     Object? callerRole = null,
+    Object? membershipStatus = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -101,6 +112,10 @@ class _$LedgerResponseCopyWithImpl<$Res, $Val extends LedgerResponse>
           ? _value.callerRole
           : callerRole // ignore: cast_nullable_to_non_nullable
               as String,
+      membershipStatus: null == membershipStatus
+          ? _value.membershipStatus
+          : membershipStatus // ignore: cast_nullable_to_non_nullable
+              as String,
     ) as $Val);
   }
 }
@@ -120,7 +135,8 @@ abstract class _$$LedgerResponseImplCopyWith<$Res>
       String contributionFrequency,
       double contributionAmount,
       String status,
-      String callerRole});
+      String callerRole,
+      String membershipStatus});
 }
 
 /// @nodoc
@@ -141,6 +157,7 @@ class __$$LedgerResponseImplCopyWithImpl<$Res>
     Object? contributionAmount = null,
     Object? status = null,
     Object? callerRole = null,
+    Object? membershipStatus = null,
   }) {
     return _then(_$LedgerResponseImpl(
       id: null == id
@@ -171,6 +188,10 @@ class __$$LedgerResponseImplCopyWithImpl<$Res>
           ? _value.callerRole
           : callerRole // ignore: cast_nullable_to_non_nullable
               as String,
+      membershipStatus: null == membershipStatus
+          ? _value.membershipStatus
+          : membershipStatus // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -185,7 +206,8 @@ class _$LedgerResponseImpl implements _LedgerResponse {
       required this.contributionFrequency,
       required this.contributionAmount,
       required this.status,
-      required this.callerRole});
+      required this.callerRole,
+      required this.membershipStatus});
 
   factory _$LedgerResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$LedgerResponseImplFromJson(json);
@@ -206,10 +228,20 @@ class _$LedgerResponseImpl implements _LedgerResponse {
 // ACTIVE | SUSPENDED
   @override
   final String callerRole;
+// ADMIN | PRESIDENT | ASSISTANT | MEMBER
+  /// The CALLER's own membership status on this ledger — NOT the
+  /// ledger's own status (see `status` above for that). Added when
+  /// joining stopped being instant: a join now returns PENDING until
+  /// the ledger's Admin approves it. Every other endpoint that returns
+  /// a LedgerResponse (create/get/update/getMyLedgers) only ever does
+  /// so for an ACTIVE caller server-side, so this is always 'ACTIVE'
+  /// there — only the join response can meaningfully be 'PENDING'.
+  @override
+  final String membershipStatus;
 
   @override
   String toString() {
-    return 'LedgerResponse(id: $id, name: $name, inviteCode: $inviteCode, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, status: $status, callerRole: $callerRole)';
+    return 'LedgerResponse(id: $id, name: $name, inviteCode: $inviteCode, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, status: $status, callerRole: $callerRole, membershipStatus: $membershipStatus)';
   }
 
   @override
@@ -227,13 +259,23 @@ class _$LedgerResponseImpl implements _LedgerResponse {
                 other.contributionAmount == contributionAmount) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.callerRole, callerRole) ||
-                other.callerRole == callerRole));
+                other.callerRole == callerRole) &&
+            (identical(other.membershipStatus, membershipStatus) ||
+                other.membershipStatus == membershipStatus));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, inviteCode,
-      contributionFrequency, contributionAmount, status, callerRole);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      inviteCode,
+      contributionFrequency,
+      contributionAmount,
+      status,
+      callerRole,
+      membershipStatus);
 
   @JsonKey(ignore: true)
   @override
@@ -258,7 +300,8 @@ abstract class _LedgerResponse implements LedgerResponse {
       required final String contributionFrequency,
       required final double contributionAmount,
       required final String status,
-      required final String callerRole}) = _$LedgerResponseImpl;
+      required final String callerRole,
+      required final String membershipStatus}) = _$LedgerResponseImpl;
 
   factory _LedgerResponse.fromJson(Map<String, dynamic> json) =
       _$LedgerResponseImpl.fromJson;
@@ -277,6 +320,15 @@ abstract class _LedgerResponse implements LedgerResponse {
   String get status;
   @override // ACTIVE | SUSPENDED
   String get callerRole;
+  @override // ADMIN | PRESIDENT | ASSISTANT | MEMBER
+  /// The CALLER's own membership status on this ledger — NOT the
+  /// ledger's own status (see `status` above for that). Added when
+  /// joining stopped being instant: a join now returns PENDING until
+  /// the ledger's Admin approves it. Every other endpoint that returns
+  /// a LedgerResponse (create/get/update/getMyLedgers) only ever does
+  /// so for an ACTIVE caller server-side, so this is always 'ACTIVE'
+  /// there — only the join response can meaningfully be 'PENDING'.
+  String get membershipStatus;
   @override
   @JsonKey(ignore: true)
   _$$LedgerResponseImplCopyWith<_$LedgerResponseImpl> get copyWith =>
@@ -792,7 +844,13 @@ mixin _$LedgerMemberResponse {
   String get fullName => throw _privateConstructorUsedError;
   String get role =>
       throw _privateConstructorUsedError; // ADMIN | PRESIDENT | ASSISTANT | MEMBER
-  String get status => throw _privateConstructorUsedError; // ACTIVE | REMOVED
+  /// ACTIVE — approved, full access.
+  /// PENDING — requested to join, awaiting Admin approval/rejection.
+  /// INVALIDATED — declined by the Admin, OR auto-invalidated because
+  ///   this user (on a free-tier account) requested to join a
+  ///   different ledger while this request was still pending.
+  /// REMOVED — was ACTIVE, then removed by the Admin.
+  String get status => throw _privateConstructorUsedError;
   String get joinedAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -938,9 +996,14 @@ class _$LedgerMemberResponseImpl implements _LedgerMemberResponse {
   @override
   final String role;
 // ADMIN | PRESIDENT | ASSISTANT | MEMBER
+  /// ACTIVE — approved, full access.
+  /// PENDING — requested to join, awaiting Admin approval/rejection.
+  /// INVALIDATED — declined by the Admin, OR auto-invalidated because
+  ///   this user (on a free-tier account) requested to join a
+  ///   different ledger while this request was still pending.
+  /// REMOVED — was ACTIVE, then removed by the Admin.
   @override
   final String status;
-// ACTIVE | REMOVED
   @override
   final String joinedAt;
 
@@ -1002,8 +1065,14 @@ abstract class _LedgerMemberResponse implements LedgerMemberResponse {
   @override
   String get role;
   @override // ADMIN | PRESIDENT | ASSISTANT | MEMBER
+  /// ACTIVE — approved, full access.
+  /// PENDING — requested to join, awaiting Admin approval/rejection.
+  /// INVALIDATED — declined by the Admin, OR auto-invalidated because
+  ///   this user (on a free-tier account) requested to join a
+  ///   different ledger while this request was still pending.
+  /// REMOVED — was ACTIVE, then removed by the Admin.
   String get status;
-  @override // ACTIVE | REMOVED
+  @override
   String get joinedAt;
   @override
   @JsonKey(ignore: true)

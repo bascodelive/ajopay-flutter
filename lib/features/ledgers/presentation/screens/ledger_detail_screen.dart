@@ -40,7 +40,8 @@ class LedgerDetailScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
+                const Icon(Icons.error_outline,
+                    size: 48, color: AjopayColors.error),
                 const SizedBox(height: 12),
                 const Text('Could not load this ledger.'),
                 const SizedBox(height: 16),
@@ -81,6 +82,17 @@ class LedgerDetailScreen extends ConsumerWidget {
                     subtitle: const Text('Payout rotation for this ledger'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/ledgers/$ledgerId/circle'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.receipt_long_outlined),
+                    title: const Text('Contributions'),
+                    subtitle: const Text('Track payments for this ledger'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () =>
+                        context.push('/ledgers/$ledgerId/contributions'),
                   ),
                 ),
               ],
@@ -232,7 +244,8 @@ class _InviteCodeCard extends StatelessWidget {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.copy_outlined, color: AjopayColors.primaryDark),
+              icon: const Icon(Icons.copy_outlined,
+                  color: AjopayColors.primaryDark),
               onPressed: () {
                 Clipboard.setData(ClipboardData(text: ledger.inviteCode));
                 AppFeedback.showSuccess(context, 'Invite code copied');

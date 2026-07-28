@@ -278,14 +278,78 @@ class _PendingCircleViewState extends ConsumerState<_PendingCircleView> {
   }
 }
 
-class _ActiveCircleView extends StatelessWidget {
+class _ActiveCircleView extends ConsumerStatefulWidget {
   const _ActiveCircleView({required this.ledgerId, required this.circle});
 
   final String ledgerId;
   final CircleResponse circle;
 
   @override
+  ConsumerState<_ActiveCircleView> createState() => _ActiveCircleViewState();
+}
+
+class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
+  bool _isGenerating = false;
+
+  Future<void> _generateCycleContributions() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Generate this cycle\'s contributions?'),
+        content: const Text(
+          'Creates one contribution row per hand, for every participant, '
+          'for whichever cycle is next due. Members will then be able to '
+          'report payment against it as usual. This can only be done once '
+          'per cycle.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Generate'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    setState(() => _isGenerating = true);
+    final created = await ref
+        .read(circleControllerProvider.notifier)
+        .generateCycleContributions(widget.ledgerId, widget.circle.id);
+
+    if (!mounted) return;
+    setState(() => _isGenerating = false);
+
+    if (created != null) {
+      AppFeedback.showSuccess(
+        context,
+        created.length == 1
+            ? '1 contribution generated for this cycle'
+            : '${created.length} contributions generated for this cycle',
+      );
+    } else {
+      final message = ref.read(circleControllerProvider.notifier).lastError;
+      AppFeedback.showError(
+        context,
+        message ??
+            'Could not generate contributions for this cycle — it may '
+                'already have been done.',
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final ledgerId = widget.ledgerId;
+    final circle = widget.circle;
+    final ledgerAsync = ref.watch(ledgerDetailProvider(ledgerId));
+    final isAdmin = ledgerAsync.valueOrNull?.callerRole == 'ADMIN';
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -338,6 +402,67 @@ class _ActiveCircleView extends StatelessWidget {
               ],
             ),
           ),
+          if (isAdmin) ...[
+            const SizedBox(height: 24),
+            Card(
+              color: AjopayColors.primaryTint,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.receipt_long_outlined,
+                            color: AjopayColors.primaryDark),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'This cycle\'s contributions',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.copyWith(
+                                  color: AjopayColors.primaryDark,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Opens one contribution per hand for whichever cycle '
+                      'is next due, so members have something to pay '
+                      'against. Do this once per cycle.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AjopayColors.primaryDark,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed:
+                          _isGenerating ? null : _generateCycleContributions,
+                      icon: _isGenerating
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.add_task),
+                      label: Text(_isGenerating
+                          ? 'Generating...'
+                          : 'Generate this cycle\'s contributions'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AjopayColors.primaryDark,
+                        side: BorderSide(color: AjopayColors.primaryDark),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -918,6 +918,13 @@ mixin _$RotationSlotResponse {
   double? get amount => throw _privateConstructorUsedError; // null until PAID
   String? get paidAt => throw _privateConstructorUsedError;
 
+  /// Set once the slot's own recipient self-confirms they actually
+  /// received the payout an Admin already confirmed. Null until then.
+  /// Purely a transparency layer — does NOT gate the rotation moving
+  /// forward (confirmPayout already advanced the queue by the time
+  /// this can even be called); only meaningful once `status == 'PAID'`.
+  String? get recipientConfirmedAt => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $RotationSlotResponseCopyWith<RotationSlotResponse> get copyWith =>
@@ -939,7 +946,8 @@ abstract class $RotationSlotResponseCopyWith<$Res> {
       String? scheduledDate,
       String status,
       double? amount,
-      String? paidAt});
+      String? paidAt,
+      String? recipientConfirmedAt});
 }
 
 /// @nodoc
@@ -965,6 +973,7 @@ class _$RotationSlotResponseCopyWithImpl<$Res,
     Object? status = null,
     Object? amount = freezed,
     Object? paidAt = freezed,
+    Object? recipientConfirmedAt = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -1003,6 +1012,10 @@ class _$RotationSlotResponseCopyWithImpl<$Res,
           ? _value.paidAt
           : paidAt // ignore: cast_nullable_to_non_nullable
               as String?,
+      recipientConfirmedAt: freezed == recipientConfirmedAt
+          ? _value.recipientConfirmedAt
+          : recipientConfirmedAt // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -1024,7 +1037,8 @@ abstract class _$$RotationSlotResponseImplCopyWith<$Res>
       String? scheduledDate,
       String status,
       double? amount,
-      String? paidAt});
+      String? paidAt,
+      String? recipientConfirmedAt});
 }
 
 /// @nodoc
@@ -1047,6 +1061,7 @@ class __$$RotationSlotResponseImplCopyWithImpl<$Res>
     Object? status = null,
     Object? amount = freezed,
     Object? paidAt = freezed,
+    Object? recipientConfirmedAt = freezed,
   }) {
     return _then(_$RotationSlotResponseImpl(
       id: null == id
@@ -1085,6 +1100,10 @@ class __$$RotationSlotResponseImplCopyWithImpl<$Res>
           ? _value.paidAt
           : paidAt // ignore: cast_nullable_to_non_nullable
               as String?,
+      recipientConfirmedAt: freezed == recipientConfirmedAt
+          ? _value.recipientConfirmedAt
+          : recipientConfirmedAt // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -1101,7 +1120,8 @@ class _$RotationSlotResponseImpl implements _RotationSlotResponse {
       this.scheduledDate,
       required this.status,
       this.amount,
-      this.paidAt});
+      this.paidAt,
+      this.recipientConfirmedAt});
 
   factory _$RotationSlotResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$RotationSlotResponseImplFromJson(json);
@@ -1130,9 +1150,17 @@ class _$RotationSlotResponseImpl implements _RotationSlotResponse {
   @override
   final String? paidAt;
 
+  /// Set once the slot's own recipient self-confirms they actually
+  /// received the payout an Admin already confirmed. Null until then.
+  /// Purely a transparency layer — does NOT gate the rotation moving
+  /// forward (confirmPayout already advanced the queue by the time
+  /// this can even be called); only meaningful once `status == 'PAID'`.
+  @override
+  final String? recipientConfirmedAt;
+
   @override
   String toString() {
-    return 'RotationSlotResponse(id: $id, userId: $userId, userFullName: $userFullName, handNumber: $handNumber, position: $position, scheduledDate: $scheduledDate, status: $status, amount: $amount, paidAt: $paidAt)';
+    return 'RotationSlotResponse(id: $id, userId: $userId, userFullName: $userFullName, handNumber: $handNumber, position: $position, scheduledDate: $scheduledDate, status: $status, amount: $amount, paidAt: $paidAt, recipientConfirmedAt: $recipientConfirmedAt)';
   }
 
   @override
@@ -1152,13 +1180,25 @@ class _$RotationSlotResponseImpl implements _RotationSlotResponse {
                 other.scheduledDate == scheduledDate) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.amount, amount) || other.amount == amount) &&
-            (identical(other.paidAt, paidAt) || other.paidAt == paidAt));
+            (identical(other.paidAt, paidAt) || other.paidAt == paidAt) &&
+            (identical(other.recipientConfirmedAt, recipientConfirmedAt) ||
+                other.recipientConfirmedAt == recipientConfirmedAt));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, id, userId, userFullName,
-      handNumber, position, scheduledDate, status, amount, paidAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      userId,
+      userFullName,
+      handNumber,
+      position,
+      scheduledDate,
+      status,
+      amount,
+      paidAt,
+      recipientConfirmedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -1186,7 +1226,8 @@ abstract class _RotationSlotResponse implements RotationSlotResponse {
       final String? scheduledDate,
       required final String status,
       final double? amount,
-      final String? paidAt}) = _$RotationSlotResponseImpl;
+      final String? paidAt,
+      final String? recipientConfirmedAt}) = _$RotationSlotResponseImpl;
 
   factory _RotationSlotResponse.fromJson(Map<String, dynamic> json) =
       _$RotationSlotResponseImpl.fromJson;
@@ -1209,6 +1250,14 @@ abstract class _RotationSlotResponse implements RotationSlotResponse {
   double? get amount;
   @override // null until PAID
   String? get paidAt;
+  @override
+
+  /// Set once the slot's own recipient self-confirms they actually
+  /// received the payout an Admin already confirmed. Null until then.
+  /// Purely a transparency layer — does NOT gate the rotation moving
+  /// forward (confirmPayout already advanced the queue by the time
+  /// this can even be called); only meaningful once `status == 'PAID'`.
+  String? get recipientConfirmedAt;
   @override
   @JsonKey(ignore: true)
   _$$RotationSlotResponseImplCopyWith<_$RotationSlotResponseImpl>

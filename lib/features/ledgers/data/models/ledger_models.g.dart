@@ -15,6 +15,7 @@ _$LedgerResponseImpl _$$LedgerResponseImplFromJson(Map<String, dynamic> json) =>
       contributionAmount: (json['contributionAmount'] as num).toDouble(),
       status: json['status'] as String,
       callerRole: json['callerRole'] as String,
+      membershipStatus: json['membershipStatus'] as String,
     );
 
 Map<String, dynamic> _$$LedgerResponseImplToJson(
@@ -27,6 +28,7 @@ Map<String, dynamic> _$$LedgerResponseImplToJson(
       'contributionAmount': instance.contributionAmount,
       'status': instance.status,
       'callerRole': instance.callerRole,
+      'membershipStatus': instance.membershipStatus,
     };
 
 _$CreateLedgerRequestImpl _$$CreateLedgerRequestImplFromJson(

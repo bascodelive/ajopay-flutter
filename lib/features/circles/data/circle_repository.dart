@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
+import '../../contributions/data/models/contribution_models.dart';
 import 'models/circle_models.dart';
 
 /// Wraps exactly the endpoints API.md's Circles section documents.
@@ -143,6 +144,34 @@ class CircleRepository {
     }
   }
 
+  /// ADMIN-only, ACTIVE circles only. Generates this cycle's Contribution
+  /// rows — one per hand, for every participant — for whichever cycle
+  /// the next pending rotation slot is scheduled for. This is the piece
+  /// that actually connects the Circle/rotation feature to the existing
+  /// Contribution report/confirm flow: without calling this, no member
+  /// has anything to pay against, and the current payout's
+  /// `confirmedSoFar` stays 0 forever.
+  ///
+  /// Manual, admin-triggered — there is no automatic scheduler. Calling
+  /// it again for a cycle that's already been generated returns 400
+  /// (surfaced as ApiException; callers should treat that as "already
+  /// generated for this cycle" rather than a generic failure).
+  Future<List<ContributionResponse>> generateCycleContributions(
+    String ledgerId,
+    String circleId,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/generate-cycle-contributions',
+      );
+      return (response.data as List)
+          .map((e) => ContributionResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<RotationSlotResponse> confirmPayout(
     String ledgerId,
     String circleId,
@@ -153,6 +182,26 @@ class CircleRepository {
       final response = await _dio.post(
         '/api/ledgers/$ledgerId/circles/$circleId/slots/$slotId/confirm-payout',
         data: ConfirmPayoutRequest(note: note).toJson(),
+      );
+      return RotationSlotResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// The slot's own recipient only — self-confirms they actually
+  /// received a payout an Admin already confirmed. Does not affect
+  /// rotation progression; the queue already advanced when the Admin
+  /// confirmed. Valid only once, only once `status == 'PAID'`.
+  Future<RotationSlotResponse> confirmReceived(
+    String ledgerId,
+    String circleId,
+    String slotId,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/slots/$slotId/confirm-received',
       );
       return RotationSlotResponse.fromJson(
           response.data as Map<String, dynamic>);
@@ -172,6 +221,23 @@ class CircleRepository {
           .map(
               (e) => CircleActivityLogEntry.fromJson(e as Map<String, dynamic>))
           .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Same visibility as getHistory — any active member — but only once
+  /// the circle is COMPLETED (API.md: 400 otherwise). Returns the raw
+  /// CSV text; `responseType: plain` is required here since this
+  /// endpoint's Content-Type is text/csv, not application/json — Dio's
+  /// default JSON transformer would otherwise choke trying to decode it.
+  Future<String> exportHistoryCsv(String ledgerId, String circleId) async {
+    try {
+      final response = await _dio.get<String>(
+        '/api/ledgers/$ledgerId/circles/$circleId/history/export',
+        options: Options(responseType: ResponseType.plain),
+      );
+      return response.data ?? '';
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
     }

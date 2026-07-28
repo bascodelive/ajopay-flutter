@@ -16,6 +16,7 @@ _$ProfileResponseImpl _$$ProfileResponseImplFromJson(
       emailVerified: json['emailVerified'] as bool,
       phoneVerified: json['phoneVerified'] as bool,
       subscriptionTier: json['subscriptionTier'] as String,
+      avatarId: json['avatarId'] as String,
     );
 
 Map<String, dynamic> _$$ProfileResponseImplToJson(
@@ -28,6 +29,7 @@ Map<String, dynamic> _$$ProfileResponseImplToJson(
       'emailVerified': instance.emailVerified,
       'phoneVerified': instance.phoneVerified,
       'subscriptionTier': instance.subscriptionTier,
+      'avatarId': instance.avatarId,
     };
 
 _$UpdateProfileRequestImpl _$$UpdateProfileRequestImplFromJson(
@@ -42,6 +44,18 @@ Map<String, dynamic> _$$UpdateProfileRequestImplToJson(
     <String, dynamic>{
       'fullName': instance.fullName,
       'phone': instance.phone,
+    };
+
+_$UpdateAvatarRequestImpl _$$UpdateAvatarRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UpdateAvatarRequestImpl(
+      avatarId: json['avatarId'] as String,
+    );
+
+Map<String, dynamic> _$$UpdateAvatarRequestImplToJson(
+        _$UpdateAvatarRequestImpl instance) =>
+    <String, dynamic>{
+      'avatarId': instance.avatarId,
     };
 
 _$ChangePasswordRequestImpl _$$ChangePasswordRequestImplFromJson(

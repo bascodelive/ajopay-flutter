@@ -6,9 +6,10 @@ part of 'ledger_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$ledgerControllerHash() => r'299389697c69b79e62c47f57cffde9417c91707f';
+String _$ledgerControllerHash() => r'5076c024a4b34535edfc1e52410eb81158034d6f';
 
-/// Holds the ledger currently being created/joined/viewed/edited.
+/// Holds the ledger currently being created/joined/viewed/edited, plus
+/// every ledger-membership mutation (create/join/update/approve/reject).
 ///
 /// This is NOT "the user's list of ledgers" — that's `myLedgersProvider`
 /// below, a separate simple FutureProvider, since listing is pure fetch

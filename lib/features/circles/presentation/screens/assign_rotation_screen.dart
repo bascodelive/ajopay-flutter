@@ -84,8 +84,9 @@ class _AssignRotationScreenState extends ConsumerState<AssignRotationScreen> {
       final participant = currentByUserId[slot.userId];
       if (participant == null) continue; // no longer a participant — drop
       final keptSoFar = keptCountByUser[slot.userId] ?? 0;
-      if (keptSoFar >= participant.handCount)
+      if (keptSoFar >= participant.handCount) {
         continue; // hand count reduced — drop excess
+      }
       keptCountByUser[slot.userId] = keptSoFar + 1;
       reconciled.add(_HandEntry(
         userId: slot.userId,
@@ -145,15 +146,15 @@ class _AssignRotationScreenState extends ConsumerState<AssignRotationScreen> {
       appBar: AppBar(title: const Text('Assign rotation')),
       body: participantsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
+        error: (error, _) => const Center(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
-                const SizedBox(height: 12),
-                const Text('Could not load participants.'),
+                SizedBox(height: 12),
+                Text('Could not load participants.'),
               ],
             ),
           ),
@@ -253,7 +254,7 @@ class _AssignRotationScreenState extends ConsumerState<AssignRotationScreen> {
                           backgroundColor: AjopayColors.primaryTint,
                           child: Text(
                             '${index + 1}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AjopayColors.primaryDark,
                               fontWeight: FontWeight.w700,
                             ),

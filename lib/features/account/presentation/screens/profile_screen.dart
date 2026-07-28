@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/avatar_display.dart';
 import '../../../../core/widgets/premium_badge.dart';
 import '../../../auth/application/auth_controller.dart';
 import '../../application/account_controller.dart';
@@ -23,6 +24,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   bool _isEditing = false;
   bool _isSaving = false;
+  bool _isChangingAvatar = false;
 
   @override
   void dispose() {
@@ -60,6 +62,28 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           context, message ?? 'Could not save changes. Try again.');
     } else {
       AppFeedback.showSuccess(context, 'Profile updated');
+    }
+  }
+
+  Future<void> _changeAvatar(ProfileResponse profile) async {
+    final chosen = await showAvatarPickerSheet(
+      context,
+      currentAvatarId: profile.avatarId,
+    );
+    if (chosen == null || chosen == profile.avatarId) return;
+    if (!mounted) return;
+
+    setState(() => _isChangingAvatar = true);
+    final ok =
+        await ref.read(accountControllerProvider.notifier).updateAvatar(chosen);
+
+    if (!mounted) return;
+    setState(() => _isChangingAvatar = false);
+
+    if (!ok) {
+      final message = ref.read(accountControllerProvider.notifier).lastError;
+      AppFeedback.showError(
+          context, message ?? 'Could not update avatar. Try again.');
     }
   }
 
@@ -132,8 +156,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(accountControllerProvider);
 
     return Scaffold(
+      backgroundColor: AjopayColors.surface,
       appBar: AppBar(
         title: const Text('Profile'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           profileAsync.maybeWhen(
             data: (profile) => _isEditing
@@ -146,6 +173,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
         ],
       ),
+      extendBodyBehindAppBar: true,
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -170,27 +198,54 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           onRefresh: () => ref.refresh(accountControllerProvider.future),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.zero,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _ProfileHeader(profile: profile),
-                const SizedBox(height: 24),
-                if (_isEditing)
-                  _EditForm(
-                    formKey: _formKey,
-                    fullNameController: _fullNameController,
-                    phoneController: _phoneController,
-                    isSaving: _isSaving,
-                    onSave: _save,
-                    onCancel: () => setState(() => _isEditing = false),
-                  )
-                else ...[
-                  _InfoCard(profile: profile),
-                  const SizedBox(height: 24),
-                  _ActionsCard(
-                      onLogout: _confirmLogout, onLogoutAll: _confirmLogoutAll),
-                ],
+                _ProfileHeader(
+                  profile: profile,
+                  isChangingAvatar: _isChangingAvatar,
+                  onTapAvatar: () => _changeAvatar(profile),
+                  topInset: MediaQuery.of(context).padding.top + kToolbarHeight,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (_isEditing)
+                        _EditForm(
+                          formKey: _formKey,
+                          fullNameController: _fullNameController,
+                          phoneController: _phoneController,
+                          isSaving: _isSaving,
+                          onSave: _save,
+                          onCancel: () => setState(() => _isEditing = false),
+                        )
+                      else ...[
+                        _SectionLabel('Contact'),
+                        const SizedBox(height: 10),
+                        _InfoCard(profile: profile),
+                        const SizedBox(height: 28),
+                        _SectionLabel('Account'),
+                        const SizedBox(height: 10),
+                        _AccountCard(
+                            onChangePassword: () =>
+                                context.push('/change-password')),
+                        const SizedBox(height: 28),
+                        _SectionLabel(
+                          'Danger zone',
+                          color: AjopayColors.error,
+                        ),
+                        const SizedBox(height: 10),
+                        _DangerCard(
+                          onLogout: _confirmLogout,
+                          onLogoutAll: _confirmLogoutAll,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -200,64 +255,193 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text, {this.color});
+
+  final String text;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        text.toUpperCase(),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: color ?? Colors.black45,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+      ),
+    );
+  }
+}
+
 class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.profile});
+  const _ProfileHeader({
+    required this.profile,
+    required this.isChangingAvatar,
+    required this.onTapAvatar,
+    required this.topInset,
+  });
 
   final ProfileResponse profile;
+  final bool isChangingAvatar;
+  final VoidCallback onTapAvatar;
+  final double topInset;
 
-  String get _initials {
-    final parts = profile.fullName.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty || parts.first.isEmpty) return '?';
-    final first = parts.first[0];
-    final last = parts.length > 1 ? parts.last[0] : '';
-    return (first + last).toUpperCase();
-  }
+  static const double _avatarRadius = 44;
+  static const double _headerHeight = 180;
 
   @override
   Widget build(BuildContext context) {
     final isPremium = profile.subscriptionTier == 'PREMIUM';
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        CircleAvatar(
-          radius: 40,
-          backgroundColor: AjopayColors.primaryTint,
-          child: Text(
-            _initials,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AjopayColors.primaryDark,
-                  fontWeight: FontWeight.w700,
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            Container(
+              height: _headerHeight + topInset,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AjopayColors.primaryDark,
+                    AjopayColors.primary,
+                  ],
                 ),
-          ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+                child: Stack(
+                  children: [
+                    // A quiet brand echo, not decoration for its own
+                    // sake — the same savings motif used elsewhere
+                    // (AVATAR_1's icon), very low opacity so it never
+                    // competes with the name/email sitting on top of it.
+                    Positioned(
+                      top: -16,
+                      right: -20,
+                      child: Icon(
+                        Icons.savings_rounded,
+                        size: 150,
+                        color: Colors.white.withValues(alpha: 0.08),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: topInset + _headerHeight - _avatarRadius,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: GestureDetector(
+                  onTap: isChangingAvatar ? null : onTapAvatar,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(isPremium ? 4 : 3),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          border: isPremium
+                              ? Border.all(color: AjopayColors.gold, width: 3)
+                              : null,
+                        ),
+                        child: Opacity(
+                          opacity: isChangingAvatar ? 0.5 : 1,
+                          child: AvatarCircle(
+                            avatarId: profile.avatarId,
+                            fullNameForFallback: profile.fullName,
+                            radius: _avatarRadius,
+                          ),
+                        ),
+                      ),
+                      if (isChangingAvatar)
+                        Positioned.fill(
+                          child: Center(
+                            child: SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          ),
+                        )
+                      else
+                        Positioned(
+                          bottom: 2,
+                          right: 2,
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: AjopayColors.primary,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const Icon(Icons.edit,
+                                size: 13, color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: _avatarRadius + 12),
         Text(
           profile.fullName,
+          textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
         ),
         const SizedBox(height: 4),
-        Text(profile.email, style: Theme.of(context).textTheme.bodyMedium),
+        Text(
+          profile.email,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.black54,
+              ),
+        ),
         const SizedBox(height: 12),
-        if (isPremium)
-          const PremiumBadge()
-        else
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AjopayColors.surface,
-              border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              'FREE',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.4,
+        Center(
+          child: isPremium
+              ? const PremiumBadge()
+              : Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border:
+                        Border.all(color: Colors.black.withValues(alpha: 0.1)),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-            ),
-          ),
+                  child: Text(
+                    'FREE',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.4,
+                        ),
+                  ),
+                ),
+        ),
       ],
     );
   }
@@ -271,6 +455,7 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Column(
@@ -281,7 +466,7 @@ class _InfoCard extends StatelessWidget {
               value: profile.email,
               trailing: _VerifiedChip(verified: profile.emailVerified),
             ),
-            const Divider(height: 1),
+            const Divider(height: 1, indent: 68),
             _InfoRow(
               icon: Icons.phone_outlined,
               label: 'Phone',
@@ -318,8 +503,16 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AjopayColors.primary),
-          const SizedBox(width: 16),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AjopayColors.primaryTint,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: AjopayColors.primaryDark),
+          ),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,8 +564,43 @@ class _VerifiedChip extends StatelessWidget {
   }
 }
 
-class _ActionsCard extends StatelessWidget {
-  const _ActionsCard({required this.onLogout, required this.onLogoutAll});
+/// Neutral, everyday actions — visually distinct from _DangerCard below
+/// on purpose. A logout action sitting in the exact same card style as
+/// "change your password" gives both equal visual weight even though
+/// one is far more consequential; separating them fixes that.
+class _AccountCard extends StatelessWidget {
+  const _AccountCard({required this.onChangePassword});
+
+  final VoidCallback onChangePassword;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: ListTile(
+        leading: Container(
+          width: 36,
+          height: 36,
+          decoration: const BoxDecoration(
+            color: AjopayColors.primaryTint,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.lock_outline,
+              size: 18, color: AjopayColors.primaryDark),
+        ),
+        title: const Text('Change password'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onChangePassword,
+      ),
+    );
+  }
+}
+
+/// A visually flagged "danger zone" — light red tint + border — same
+/// pattern a lot of modern settings screens use to make consequential
+/// actions read as consequential before you even reach for the text.
+class _DangerCard extends StatelessWidget {
+  const _DangerCard({required this.onLogout, required this.onLogoutAll});
 
   final VoidCallback onLogout;
   final VoidCallback onLogoutAll;
@@ -380,21 +608,23 @@ class _ActionsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
+      color: AjopayColors.error.withValues(alpha: 0.05),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: AjopayColors.error.withValues(alpha: 0.18)),
+      ),
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(Icons.lock_outline),
-            title: const Text('Change password'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/change-password'),
-          ),
-          const Divider(height: 1),
           ListTile(
             leading: Icon(Icons.logout, color: AjopayColors.error),
             title: Text('Log out', style: TextStyle(color: AjopayColors.error)),
             onTap: onLogout,
           ),
-          const Divider(height: 1),
+          Divider(
+              height: 1,
+              indent: 68,
+              color: AjopayColors.error.withValues(alpha: 0.15)),
           ListTile(
             leading: Icon(Icons.phonelink_erase, color: AjopayColors.error),
             title: Text('Log out of all devices',
@@ -427,6 +657,7 @@ class _EditForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(

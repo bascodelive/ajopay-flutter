@@ -72,6 +72,13 @@ class RotationSlotResponse with _$RotationSlotResponse {
     required String status, // PENDING | PAID
     double? amount, // null until PAID
     String? paidAt,
+
+    /// Set once the slot's own recipient self-confirms they actually
+    /// received the payout an Admin already confirmed. Null until then.
+    /// Purely a transparency layer — does NOT gate the rotation moving
+    /// forward (confirmPayout already advanced the queue by the time
+    /// this can even be called); only meaningful once `status == 'PAID'`.
+    String? recipientConfirmedAt,
   }) = _RotationSlotResponse;
 
   factory RotationSlotResponse.fromJson(Map<String, dynamic> json) =>
