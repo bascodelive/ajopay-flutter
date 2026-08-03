@@ -26,6 +26,7 @@ mixin _$ErrorResponse {
   String get message => throw _privateConstructorUsedError;
   String get path => throw _privateConstructorUsedError;
   String get traceId => throw _privateConstructorUsedError;
+  String? get errorCode => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -45,7 +46,8 @@ abstract class $ErrorResponseCopyWith<$Res> {
       String error,
       String message,
       String path,
-      String traceId});
+      String traceId,
+      String? errorCode});
 }
 
 /// @nodoc
@@ -67,6 +69,7 @@ class _$ErrorResponseCopyWithImpl<$Res, $Val extends ErrorResponse>
     Object? message = null,
     Object? path = null,
     Object? traceId = null,
+    Object? errorCode = freezed,
   }) {
     return _then(_value.copyWith(
       timestamp: null == timestamp
@@ -93,6 +96,10 @@ class _$ErrorResponseCopyWithImpl<$Res, $Val extends ErrorResponse>
           ? _value.traceId
           : traceId // ignore: cast_nullable_to_non_nullable
               as String,
+      errorCode: freezed == errorCode
+          ? _value.errorCode
+          : errorCode // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -111,7 +118,8 @@ abstract class _$$ErrorResponseImplCopyWith<$Res>
       String error,
       String message,
       String path,
-      String traceId});
+      String traceId,
+      String? errorCode});
 }
 
 /// @nodoc
@@ -131,6 +139,7 @@ class __$$ErrorResponseImplCopyWithImpl<$Res>
     Object? message = null,
     Object? path = null,
     Object? traceId = null,
+    Object? errorCode = freezed,
   }) {
     return _then(_$ErrorResponseImpl(
       timestamp: null == timestamp
@@ -157,6 +166,10 @@ class __$$ErrorResponseImplCopyWithImpl<$Res>
           ? _value.traceId
           : traceId // ignore: cast_nullable_to_non_nullable
               as String,
+      errorCode: freezed == errorCode
+          ? _value.errorCode
+          : errorCode // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -170,7 +183,8 @@ class _$ErrorResponseImpl implements _ErrorResponse {
       required this.error,
       required this.message,
       required this.path,
-      required this.traceId});
+      required this.traceId,
+      this.errorCode});
 
   factory _$ErrorResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ErrorResponseImplFromJson(json);
@@ -187,10 +201,12 @@ class _$ErrorResponseImpl implements _ErrorResponse {
   final String path;
   @override
   final String traceId;
+  @override
+  final String? errorCode;
 
   @override
   String toString() {
-    return 'ErrorResponse(timestamp: $timestamp, status: $status, error: $error, message: $message, path: $path, traceId: $traceId)';
+    return 'ErrorResponse(timestamp: $timestamp, status: $status, error: $error, message: $message, path: $path, traceId: $traceId, errorCode: $errorCode)';
   }
 
   @override
@@ -204,13 +220,15 @@ class _$ErrorResponseImpl implements _ErrorResponse {
             (identical(other.error, error) || other.error == error) &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.path, path) || other.path == path) &&
-            (identical(other.traceId, traceId) || other.traceId == traceId));
+            (identical(other.traceId, traceId) || other.traceId == traceId) &&
+            (identical(other.errorCode, errorCode) ||
+                other.errorCode == errorCode));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(
-      runtimeType, timestamp, status, error, message, path, traceId);
+      runtimeType, timestamp, status, error, message, path, traceId, errorCode);
 
   @JsonKey(ignore: true)
   @override
@@ -233,7 +251,8 @@ abstract class _ErrorResponse implements ErrorResponse {
       required final String error,
       required final String message,
       required final String path,
-      required final String traceId}) = _$ErrorResponseImpl;
+      required final String traceId,
+      final String? errorCode}) = _$ErrorResponseImpl;
 
   factory _ErrorResponse.fromJson(Map<String, dynamic> json) =
       _$ErrorResponseImpl.fromJson;
@@ -250,6 +269,8 @@ abstract class _ErrorResponse implements ErrorResponse {
   String get path;
   @override
   String get traceId;
+  @override
+  String? get errorCode;
   @override
   @JsonKey(ignore: true)
   _$$ErrorResponseImplCopyWith<_$ErrorResponseImpl> get copyWith =>

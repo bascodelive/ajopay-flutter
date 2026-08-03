@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../../ledgers/application/ledger_controller.dart';
 import '../../application/contribution_action_controller.dart';
 
@@ -76,68 +79,92 @@ class _ScheduleContributionScreenState
 
     return Scaffold(
       appBar: AppBar(title: const Text('Schedule contribution')),
-      body: SafeArea(
-        child: membersAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) =>
-              const Center(child: Text('Could not load ledger members.')),
-          data: (members) {
-            final activeMembers =
-                members.where((m) => m.status == 'ACTIVE').toList();
+      body: AppBackdrop(
+        child: SafeArea(
+          child: membersAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) =>
+                const Center(child: Text('Could not load ledger members.')),
+            data: (members) {
+              final activeMembers =
+                  members.where((m) => m.status == 'ACTIVE').toList();
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Open a pending contribution for one member\'s cycle.',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 24),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedUserId,
-                    decoration: const InputDecoration(labelText: 'Member'),
-                    items: activeMembers
-                        .map((m) => DropdownMenuItem(
-                              value: m.userId,
-                              child: Text(m.fullName),
-                            ))
-                        .toList(),
-                    onChanged: (value) =>
-                        setState(() => _selectedUserId = value),
-                  ),
-                  const SizedBox(height: 16),
-                  OutlinedButton.icon(
-                    onPressed: _pickDate,
-                    icon: const Icon(Icons.calendar_today_outlined),
-                    label: Text(
-                      _cycleDate == null
-                          ? 'Pick cycle date'
-                          : _dateFormat.format(_cycleDate!),
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: const BoxDecoration(
+                        color: AjopayColors.primaryTint,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.event_available_outlined,
+                          color: AjopayColors.primaryDark, size: 28),
                     ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Open a pending contribution for one member\'s cycle.',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AjopayColors.textSecondary,
+                          ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submit,
-                    child: _isSubmitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    const SizedBox(height: 24),
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            DropdownButtonFormField<String>(
+                              initialValue: _selectedUserId,
+                              decoration: const InputDecoration(
+                                labelText: 'Member',
+                                prefixIcon: Icon(Icons.person_outline),
+                              ),
+                              items: activeMembers
+                                  .map((m) => DropdownMenuItem(
+                                        value: m.userId,
+                                        child: Text(m.fullName),
+                                      ))
+                                  .toList(),
+                              onChanged: (value) =>
+                                  setState(() => _selectedUserId = value),
                             ),
-                          )
-                        : const Text('Schedule'),
-                  ),
-                ],
-              ),
-            );
-          },
+                            const SizedBox(height: 16),
+                            OutlinedButton.icon(
+                              onPressed: _pickDate,
+                              icon: const Icon(Icons.calendar_today_outlined),
+                              label: Text(
+                                _cycleDate == null
+                                    ? 'Pick cycle date'
+                                    : _dateFormat.format(_cycleDate!),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                alignment: Alignment.centerLeft,
+                                side: const BorderSide(
+                                    color: AjopayColors.border),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    AppPrimaryButton(
+                      label: 'Schedule',
+                      isLoading: _isSubmitting,
+                      onPressed: _isSubmitting ? null : _submit,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

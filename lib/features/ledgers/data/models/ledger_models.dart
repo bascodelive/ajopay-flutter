@@ -85,3 +85,45 @@ class LedgerMemberResponse with _$LedgerMemberResponse {
   factory LedgerMemberResponse.fromJson(Map<String, dynamic> json) =>
       _$LedgerMemberResponseFromJson(json);
 }
+
+/// The public directory listing shape — deliberately NARROWER than
+/// LedgerResponse. Never carries inviteCode (that's the entire join
+/// gate) or callerRole/membershipStatus (the caller browsing the
+/// directory may have no relationship to a given result at all).
+@freezed
+class LedgerDirectoryEntryResponse with _$LedgerDirectoryEntryResponse {
+  const factory LedgerDirectoryEntryResponse({
+    required String id,
+    required String name,
+    required String contributionFrequency, // DAILY | WEEKLY | MONTHLY
+    required double contributionAmount,
+    /// 0.0 if never rated — always treat that as "no rating yet," never
+    /// as a genuine zero-star average.
+    required double averageRating,
+    required int ratingCount,
+    required String createdAt,
+  }) = _LedgerDirectoryEntryResponse;
+
+  factory LedgerDirectoryEntryResponse.fromJson(Map<String, dynamic> json) =>
+      _$LedgerDirectoryEntryResponseFromJson(json);
+}
+
+@freezed
+class RateLedgerRequest with _$RateLedgerRequest {
+  const factory RateLedgerRequest({required int stars}) = _RateLedgerRequest;
+
+  factory RateLedgerRequest.fromJson(Map<String, dynamic> json) =>
+      _$RateLedgerRequestFromJson(json);
+}
+
+@freezed
+class LedgerRatingResponse with _$LedgerRatingResponse {
+  const factory LedgerRatingResponse({
+    required String ledgerId,
+    required int stars,
+    required String updatedAt,
+  }) = _LedgerRatingResponse;
+
+  factory LedgerRatingResponse.fromJson(Map<String, dynamic> json) =>
+      _$LedgerRatingResponseFromJson(json);
+}

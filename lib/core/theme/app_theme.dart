@@ -7,16 +7,71 @@ import 'package:google_fonts/google_fonts.dart';
 /// anywhere in the app without updating BRAND.md first, per that file's own
 /// "Changing this palette" rule. If these two ever disagree, BRAND.md wins
 /// and this file is stale.
+///
+/// --- 2026 Auth UI refresh: palette expansion ---
+/// The original palette only defined brand colors + two neutrals
+/// (`textPrimary`, `surface`) — enough for cards and app bars, but not
+/// enough to express hierarchy inside a form-heavy screen (labels vs.
+/// hints vs. helper text, resting vs. focused input borders, a semantic
+/// "success" distinct from the brand green, or a soft backdrop that reads
+/// as more than a flat gray). The five tokens below are additive only —
+/// nothing existing was renamed or removed — and each is documented with
+/// the UX reason it exists. Add these to BRAND.md when confirmed.
 abstract final class AjopayColors {
   static const Color primary = Color(0xFF0F8A5F);
   static const Color primaryDark = Color(0xFF0B6B48);
   static const Color primaryTint = Color(0xFFDCF2E7);
   static const Color gold = Color(0xFFD99A2B);
+
+  /// Same relationship to [gold] that [primaryTint] has to [primary] —
+  /// added 2026-07-27 for rating/star content, so it reads as its own
+  /// visual category instead of borrowing the green tint. See BRAND.md.
+  static const Color goldTint = Color(0xFFF8ECD7);
   static const Color error = Color(0xFFD64545);
 
   // Supporting neutrals (BRAND.md — not brand colors, used alongside them)
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color surface = Color(0xFFF4F5F7);
+
+  // --- New: text hierarchy ---
+  // `textPrimary` alone forces every line of copy to compete at full
+  // contrast. Forms need a visible ranking: label > helper/subtitle >
+  // placeholder. Two new steps down from `textPrimary` give that ranking
+  // without ever touching pure gray-on-white, which reads as "unstyled."
+  /// Secondary body copy: subtitles under a headline, helper text under a
+  /// field, "Don't have an account?" prompts. One step down from
+  /// [textPrimary] so it's clearly supporting copy, not competing with it.
+  static const Color textSecondary = Color(0xFF6B7280);
+
+  /// Hints, placeholder text, resting (unfocused) icon tint, disabled
+  /// labels. The lowest-contrast text token — deliberately quiet so a
+  /// hint never gets mistaken for entered content.
+  static const Color textMuted = Color(0xFF9CA3AF);
+
+  // --- New: input & divider structure ---
+  /// Resting border for inputs, dividers, and outlined chips/cards that
+  /// aren't in an active/error state. The old theme only defined a
+  /// focused border color — every field looked identical until tapped.
+  /// This gives unfocused fields a visible (but quiet) edge, so a form
+  /// reads as a set of distinct fields before the user ever interacts.
+  static const Color border = Color(0xFFE4E7EC);
+
+  // --- New: semantic feedback ---
+  /// A positive/success state that is NOT [primary]. Auth screens need to
+  /// confirm things ("password meets requirements", "email verified")
+  /// separately from *brand* actions (buttons, links) — reusing `primary`
+  /// for both would make every success checkmark look like a call to
+  /// action. Kept in the same green family as the brand so it still reads
+  /// as "good news," just as its own semantic token.
+  static const Color success = Color(0xFF1AA262);
+
+  // --- New: backdrop ---
+  /// The soft endpoint of a brand-tinted background wash (paired with
+  /// white) behind auth screens. Flat `surface` gray works for app
+  /// content, but a full-bleed auth background needs a slightly warmer,
+  /// on-brand backdrop for a gradient hero to sit on top of — this is
+  /// that endpoint, one step softer than [primaryTint].
+  static const Color surfaceAlt = Color(0xFFEFF7F2);
 }
 
 /// Ajopay's ThemeData, built once and reused everywhere — no screen should
@@ -95,12 +150,20 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AjopayColors.surface,
+      // 2026-07-30 app-wide polish pass: was flat Surface gray on every
+      // screen with no exceptions — nothing to differentiate "screen
+      // background" from "card background" except a hairline border, which
+      // read as unfinished/boring rather than intentional. Surface alt is
+      // one step warmer, on-brand, and still light enough that white cards
+      // sitting on it read as clearly raised.
+      scaffoldBackgroundColor: AjopayColors.surfaceAlt,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: AjopayColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.16),
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge?.copyWith(
           color: Colors.white,
@@ -112,9 +175,16 @@ class AppTheme {
           backgroundColor: AjopayColors.primary,
           foregroundColor: Colors.white,
           disabledBackgroundColor: AjopayColors.primary.withValues(alpha: 0.4),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          // Pill radius, matching AuthPrimaryButton/AppPrimaryButton's
+          // shape language — was a fairly conservative 12px radius, which
+          // read as generic/default Material rather than as this app's
+          // own button. Any ElevatedButton not yet migrated to
+          // AppPrimaryButton (e.g. inside AlertDialogs) still picks this
+          // up automatically.
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          elevation: 0,
           textStyle:
               textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ).copyWith(
@@ -132,10 +202,16 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: Colors.white,
-        elevation: 0,
+        // Was elevation 0 + a 6%-black hairline border — flat, no depth,
+        // reads as a wireframe rather than a finished surface. Real
+        // elevation (soft shadow, no border) is what actually makes a
+        // white card read as "raised off the page" against Surface alt.
+        elevation: 3,
+        shadowColor: Colors.black.withValues(alpha: 0.10),
+        surfaceTintColor: Colors.transparent,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
         ),
       ),
       chipTheme: ChipThemeData(

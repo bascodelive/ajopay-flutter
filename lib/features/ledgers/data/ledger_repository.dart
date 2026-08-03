@@ -3,25 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../shared/models/page_response.dart';
 import 'models/ledger_models.dart';
 
 /// Wraps exactly the endpoints API.md's Ledgers section documents.
-///
-/// Notably absent, because it doesn't exist in API.md: a "list all my
-/// ledgers" endpoint. Every method here requires an already-known
-/// ledgerId except create/join, which return one. See BUILD_PHASES.md
-/// Phase 3 for the open question this creates for the home screen.
 class LedgerRepository {
   LedgerRepository(this._dio);
 
   final Dio _dio;
 
   /// Every ledger the caller is currently an ACTIVE member of — not a
-  /// public directory. Ajopay has no ledger-browsing/discovery feature by
-  /// design; joining a NEW ledger still only ever happens via invite code
-  /// (joinLedger below). This just answers "what do I already belong to."
-  /// A PENDING request never appears here — only an approved membership
-  /// does (server-side: this is ACTIVE-only).
+  /// public directory (see getDirectory below for that). Joining a NEW
+  /// ledger still only ever happens via invite code (joinLedger below);
+  /// this just answers "what do I already belong to." A PENDING request
+  /// never appears here — only an approved membership does (server-side:
+  /// this is ACTIVE-only).
   Future<List<LedgerResponse>> getMyLedgers() async {
     try {
       final response = await _dio.get('/api/ledgers');
@@ -151,6 +147,66 @@ class LedgerRepository {
           response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// The public directory — every ACTIVE ledger in the system, browsable
+  /// by any registered user with at least one active membership
+  /// somewhere (server-side gate; see API.md). Deliberately returns the
+  /// narrower LedgerDirectoryEntryResponse, never the real LedgerResponse
+  /// (no inviteCode leak to non-members).
+  Future<PageResponse<LedgerDirectoryEntryResponse>> getDirectory({
+    String? search,
+    int page = 0,
+    int size = 20,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/api/ledgers/directory',
+        queryParameters: {
+          if (search != null && search.isNotEmpty) 'search': search,
+          'page': page,
+          'size': size,
+        },
+      );
+      return PageResponse<LedgerDirectoryEntryResponse>.fromJson(
+        response.data as Map<String, dynamic>,
+        (json) =>
+            LedgerDirectoryEntryResponse.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Upserts the caller's own 1-5 star rating on this ledger. Same
+  /// membership gate as getDirectory; additionally rejected (403) if the
+  /// caller is this ledger's own Admin.
+  Future<LedgerRatingResponse> rateLedger(String ledgerId, int stars) async {
+    try {
+      final response = await _dio.put(
+        '/api/ledgers/$ledgerId/rating',
+        data: RateLedgerRequest(stars: stars).toJson(),
+      );
+      return LedgerRatingResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// The caller's own existing rating on this ledger — null if they
+  /// haven't rated it yet (a 404 here is a normal, expected outcome, not
+  /// an error state; see getMyRating's caller).
+  Future<LedgerRatingResponse?> getMyRating(String ledgerId) async {
+    try {
+      final response = await _dio.get('/api/ledgers/$ledgerId/rating/me');
+      return LedgerRatingResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final apiException = ApiException.fromDioException(e);
+      if (apiException.isNotFound) return null;
+      throw apiException;
     }
   }
 }

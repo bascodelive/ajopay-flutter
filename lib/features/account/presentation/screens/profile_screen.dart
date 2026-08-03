@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/widgets/avatar_display.dart';
 import '../../../../core/widgets/premium_badge.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../../auth/application/auth_controller.dart';
 import '../../application/account_controller.dart';
 import '../../data/models/account_models.dart';
@@ -130,7 +131,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Log out everywhere',
+            child: const Text('Log out everywhere',
                 style: TextStyle(color: AjopayColors.error)),
           ),
         ],
@@ -156,7 +157,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(accountControllerProvider);
 
     return Scaffold(
-      backgroundColor: AjopayColors.surface,
+      // No explicit backgroundColor override — inherits the theme's
+      // Surface alt scaffold background (2026-07-30 app-wide polish pass),
+      // same as every other screen. The gradient header below still
+      // supplies its own background for the area behind the AppBar.
       appBar: AppBar(
         title: const Text('Profile'),
         backgroundColor: Colors.transparent,
@@ -182,7 +186,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
+                const Icon(Icons.error_outline,
+                    size: 48, color: AjopayColors.error),
                 const SizedBox(height: 12),
                 const Text('Could not load your profile.'),
                 const SizedBox(height: 16),
@@ -223,17 +228,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           onCancel: () => setState(() => _isEditing = false),
                         )
                       else ...[
-                        _SectionLabel('Contact'),
+                        const _SectionLabel('Contact'),
                         const SizedBox(height: 10),
                         _InfoCard(profile: profile),
                         const SizedBox(height: 28),
-                        _SectionLabel('Account'),
+                        const _SectionLabel('Account'),
                         const SizedBox(height: 10),
                         _AccountCard(
                             onChangePassword: () =>
                                 context.push('/change-password')),
                         const SizedBox(height: 28),
-                        _SectionLabel(
+                        const _SectionLabel(
                           'Danger zone',
                           color: AjopayColors.error,
                         ),
@@ -373,7 +378,7 @@ class _ProfileHeader extends StatelessWidget {
                         ),
                       ),
                       if (isChangingAvatar)
-                        Positioned.fill(
+                        const Positioned.fill(
                           child: Center(
                             child: SizedBox(
                               width: 22,
@@ -404,7 +409,7 @@ class _ProfileHeader extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: _avatarRadius + 12),
+        const SizedBox(height: _avatarRadius + 12),
         Text(
           profile.fullName,
           textAlign: TextAlign.center,
@@ -585,7 +590,7 @@ class _AccountCard extends StatelessWidget {
             color: AjopayColors.primaryTint,
             shape: BoxShape.circle,
           ),
-          child: Icon(Icons.lock_outline,
+          child: const Icon(Icons.lock_outline,
               size: 18, color: AjopayColors.primaryDark),
         ),
         title: const Text('Change password'),
@@ -617,8 +622,9 @@ class _DangerCard extends StatelessWidget {
       child: Column(
         children: [
           ListTile(
-            leading: Icon(Icons.logout, color: AjopayColors.error),
-            title: Text('Log out', style: TextStyle(color: AjopayColors.error)),
+            leading: const Icon(Icons.logout, color: AjopayColors.error),
+            title: const Text('Log out',
+                style: TextStyle(color: AjopayColors.error)),
             onTap: onLogout,
           ),
           Divider(
@@ -626,8 +632,9 @@ class _DangerCard extends StatelessWidget {
               indent: 68,
               color: AjopayColors.error.withValues(alpha: 0.15)),
           ListTile(
-            leading: Icon(Icons.phonelink_erase, color: AjopayColors.error),
-            title: Text('Log out of all devices',
+            leading:
+                const Icon(Icons.phonelink_erase, color: AjopayColors.error),
+            title: const Text('Log out of all devices',
                 style: TextStyle(color: AjopayColors.error)),
             onTap: onLogoutAll,
           ),
@@ -696,18 +703,11 @@ class _EditForm extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
+                    child: AppPrimaryButton(
+                      label: 'Save',
+                      height: 48,
+                      isLoading: isSaving,
                       onPressed: isSaving ? null : onSave,
-                      child: isSaving
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Save'),
                     ),
                   ),
                 ],

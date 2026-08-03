@@ -227,9 +227,13 @@ class _AssignRotationScreenState extends ConsumerState<AssignRotationScreen> {
                 child: ReorderableListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: hands.length,
-                  onReorder: (oldIndex, newIndex) {
+                  // onReorderItem (not onReorder — deprecated) already
+                  // returns newIndex pre-adjusted for the removed item at
+                  // oldIndex, so the old manual "if (newIndex > oldIndex)
+                  // newIndex--" correction is gone too — doing it again
+                  // here would double-correct and land one slot off.
+                  onReorderItem: (oldIndex, newIndex) {
                     setState(() {
-                      if (newIndex > oldIndex) newIndex--;
                       final item = hands.removeAt(oldIndex);
                       hands.insert(newIndex, item);
                     });

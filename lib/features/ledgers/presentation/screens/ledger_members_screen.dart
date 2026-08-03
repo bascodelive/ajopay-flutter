@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -74,15 +76,18 @@ class _LedgerMembersScreenState extends ConsumerState<LedgerMembersScreen>
               )
             : null,
       ),
-      body: tabCount > 1
-          ? TabBarView(
-              controller: _tabController,
-              children: [
-                _ActiveMembersView(ledgerId: widget.ledgerId),
-                _PendingMembersView(ledgerId: widget.ledgerId),
-              ],
-            )
-          : _ActiveMembersView(ledgerId: widget.ledgerId),
+      body: AppBackdrop(
+        stops: const [0.0, 0.2],
+        child: tabCount > 1
+            ? TabBarView(
+                controller: _tabController,
+                children: [
+                  _ActiveMembersView(ledgerId: widget.ledgerId),
+                  _PendingMembersView(ledgerId: widget.ledgerId),
+                ],
+              )
+            : _ActiveMembersView(ledgerId: widget.ledgerId),
+      ),
     );
   }
 }
@@ -176,8 +181,8 @@ class _PendingMembersView extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Approve this request?'),
-        content: Text(
-            '${member.fullName} will get full access to this ledger.'),
+        content:
+            Text('${member.fullName} will get full access to this ledger.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -213,8 +218,7 @@ class _PendingMembersView extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Decline this request?'),
-        content: Text(
-            "${member.fullName}'s request to join will be declined."),
+        content: Text("${member.fullName}'s request to join will be declined."),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -222,7 +226,8 @@ class _PendingMembersView extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('Decline', style: TextStyle(color: AjopayColors.error)),
+            child: const Text('Decline',
+                style: TextStyle(color: AjopayColors.error)),
           ),
         ],
       ),
@@ -283,7 +288,7 @@ class _PendingMembersView extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.mark_email_read_outlined,
+                        const Icon(Icons.mark_email_read_outlined,
                             size: 56, color: AjopayColors.primary),
                         const SizedBox(height: 16),
                         Text(
@@ -294,7 +299,10 @@ class _PendingMembersView extends ConsumerWidget {
                         Text(
                           "You're all caught up — new join requests will show up here.",
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AjopayColors.textMuted,
+                                  ),
                         ),
                       ],
                     ),
@@ -431,14 +439,16 @@ class _PendingMemberTile extends StatelessWidget {
                       ),
                       Text(
                         'Wants to join',
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AjopayColors.textMuted,
+                            ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
@@ -446,20 +456,23 @@ class _PendingMemberTile extends StatelessWidget {
                     onPressed: onReject,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AjopayColors.error,
-                      side: BorderSide(color: AjopayColors.error),
+                      side: const BorderSide(color: AjopayColors.error),
+                      minimumSize: const Size.fromHeight(44),
                     ),
                     child: const Text('Decline'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ElevatedButton(
+                  child: AppPrimaryButton(
+                    label: 'Approve',
+                    height: 44,
                     onPressed: onApprove,
-                    child: const Text('Approve'),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 4),
           ],
         ),
       ),

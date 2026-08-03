@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/widgets/brand_underline.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/auth_hero_header.dart';
+import '../../../../core/widgets/auth_text_field.dart';
+import '../../../../core/widgets/auth_primary_button.dart';
 import '../../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -68,77 +71,110 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Log in')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
+      // Full-bleed soft brand wash behind the hero + card, instead of a
+      // flat scaffold background — see AjopayColors.surfaceAlt.
+      backgroundColor: AjopayColors.surface,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AjopayColors.surfaceAlt, AjopayColors.surface],
+            stops: [0.0, 0.4],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Welcome back',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                const AuthHeroHeader(
+                  title: 'Welcome back',
+                  subtitle: 'Log in to keep your circles moving.',
                 ),
-                const SizedBox(height: 10),
-                const BrandUnderline(),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  autocorrect: false,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Email is required'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscurePassword
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AuthTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.mail_outline,
+                          keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                                  ? 'Email is required'
+                                  : null,
+                        ),
+                        const SizedBox(height: 18),
+                        AuthTextField(
+                          controller: _passwordController,
+                          label: 'Password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AjopayColors.textMuted,
+                            ),
+                            onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword),
+                          ),
+                          validator: (value) => (value == null || value.isEmpty)
+                              ? 'Password is required'
+                              : null,
+                        ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AjopayColors.primaryDark,
+                            ),
+                            onPressed: _isSubmitting
+                                ? null
+                                : () => context.push('/forgot-password'),
+                            child: const Text('Forgot password?'),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        AuthPrimaryButton(
+                          label: 'Log in',
+                          isLoading: _isSubmitting,
+                          onPressed: _isSubmitting ? null : _submit,
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account?",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: AjopayColors.textSecondary),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                foregroundColor: AjopayColors.primaryDark,
+                              ),
+                              onPressed: _isSubmitting
+                                  ? null
+                                  : () => context.go('/register'),
+                              child: const Text('Create one'),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                  validator: (value) =>
-                      (value == null || value.isEmpty) ? 'Password is required' : null,
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _isSubmitting
-                        ? null
-                        : () => context.push('/forgot-password'),
-                    child: const Text('Forgot password?'),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Log in'),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: _isSubmitting ? null : () => context.go('/register'),
-                  child: const Text("Don't have an account? Create one"),
                 ),
               ],
             ),

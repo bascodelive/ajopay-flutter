@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/app_backdrop.dart';
 import '../../../../core/widgets/brand_underline.dart';
 import '../../../ledgers/application/ledger_controller.dart';
 import '../../application/circle_controller.dart';
@@ -30,42 +31,58 @@ class CircleHomeScreen extends ConsumerWidget {
     final ledgerAsync = ref.watch(ledgerDetailProvider(ledgerId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Circle')),
-      body: circleAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) {
-          if (error is ApiException && error.isNotFound) {
-            final isAdmin = ledgerAsync.valueOrNull?.callerRole == 'ADMIN';
-            return _NoCircleYet(ledgerId: ledgerId, isAdmin: isAdmin);
-          }
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.error_outline,
-                      size: 48, color: AjopayColors.error),
-                  const SizedBox(height: 12),
-                  const Text('Could not load this ledger\'s circle.'),
-                  const SizedBox(height: 16),
-                  OutlinedButton(
-                    onPressed: () =>
-                        ref.invalidate(currentCircleProvider(ledgerId)),
-                    child: const Text('Retry'),
-                  ),
-                ],
+      appBar: AppBar(
+        title: const Text('Circle'),
+        actions: [
+          // Always visible, regardless of the CURRENT circle's state —
+          // this is the fix for a completed circle becoming unreachable:
+          // currentCircleProvider only ever returns PENDING/ACTIVE (404
+          // otherwise), so this is the one entry point that survives a
+          // circle completing.
+          IconButton(
+            tooltip: 'Past circles',
+            icon: const Icon(Icons.event_repeat_outlined),
+            onPressed: () => context.push('/ledgers/$ledgerId/circle/past'),
+          ),
+        ],
+      ),
+      body: AppBackdrop(
+        child: circleAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) {
+            if (error is ApiException && error.isNotFound) {
+              final isAdmin = ledgerAsync.valueOrNull?.callerRole == 'ADMIN';
+              return _NoCircleYet(ledgerId: ledgerId, isAdmin: isAdmin);
+            }
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 48, color: AjopayColors.error),
+                    const SizedBox(height: 12),
+                    const Text('Could not load this ledger\'s circle.'),
+                    const SizedBox(height: 16),
+                    OutlinedButton(
+                      onPressed: () =>
+                          ref.invalidate(currentCircleProvider(ledgerId)),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-        data: (circle) => switch (circle.status) {
-          'PENDING' => _PendingCircleView(ledgerId: ledgerId, circle: circle),
-          'ACTIVE' => _ActiveCircleView(ledgerId: ledgerId, circle: circle),
-          'COMPLETED' =>
-            _CompletedCircleView(ledgerId: ledgerId, circle: circle),
-          _ => Center(child: Text('Unknown circle status: ${circle.status}')),
-        },
+            );
+          },
+          data: (circle) => switch (circle.status) {
+            'PENDING' => _PendingCircleView(ledgerId: ledgerId, circle: circle),
+            'ACTIVE' => _ActiveCircleView(ledgerId: ledgerId, circle: circle),
+            'COMPLETED' =>
+              _CompletedCircleView(ledgerId: ledgerId, circle: circle),
+            _ => Center(child: Text('Unknown circle status: ${circle.status}')),
+          },
+        ),
       ),
     );
   }
@@ -90,7 +107,8 @@ class _NoCircleYet extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.autorenew, size: 64, color: AjopayColors.primary),
+                  const Icon(Icons.autorenew,
+                      size: 64, color: AjopayColors.primary),
                   const SizedBox(height: 16),
                   Text(
                     'No circle yet',
@@ -201,7 +219,8 @@ class _PendingCircleViewState extends ConsumerState<_PendingCircleView> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.hourglass_top, color: AjopayColors.primaryDark),
+                  const Icon(Icons.hourglass_top,
+                      color: AjopayColors.primaryDark),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -360,7 +379,8 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.play_circle_outline, color: AjopayColors.primary),
+                  const Icon(Icons.play_circle_outline,
+                      color: AjopayColors.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -396,8 +416,10 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
                   leading: const Icon(Icons.history),
                   title: const Text('History'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () => context
-                      .push('/ledgers/$ledgerId/circle/${circle.id}/history'),
+                  onTap: () => context.push(
+                    '/ledgers/$ledgerId/circle/${circle.id}/history',
+                    extra: circle.status,
+                  ),
                 ),
               ],
             ),
@@ -413,7 +435,7 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.receipt_long_outlined,
+                        const Icon(Icons.receipt_long_outlined,
                             color: AjopayColors.primaryDark),
                         const SizedBox(width: 10),
                         Expanded(
@@ -455,7 +477,7 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
                           : 'Generate this cycle\'s contributions'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AjopayColors.primaryDark,
-                        side: BorderSide(color: AjopayColors.primaryDark),
+                        side: const BorderSide(color: AjopayColors.primaryDark),
                       ),
                     ),
                   ],
@@ -487,7 +509,8 @@ class _CompletedCircleView extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Icon(Icons.check_circle_outline, color: AjopayColors.primary),
+                  const Icon(Icons.check_circle_outline,
+                      color: AjopayColors.primary),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -505,8 +528,10 @@ class _CompletedCircleView extends StatelessWidget {
               leading: const Icon(Icons.history),
               title: const Text('History'),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () => context
-                  .push('/ledgers/$ledgerId/circle/${circle.id}/history'),
+              onTap: () => context.push(
+                '/ledgers/$ledgerId/circle/${circle.id}/history',
+                extra: circle.status,
+              ),
             ),
           ),
         ],

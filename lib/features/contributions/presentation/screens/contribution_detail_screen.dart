@@ -5,6 +5,8 @@ import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/csv_share.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../../account/application/account_controller.dart';
 import '../../../ledgers/application/ledger_controller.dart';
 import '../../application/contribution_action_controller.dart';
@@ -124,7 +126,7 @@ class _ContributionDetailScreenState
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      AppFeedback.showError(context, e.message ?? 'Could not export history.');
+      AppFeedback.showError(context, e.message);
     } finally {
       if (mounted) setState(() => _isExporting = false);
     }
@@ -162,72 +164,118 @@ class _ContributionDetailScreenState
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _DetailCard(contribution: _contribution),
-            const SizedBox(height: 16),
-            if (isAdmin || isOwner) ...[
-              _ActionsSection(
-                contribution: _contribution,
-                isAdmin: isAdmin,
-                isOwner: isOwner,
-                isActing: _isActing,
-                onReport: () => _runAction(
-                  'Report payment',
-                  (note) => ref
-                      .read(contributionActionControllerProvider.notifier)
-                      .reportPayment(widget.ledgerId, _contribution.id,
-                          note: note),
-                ),
-                onMarkMissed: () => _runAction(
-                  'Mark missed',
-                  (note) => ref
-                      .read(contributionActionControllerProvider.notifier)
-                      .markMissed(widget.ledgerId, _contribution.id,
-                          note: note),
-                ),
-                onConfirm: () => _runAction(
-                  'Confirm payment',
-                  (note) => ref
-                      .read(contributionActionControllerProvider.notifier)
-                      .confirmPayment(widget.ledgerId, _contribution.id,
-                          note: note),
-                ),
-                onReject: () => _runAction(
-                  'Reject report',
-                  (note) => ref
-                      .read(contributionActionControllerProvider.notifier)
-                      .rejectReport(widget.ledgerId, _contribution.id,
-                          note: note),
-                ),
-                onReopen: () => _runAction(
-                  'Reopen for late payment',
-                  (note) => ref
-                      .read(contributionActionControllerProvider.notifier)
-                      .reopenForLatePayment(widget.ledgerId, _contribution.id,
-                          note: note),
-                ),
-              ),
+      body: AppBackdrop(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _DetailCard(contribution: _contribution),
               const SizedBox(height: 16),
+              if (isAdmin || isOwner) ...[
+                _ActionsSection(
+                  contribution: _contribution,
+                  isAdmin: isAdmin,
+                  isOwner: isOwner,
+                  isActing: _isActing,
+                  onReport: () => _runAction(
+                    'Report payment',
+                    (note) => ref
+                        .read(contributionActionControllerProvider.notifier)
+                        .reportPayment(widget.ledgerId, _contribution.id,
+                            note: note),
+                  ),
+                  onMarkMissed: () => _runAction(
+                    'Mark missed',
+                    (note) => ref
+                        .read(contributionActionControllerProvider.notifier)
+                        .markMissed(widget.ledgerId, _contribution.id,
+                            note: note),
+                  ),
+                  onConfirm: () => _runAction(
+                    'Confirm payment',
+                    (note) => ref
+                        .read(contributionActionControllerProvider.notifier)
+                        .confirmPayment(widget.ledgerId, _contribution.id,
+                            note: note),
+                  ),
+                  onReject: () => _runAction(
+                    'Reject report',
+                    (note) => ref
+                        .read(contributionActionControllerProvider.notifier)
+                        .rejectReport(widget.ledgerId, _contribution.id,
+                            note: note),
+                  ),
+                  onReopen: () => _runAction(
+                    'Reopen for late payment',
+                    (note) => ref
+                        .read(contributionActionControllerProvider.notifier)
+                        .reopenForLatePayment(widget.ledgerId, _contribution.id,
+                            note: note),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+              Text('History', style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              historyAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const Text('Could not load history.'),
+                data: (entries) => entries.isEmpty
+                    ? Text(
+                        'No activity yet.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AjopayColors.textMuted,
+                            ),
+                      )
+                    : Card(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          child: Column(
+                            children: entries
+                                .map((e) => _HistoryTile(entry: e))
+                                .toList(),
+                          ),
+                        ),
+                      ),
+              ),
             ],
-            Text('History', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            historyAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Text('Could not load history.'),
-              data: (entries) => entries.isEmpty
-                  ? const Text('No activity yet.')
-                  : Column(
-                      children:
-                          entries.map((e) => _HistoryTile(entry: e)).toList(),
-                    ),
-            ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _Row extends StatelessWidget {
+  const _Row({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: AjopayColors.textSecondary)),
+        const Spacer(),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -246,7 +294,7 @@ class _DetailCard extends StatelessWidget {
       case 'REPORTED':
         return AjopayColors.gold;
       default:
-        return Colors.black45;
+        return AjopayColors.textMuted;
     }
   }
 
@@ -332,34 +380,6 @@ class _DetailCard extends StatelessWidget {
   }
 }
 
-class _Row extends StatelessWidget {
-  const _Row({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: Theme.of(context).textTheme.bodyMedium),
-        const Spacer(),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Mirrors ContributionService's exact transition rules — every button
 /// shown here corresponds exactly to a transition the backend actually
 /// allows from the contribution's current status, for the caller's
@@ -391,18 +411,25 @@ class _ActionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttons = <Widget>[];
+    // Primary (filled, gradient AppPrimaryButton) vs. secondary
+    // (OutlinedButton) follows the same weight the original ElevatedButton/
+    // OutlinedButton split already encoded: the forward-moving action in
+    // each status (Report, Confirm) is primary; the alternate path
+    // (Mark missed, Reject, Reopen) stays outlined/secondary. Not a new
+    // decision, just carried over into the new button widgets.
+    final primaryButtons = <Widget>[];
+    final secondaryButtons = <Widget>[];
 
     switch (contribution.status) {
       case 'PENDING':
         if (isOwner) {
-          buttons.add(ElevatedButton(
+          primaryButtons.add(AppPrimaryButton(
+            label: 'Report payment',
             onPressed: isActing ? null : onReport,
-            child: const Text('Report payment'),
           ));
         }
         if (isAdmin) {
-          buttons.add(OutlinedButton(
+          secondaryButtons.add(OutlinedButton(
             onPressed: isActing ? null : onMarkMissed,
             child: const Text('Mark missed'),
           ));
@@ -410,24 +437,27 @@ class _ActionsSection extends StatelessWidget {
         break;
       case 'REPORTED':
         if (isAdmin) {
-          buttons.add(ElevatedButton(
+          primaryButtons.add(AppPrimaryButton(
+            label: 'Confirm payment',
             onPressed: isActing ? null : onConfirm,
-            child: const Text('Confirm payment'),
           ));
-          buttons.add(OutlinedButton(
+          secondaryButtons.add(OutlinedButton(
             onPressed: isActing ? null : onReject,
-            child: Text('Reject report',
-                style: TextStyle(color: AjopayColors.error)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AjopayColors.error,
+              side: const BorderSide(color: AjopayColors.error),
+            ),
+            child: const Text('Reject report'),
           ));
         }
         break;
       case 'MISSED':
         if (isAdmin) {
-          buttons.add(ElevatedButton(
+          primaryButtons.add(AppPrimaryButton(
+            label: 'Confirm (late payment)',
             onPressed: isActing ? null : onConfirm,
-            child: const Text('Confirm (late payment)'),
           ));
-          buttons.add(OutlinedButton(
+          secondaryButtons.add(OutlinedButton(
             onPressed: isActing ? null : onReopen,
             child: const Text('Reopen for late payment'),
           ));
@@ -437,12 +467,18 @@ class _ActionsSection extends StatelessWidget {
         break;
     }
 
-    if (buttons.isEmpty) return const SizedBox.shrink();
+    if (primaryButtons.isEmpty && secondaryButtons.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final button in buttons) ...[
+        for (final button in primaryButtons) ...[
+          button,
+          const SizedBox(height: 8),
+        ],
+        for (final button in secondaryButtons) ...[
           button,
           const SizedBox(height: 8),
         ],
@@ -468,21 +504,25 @@ class _HistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
+      leading: const CircleAvatar(
         radius: 16,
         backgroundColor: AjopayColors.primaryTint,
         child: Icon(Icons.circle, size: 8, color: AjopayColors.primaryDark),
       ),
-      title: Text(_actionLabels[entry.action] ?? entry.action),
+      title: Text(_actionLabels[entry.action] ?? entry.action,
+          style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(
         entry.note != null && entry.note!.isNotEmpty
             ? '${entry.actorFullName} · ${entry.note}'
             : entry.actorFullName,
+        style: const TextStyle(color: AjopayColors.textMuted),
       ),
       trailing: Text(
         entry.createdAt.split('T').first,
-        style: Theme.of(context).textTheme.labelSmall,
+        style: Theme.of(context)
+            .textTheme
+            .labelSmall
+            ?.copyWith(color: AjopayColors.textMuted),
       ),
     );
   }

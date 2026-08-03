@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../application/ledger_controller.dart';
 
 const _frequencies = ['DAILY', 'WEEKLY', 'MONTHLY'];
@@ -58,87 +60,109 @@ class _CreateLedgerScreenState extends ConsumerState<CreateLedgerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Create ledger')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Start a savings group',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "You'll automatically become this ledger's Admin. "
-                  "Free-tier accounts can have one active ledger.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Ledger name',
-                    hintText: 'e.g. Market Traders Circle',
+      body: AppBackdrop(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                      color: AjopayColors.primaryTint,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.savings_rounded,
+                        color: AjopayColors.primaryDark, size: 28),
                   ),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Ledger name is required'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: _frequency,
-                  decoration: const InputDecoration(
-                      labelText: 'Contribution frequency'),
-                  items: _frequencies
-                      .map((f) => DropdownMenuItem(
-                            value: f,
-                            child:
-                                Text('${f[0]}${f.substring(1).toLowerCase()}'),
-                          ))
-                      .toList(),
-                  onChanged: (value) =>
-                      setState(() => _frequency = value ?? _frequency),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: 'Contribution amount',
-                    prefixText: '₦ ',
+                  const SizedBox(height: 16),
+                  Text(
+                    'Start a savings group',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Amount is required';
-                    final parsed = double.tryParse(v);
-                    if (parsed == null || parsed <= 0) {
-                      return 'Enter an amount greater than 0';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                  const SizedBox(height: 8),
+                  Text(
+                    "You'll automatically become this ledger's Admin. "
+                    "Free-tier accounts can have one active ledger.",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AjopayColors.textSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: 28),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _nameController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              labelText: 'Ledger name',
+                              hintText: 'e.g. Market Traders Circle',
+                              prefixIcon: Icon(Icons.badge_outlined),
+                            ),
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                    ? 'Ledger name is required'
+                                    : null,
                           ),
-                        )
-                      : const Text('Create ledger'),
-                ),
-              ],
+                          const SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            initialValue: _frequency,
+                            decoration: const InputDecoration(
+                              labelText: 'Contribution frequency',
+                              prefixIcon: Icon(Icons.repeat),
+                            ),
+                            items: _frequencies
+                                .map((f) => DropdownMenuItem(
+                                      value: f,
+                                      child: Text(
+                                          '${f[0]}${f.substring(1).toLowerCase()}'),
+                                    ))
+                                .toList(),
+                            onChanged: (value) => setState(
+                                () => _frequency = value ?? _frequency),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _amountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: const InputDecoration(
+                              labelText: 'Contribution amount',
+                              prefixIcon: Icon(Icons.payments_outlined),
+                              prefixText: '₦ ',
+                            ),
+                            validator: (value) {
+                              final v = value?.trim() ?? '';
+                              if (v.isEmpty) return 'Amount is required';
+                              final parsed = double.tryParse(v);
+                              if (parsed == null || parsed <= 0) {
+                                return 'Enter an amount greater than 0';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  AppPrimaryButton(
+                    label: 'Create ledger',
+                    isLoading: _isSubmitting,
+                    onPressed: _isSubmitting ? null : _submit,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

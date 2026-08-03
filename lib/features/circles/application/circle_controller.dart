@@ -197,6 +197,19 @@ final currentCircleProvider =
   );
 });
 
+/// Every circle this ledger has ever had, newest-started first — see
+/// CircleRepository.listCircles's Javadoc-equivalent comment for why
+/// this exists alongside currentCircleProvider rather than instead of
+/// it: that one 404s the moment a circle COMPLETES, so it can never be
+/// the source for "let me look at a circle that already finished."
+final circlesListProvider = FutureProvider.autoDispose
+    .family<List<CircleResponse>, String>((ref, ledgerId) {
+  return requireAuthenticated(
+    ref,
+    () => ref.read(circleRepositoryProvider).listCircles(ledgerId),
+  );
+});
+
 /// Read-only, keyed by (ledgerId, circleId) — same `.autoDispose` +
 /// `requireAuthenticated` guard pattern as the Ledger data providers
 /// (BUILD_PHASES.md Bug 1 & 2).
