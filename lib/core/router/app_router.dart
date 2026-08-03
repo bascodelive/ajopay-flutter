@@ -7,6 +7,7 @@ import '../../features/account/presentation/screens/forgot_password_screen.dart'
 import '../../features/account/presentation/screens/profile_screen.dart';
 import '../../features/account/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/application/auth_controller.dart';
+import '../../features/ledgers/presentation/screens/ledger_directory_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/verify_email_screen.dart';
@@ -16,6 +17,7 @@ import '../../features/circles/presentation/screens/circle_home_screen.dart';
 import '../../features/circles/presentation/screens/circle_participants_screen.dart';
 import '../../features/circles/presentation/screens/create_circle_screen.dart';
 import '../../features/circles/presentation/screens/current_payout_screen.dart';
+import '../../features/circles/presentation/screens/past_circles_screen.dart';
 import '../../features/circles/presentation/screens/rotation_queue_screen.dart';
 import '../../features/contributions/data/models/contribution_models.dart';
 import '../../features/contributions/presentation/screens/contribution_detail_screen.dart';
@@ -27,6 +29,8 @@ import '../../features/ledgers/presentation/screens/join_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_detail_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_home_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_members_screen.dart';
+import '../../features/messages/presentation/screens/messages_home_screen.dart';
+import '../../features/messages/presentation/screens/private_message_thread_screen.dart';
 
 /// go_router needs a Listenable to know when to re-run `redirect` — Riverpod
 /// state changes aren't one by default, so this bridges AuthController's
@@ -43,7 +47,13 @@ class _GoRouterRefreshNotifier extends ChangeNotifier {
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshNotifier = _GoRouterRefreshNotifier(ref);
 
-  const authRoutes = {'/login', '/register', '/verify-email', '/forgot-password', '/reset-password'};
+  const authRoutes = {
+    '/login',
+    '/register',
+    '/verify-email',
+    '/forgot-password',
+    '/reset-password'
+  };
 
   return GoRouter(
     initialLocation: '/login',
@@ -113,6 +123,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const JoinLedgerScreen(),
       ),
       GoRoute(
+        path: '/ledgers/directory',
+        builder: (context, state) => const LedgerDirectoryScreen(),
+      ),
+      GoRoute(
         path: '/ledgers/:id',
         builder: (context, state) => LedgerDetailScreen(
           ledgerId: state.pathParameters['id']!,
@@ -172,11 +186,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: '/ledgers/:id/circle/:circleId/history',
-        builder: (context, state) => CircleHistoryScreen(
+        path: '/ledgers/:id/circle/past',
+        builder: (context, state) => PastCirclesScreen(
           ledgerId: state.pathParameters['id']!,
-          circleId: state.pathParameters['circleId']!,
         ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/history',
+        builder: (context, state) {
+          // circleStatus is passed via `extra` by every screen that
+          // navigates here (CircleHomeScreen's Active/Completed views,
+          // PastCirclesScreen) — null only for a bare deep link with no
+          // navigation context, in which case CircleHistoryScreen keeps
+          // export hidden rather than guessing. See that screen's own
+          // doc comment on why this is no longer re-derived from
+          // currentCircleProvider.
+          final extra = state.extra;
+          final circleStatus = extra is String ? extra : null;
+          return CircleHistoryScreen(
+            ledgerId: state.pathParameters['id']!,
+            circleId: state.pathParameters['circleId']!,
+            circleStatus: circleStatus,
+          );
+        },
       ),
       // Protected — Contributions.
       GoRoute(
@@ -218,10 +250,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             );
           }
-          return ContributionDetailScreen(ledgerId: ledgerId, initialContribution: extra);
+          return ContributionDetailScreen(
+              ledgerId: ledgerId, initialContribution: extra);
+        },
+      ),
+      GoRoute(
+        path: '/ledgers/:id/messages',
+        builder: (context, state) => MessagesHomeScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/messages/private/:otherUserId',
+        builder: (context, state) {
+          final extra = state.extra;
+          final otherUserFullName = extra is String ? extra : 'Member';
+          return PrivateMessageThreadScreen(
+            ledgerId: state.pathParameters['id']!,
+            otherUserId: state.pathParameters['otherUserId']!,
+            otherUserFullName: otherUserFullName,
+          );
         },
       ),
     ],
   );
 });
-

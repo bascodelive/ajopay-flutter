@@ -24,6 +24,22 @@ class CircleRepository {
     }
   }
 
+  /// Every circle this ledger has ever had — PENDING, ACTIVE, and
+  /// COMPLETED — newest-started first. `getCurrentCircle` above only
+  /// ever returns a PENDING/ACTIVE circle (404 otherwise); this is how
+  /// a completed circle stays reachable afterward. Not paginated — see
+  /// the backend's own reasoning in CircleService.listCircles's Javadoc.
+  Future<List<CircleResponse>> listCircles(String ledgerId) async {
+    try {
+      final response = await _dio.get('/api/ledgers/$ledgerId/circles');
+      return (response.data as List)
+          .map((e) => CircleResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<CircleResponse> createCircle(String ledgerId, String startDate) async {
     try {
       final response = await _dio.post(

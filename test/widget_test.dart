@@ -2,7 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:ajopay_mobile/app.dart';
+import 'package:ajopay/app.dart';
 
 void main() {
   testWidgets(

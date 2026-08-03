@@ -14,6 +14,7 @@ _$ErrorResponseImpl _$$ErrorResponseImplFromJson(Map<String, dynamic> json) =>
       message: json['message'] as String,
       path: json['path'] as String,
       traceId: json['traceId'] as String,
+      errorCode: json['errorCode'] as String?,
     );
 
 Map<String, dynamic> _$$ErrorResponseImplToJson(_$ErrorResponseImpl instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$$ErrorResponseImplToJson(_$ErrorResponseImpl instance) =>
       'message': instance.message,
       'path': instance.path,
       'traceId': instance.traceId,
+      'errorCode': instance.errorCode,
     };

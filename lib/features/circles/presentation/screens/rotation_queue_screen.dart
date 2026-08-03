@@ -40,7 +40,8 @@ class RotationQueueScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
+                const Icon(Icons.error_outline,
+                    size: 48, color: AjopayColors.error),
                 const SizedBox(height: 12),
                 const Text('Could not load the rotation queue.'),
                 const SizedBox(height: 16),
@@ -243,7 +244,8 @@ class _SlotTile extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
                 children: [
-                  Icon(Icons.verified, size: 16, color: AjopayColors.primary),
+                  const Icon(Icons.verified,
+                      size: 16, color: AjopayColors.primary),
                   const SizedBox(width: 8),
                   Text(
                     'Receipt confirmed by ${slot.userFullName}',
@@ -271,7 +273,7 @@ class _SlotTile extends ConsumerWidget {
                     onPressed: () => _confirmReceived(context, ref),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AjopayColors.primaryDark,
-                      side: BorderSide(color: AjopayColors.primaryDark),
+                      side: const BorderSide(color: AjopayColors.primaryDark),
                     ),
                     child: const Text('Confirm received'),
                   ),

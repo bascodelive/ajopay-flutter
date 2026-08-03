@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/auth_hero_header.dart';
+import '../../../../core/widgets/auth_text_field.dart';
+import '../../../../core/widgets/auth_primary_button.dart';
 import '../../application/account_controller.dart';
 
 final _strongPasswordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
@@ -66,113 +70,123 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset password')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
+      backgroundColor: AjopayColors.surface,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AjopayColors.surfaceAlt, AjopayColors.surface],
+            stops: [0.0, 0.35],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Check your inbox',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                const AuthHeroHeader(
+                  title: 'Check your inbox',
+                  subtitle:
+                      'Enter the 6-digit code, then choose a new password.',
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Enter the 6-digit code, then choose a new password.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Email is required'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _codeController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  decoration: const InputDecoration(
-                    labelText: '6-digit code',
-                    counterText: '',
-                  ),
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Code is required';
-                    if (!_sixDigitRegex.hasMatch(v)) {
-                      return 'Enter all 6 digits';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _newPasswordController,
-                  obscureText: _obscureNew,
-                  decoration: InputDecoration(
-                    labelText: 'New password',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureNew
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
-                      onPressed: () =>
-                          setState(() => _obscureNew = !_obscureNew),
-                    ),
-                  ),
-                  validator: (value) {
-                    final v = value ?? '';
-                    if (v.isEmpty) return 'New password is required';
-                    if (!_strongPasswordRegex.hasMatch(v)) {
-                      return 'At least 8 characters, with upper, lower, and a digit';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirm,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm new password',
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirm
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
-                      onPressed: () =>
-                          setState(() => _obscureConfirm = !_obscureConfirm),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Confirm your new password';
-                    }
-                    if (value != _newPasswordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AuthTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.mail_outline,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                                  ? 'Email is required'
+                                  : null,
+                        ),
+                        const SizedBox(height: 18),
+                        AuthTextField(
+                          controller: _codeController,
+                          label: '6-digit code',
+                          icon: Icons.pin_outlined,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) {
+                            final v = value?.trim() ?? '';
+                            if (v.isEmpty) return 'Code is required';
+                            if (!_sixDigitRegex.hasMatch(v)) {
+                              return 'Enter all 6 digits';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 18),
+                        AuthTextField(
+                          controller: _newPasswordController,
+                          label: 'New password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscureNew,
+                          textInputAction: TextInputAction.next,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureNew
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AjopayColors.textMuted,
+                            ),
+                            onPressed: () =>
+                                setState(() => _obscureNew = !_obscureNew),
                           ),
-                        )
-                      : const Text('Reset password'),
+                          validator: (value) {
+                            final v = value ?? '';
+                            if (v.isEmpty) return 'New password is required';
+                            if (!_strongPasswordRegex.hasMatch(v)) {
+                              return 'At least 8 characters, with upper, lower, and a digit';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 18),
+                        AuthTextField(
+                          controller: _confirmPasswordController,
+                          label: 'Confirm new password',
+                          icon: Icons.lock_outline,
+                          obscureText: _obscureConfirm,
+                          textInputAction: TextInputAction.done,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirm
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: AjopayColors.textMuted,
+                            ),
+                            onPressed: () => setState(
+                                () => _obscureConfirm = !_obscureConfirm),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Confirm your new password';
+                            }
+                            if (value != _newPasswordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 28),
+                        AuthPrimaryButton(
+                          label: 'Reset password',
+                          isLoading: _isSubmitting,
+                          onPressed: _isSubmitting ? null : _submit,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

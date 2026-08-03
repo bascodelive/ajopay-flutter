@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../../circles/application/circle_controller.dart';
 import '../../../ledgers/application/ledger_controller.dart';
 import '../../application/contributions_pager.dart';
@@ -50,6 +52,10 @@ class _ContributionsListScreenState
         bottom: tabCount > 1
             ? TabBar(
                 controller: _tabController,
+                indicatorColor: Colors.white,
+                indicatorWeight: 3,
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.white70,
                 tabs: const [Tab(text: 'All'), Tab(text: 'Mine')],
               )
             : null,
@@ -62,27 +68,30 @@ class _ContributionsListScreenState
             ),
         ],
       ),
-      body: tabCount > 1
-          ? TabBarView(
-              controller: _tabController,
-              children: [
-                _ContributionsListView(
-                  ledgerId: widget.ledgerId,
-                  scope: ContributionScope.all,
-                  isAdmin: isAdmin,
-                ),
-                _ContributionsListView(
-                  ledgerId: widget.ledgerId,
-                  scope: ContributionScope.own,
-                  isAdmin: isAdmin,
-                ),
-              ],
-            )
-          : _ContributionsListView(
-              ledgerId: widget.ledgerId,
-              scope: ContributionScope.own,
-              isAdmin: isAdmin,
-            ),
+      body: AppBackdrop(
+        stops: const [0.0, 0.15],
+        child: tabCount > 1
+            ? TabBarView(
+                controller: _tabController,
+                children: [
+                  _ContributionsListView(
+                    ledgerId: widget.ledgerId,
+                    scope: ContributionScope.all,
+                    isAdmin: isAdmin,
+                  ),
+                  _ContributionsListView(
+                    ledgerId: widget.ledgerId,
+                    scope: ContributionScope.own,
+                    isAdmin: isAdmin,
+                  ),
+                ],
+              )
+            : _ContributionsListView(
+                ledgerId: widget.ledgerId,
+                scope: ContributionScope.own,
+                isAdmin: isAdmin,
+              ),
+      ),
     );
   }
 }
@@ -158,7 +167,8 @@ class _ContributionsListViewState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.error_outline, size: 48, color: AjopayColors.error),
+              const Icon(Icons.error_outline,
+                  size: 48, color: AjopayColors.error),
               const SizedBox(height: 12),
               const Text('Could not load contributions.'),
               const SizedBox(height: 16),
@@ -198,11 +208,26 @@ class _ContributionsListViewState
                 ),
               Expanded(
                 child: Center(
-                  child: Text(
-                    widget.scope == ContributionScope.all
-                        ? 'No contributions scheduled yet.'
-                        : 'You have no contributions yet.',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.receipt_long_outlined,
+                            size: 48, color: AjopayColors.primary),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.scope == ContributionScope.all
+                              ? 'No contributions scheduled yet.'
+                              : 'You have no contributions yet.',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AjopayColors.textSecondary,
+                                  ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -327,7 +352,16 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long_outlined, color: AjopayColors.primaryDark),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.receipt_long_outlined,
+                  color: AjopayColors.primaryDark, size: 19),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -355,9 +389,13 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : TextButton(
-                    onPressed: _generate,
-                    child: const Text('Generate'),
+                : SizedBox(
+                    width: 96,
+                    child: AppPrimaryButton(
+                      label: 'Generate',
+                      height: 36,
+                      onPressed: _generate,
+                    ),
                   ),
           ],
         ),
@@ -381,7 +419,7 @@ class _ContributionTile extends StatelessWidget {
       case 'REPORTED':
         return AjopayColors.gold;
       default:
-        return Colors.black45;
+        return AjopayColors.textMuted;
     }
   }
 
@@ -408,27 +446,41 @@ class _ContributionTile extends StatelessWidget {
         : '${contribution.cycleDate} · ₦${contribution.amount.toStringAsFixed(0)}';
 
     return Card(
-      child: ListTile(
-        leading: Icon(_statusIcon, color: _statusColor),
-        title: Text(contribution.memberFullName),
-        subtitle: Text(subtitle),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: _statusColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            contribution.status,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _statusColor,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
-        ),
+      margin: EdgeInsets.zero,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
         onTap: () => context.push(
           '/ledgers/$ledgerId/contributions/${contribution.id}',
           extra: contribution,
+        ),
+        child: ListTile(
+          leading: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: _statusColor.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(_statusIcon, color: _statusColor, size: 20),
+          ),
+          title: Text(contribution.memberFullName,
+              style: const TextStyle(fontWeight: FontWeight.w600)),
+          subtitle: Text(subtitle,
+              style: const TextStyle(color: AjopayColors.textMuted)),
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _statusColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              contribution.status,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: _statusColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+          ),
         ),
       ),
     );

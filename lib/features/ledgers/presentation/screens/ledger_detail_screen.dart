@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/app_backdrop.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -32,70 +33,83 @@ class LedgerDetailScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: ledgerAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.error_outline,
-                    size: 48, color: AjopayColors.error),
-                const SizedBox(height: 12),
-                const Text('Could not load this ledger.'),
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: () =>
-                      ref.invalidate(ledgerDetailProvider(ledgerId)),
-                  child: const Text('Retry'),
-                ),
-              ],
+      body: AppBackdrop(
+        stops: const [0.0, 0.2],
+        child: ledgerAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.error_outline,
+                      size: 48, color: AjopayColors.error),
+                  const SizedBox(height: 12),
+                  const Text('Could not load this ledger.'),
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    onPressed: () =>
+                        ref.invalidate(ledgerDetailProvider(ledgerId)),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        data: (ledger) => RefreshIndicator(
-          onRefresh: () => ref.refresh(ledgerDetailProvider(ledgerId).future),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _HeaderCard(ledger: ledger),
-                const SizedBox(height: 16),
-                _InviteCodeCard(ledger: ledger),
-                const SizedBox(height: 16),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.groups_outlined),
-                    title: const Text('Members'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/ledgers/$ledgerId/members'),
+          data: (ledger) => RefreshIndicator(
+            onRefresh: () => ref.refresh(ledgerDetailProvider(ledgerId).future),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _HeaderCard(ledger: ledger),
+                  const SizedBox(height: 16),
+                  _InviteCodeCard(ledger: ledger),
+                  const SizedBox(height: 20),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.groups_outlined),
+                      title: const Text('Members'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/ledgers/$ledgerId/members'),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.autorenew),
-                    title: const Text('Circle'),
-                    subtitle: const Text('Payout rotation for this ledger'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/ledgers/$ledgerId/circle'),
+                  const SizedBox(height: 12),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.autorenew),
+                      title: const Text('Circle'),
+                      subtitle: const Text('Payout rotation for this ledger'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/ledgers/$ledgerId/circle'),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.receipt_long_outlined),
-                    title: const Text('Contributions'),
-                    subtitle: const Text('Track payments for this ledger'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () =>
-                        context.push('/ledgers/$ledgerId/contributions'),
+                  const SizedBox(height: 12),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.receipt_long_outlined),
+                      title: const Text('Contributions'),
+                      subtitle: const Text('Track payments for this ledger'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () =>
+                          context.push('/ledgers/$ledgerId/contributions'),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.chat_bubble_outline_rounded),
+                      title: const Text('Messages'),
+                      subtitle: const Text('Group chat and direct messages'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/ledgers/$ledgerId/messages'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -192,7 +206,7 @@ class _DetailRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Colors.black54),
+        Icon(icon, size: 18, color: AjopayColors.textMuted),
         const SizedBox(width: 8),
         Text(label, style: Theme.of(context).textTheme.bodyMedium),
         const Spacer(),

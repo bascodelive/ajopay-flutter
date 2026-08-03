@@ -8,7 +8,8 @@ import '../data/models/ledger_models.dart';
 part 'ledger_controller.g.dart';
 
 /// Holds the ledger currently being created/joined/viewed/edited, plus
-/// every ledger-membership mutation (create/join/update/approve/reject).
+/// every ledger-membership mutation (create/join/update/approve/reject/
+/// rate).
 ///
 /// This is NOT "the user's list of ledgers" — that's `myLedgersProvider`
 /// below, a separate simple FutureProvider, since listing is pure fetch
@@ -126,6 +127,27 @@ class LedgerController extends _$LedgerController {
       return false;
     }
   }
+
+  /// Any registered user with at least one active ledger membership
+  /// somewhere — upserts the caller's own 1-5 star rating on ANY
+  /// ledger, membership in that specific ledger not required. Rejected
+  /// if the caller is that ledger's own Admin. Invalidates the caller's
+  /// own-rating cache for this ledger so a re-opened rating sheet shows
+  /// the freshly-saved value; does NOT invalidate the directory pager
+  /// (the new average only becomes visible on that ledger's next
+  /// natural refetch — acceptable staleness for a browsable list, same
+  /// tradeoff the Contributions pager already accepts elsewhere).
+  Future<bool> rateLedger(String ledgerId, int stars) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      await repository.rateLedger(ledgerId, stars);
+      ref.invalidate(myLedgerRatingProvider(ledgerId));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
 }
 
 /// The home/list screen's data source — every ledger the caller belongs
@@ -199,4 +221,13 @@ final myMembershipProvider = FutureProvider.autoDispose
     .family<LedgerMemberResponse, String>((ref, ledgerId) {
   return requireAuthenticated(
       ref, () => ref.read(ledgerRepositoryProvider).getMyMembership(ledgerId));
+});
+
+/// The caller's own rating on a given ledger, if any — null (not an
+/// error) if they haven't rated it yet. Drives whether the rating
+/// sheet opens pre-filled ("you rated this 4★") or blank.
+final myLedgerRatingProvider = FutureProvider.autoDispose
+    .family<LedgerRatingResponse?, String>((ref, ledgerId) {
+  return requireAuthenticated(
+      ref, () => ref.read(ledgerRepositoryProvider).getMyRating(ledgerId));
 });

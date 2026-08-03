@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/auth_hero_header.dart';
+import '../../../../core/widgets/auth_text_field.dart';
+import '../../../../core/widgets/auth_primary_button.dart';
 import '../../application/auth_controller.dart';
 
 final _sixDigitRegex = RegExp(r'^\d{6}$');
@@ -80,74 +84,89 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Verify email')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
+      backgroundColor: AjopayColors.surface,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AjopayColors.surfaceAlt, AjopayColors.surface],
+            stops: [0.0, 0.4],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Check your inbox',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
+                const AuthHeroHeader(
+                  title: 'Check your inbox',
+                  subtitle:
+                      'Enter the 6-digit code we sent. It expires after 24 '
+                      'hours, and locks after 5 wrong attempts — resend if '
+                      'that happens.',
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Enter the 6-digit code we sent. It expires after 24 hours, '
-                  'and locks after 5 wrong attempts — resend if that happens.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Email is required'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _codeController,
-                  keyboardType: TextInputType.number,
-                  maxLength: 6,
-                  decoration: const InputDecoration(
-                    labelText: '6-digit code',
-                    counterText: '',
-                  ),
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Code is required';
-                    if (!_sixDigitRegex.hasMatch(v)) {
-                      return 'Enter all 6 digits';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AuthTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.mail_outline,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          validator: (value) =>
+                              (value == null || value.trim().isEmpty)
+                                  ? 'Email is required'
+                                  : null,
+                        ),
+                        const SizedBox(height: 18),
+                        AuthTextField(
+                          controller: _codeController,
+                          label: '6-digit code',
+                          icon: Icons.pin_outlined,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          textInputAction: TextInputAction.done,
+                          validator: (value) {
+                            final v = value?.trim() ?? '';
+                            if (v.isEmpty) return 'Code is required';
+                            if (!_sixDigitRegex.hasMatch(v)) {
+                              return 'Enter all 6 digits';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        AuthPrimaryButton(
+                          label: 'Verify',
+                          isLoading: _isSubmitting,
+                          onPressed: _isSubmitting ? null : _submit,
+                        ),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AjopayColors.primaryDark,
+                            ),
+                            onPressed: _isResending ? null : _resend,
+                            child: _isResending
+                                ? const Text(
+                                    'Sending...',
+                                    style: TextStyle(
+                                      color: AjopayColors.textMuted,
+                                    ),
+                                  )
+                                : const Text('Resend code'),
                           ),
-                        )
-                      : const Text('Verify'),
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: _isResending ? null : _resend,
-                  child: _isResending
-                      ? const Text('Sending...')
-                      : const Text('Resend code'),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

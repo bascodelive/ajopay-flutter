@@ -82,7 +82,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/icon/
+    - assets/brand/
 
 # Run: dart run flutter_launcher_icons
 flutter_launcher_icons:

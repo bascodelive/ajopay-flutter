@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/auth_text_field.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../application/account_controller.dart';
 
 final _strongPasswordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$');
@@ -82,93 +86,113 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Change password')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _currentPasswordController,
-                  obscureText: _obscureCurrent,
-                  decoration: InputDecoration(
-                    labelText: 'Current password',
+      body: AppBackdrop(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Icon(Icons.lock_reset_rounded,
+                      size: 40, color: AjopayColors.primary),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Choose a new password',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "You'll be signed out of every device once this is done.",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AjopayColors.textSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: 28),
+                  AuthTextField(
+                    controller: _currentPasswordController,
+                    label: 'Current password',
+                    icon: Icons.lock_outline,
+                    obscureText: _obscureCurrent,
+                    textInputAction: TextInputAction.next,
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureCurrent
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
+                      icon: Icon(
+                        _obscureCurrent
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AjopayColors.textMuted,
+                      ),
                       onPressed: () =>
                           setState(() => _obscureCurrent = !_obscureCurrent),
                     ),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Current password is required'
+                        : null,
                   ),
-                  validator: (value) => (value == null || value.isEmpty)
-                      ? 'Current password is required'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _newPasswordController,
-                  obscureText: _obscureNew,
-                  decoration: InputDecoration(
-                    labelText: 'New password',
+                  const SizedBox(height: 18),
+                  AuthTextField(
+                    controller: _newPasswordController,
+                    label: 'New password',
+                    icon: Icons.lock_outline,
+                    obscureText: _obscureNew,
+                    textInputAction: TextInputAction.next,
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureNew
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
+                      icon: Icon(
+                        _obscureNew
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AjopayColors.textMuted,
+                      ),
                       onPressed: () =>
                           setState(() => _obscureNew = !_obscureNew),
                     ),
+                    validator: (value) {
+                      final v = value ?? '';
+                      if (v.isEmpty) return 'New password is required';
+                      if (!_strongPasswordRegex.hasMatch(v)) {
+                        return 'At least 8 characters, with upper, lower, and a digit';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    final v = value ?? '';
-                    if (v.isEmpty) return 'New password is required';
-                    if (!_strongPasswordRegex.hasMatch(v)) {
-                      return 'At least 8 characters, with upper, lower, and a digit';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: _obscureConfirm,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm new password',
+                  const SizedBox(height: 18),
+                  AuthTextField(
+                    controller: _confirmPasswordController,
+                    label: 'Confirm new password',
+                    icon: Icons.lock_outline,
+                    obscureText: _obscureConfirm,
+                    textInputAction: TextInputAction.done,
                     suffixIcon: IconButton(
-                      icon: Icon(_obscureConfirm
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
+                      icon: Icon(
+                        _obscureConfirm
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AjopayColors.textMuted,
+                      ),
                       onPressed: () =>
                           setState(() => _obscureConfirm = !_obscureConfirm),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Confirm your new password';
+                      }
+                      if (value != _newPasswordController.text) {
+                        return 'Passwords do not match';
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Confirm your new password';
-                    }
-                    if (value != _newPasswordController.text) {
-                      return 'Passwords do not match';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Change password'),
-                ),
-              ],
+                  const SizedBox(height: 32),
+                  AppPrimaryButton(
+                    label: 'Change password',
+                    isLoading: _isSubmitting,
+                    onPressed: _isSubmitting ? null : _submit,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

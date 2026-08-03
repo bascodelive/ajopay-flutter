@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/widgets/brand_underline.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -80,59 +82,74 @@ class _JoinLedgerScreenState extends ConsumerState<JoinLedgerScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Join ledger')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Enter your invite code',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                const BrandUnderline(width: 32),
-                const SizedBox(height: 16),
-                Text(
-                  "Ask the ledger's Admin for the 8-character code they received "
-                  'when they created it. Joining sends a request — the '
-                  "Admin needs to approve it before you're in.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _codeController,
-                  textCapitalization: TextCapitalization.characters,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        letterSpacing: 2,
-                      ),
-                  decoration: const InputDecoration(
-                    labelText: 'Invite code',
-                    hintText: 'e.g. A1B2C3D4',
+      body: AppBackdrop(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: const BoxDecoration(
+                      color: AjopayColors.primaryTint,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.group_add_outlined,
+                        color: AjopayColors.primaryDark, size: 28),
                   ),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Invite code is required'
-                      : null,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Send join request'),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  Text(
+                    'Enter your invite code',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  const BrandUnderline(width: 32),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Ask the ledger's Admin for the 8-character code they received "
+                    'when they created it. Joining sends a request — the '
+                    "Admin needs to approve it before you're in.",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AjopayColors.textSecondary,
+                        ),
+                  ),
+                  const SizedBox(height: 28),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: TextFormField(
+                        controller: _codeController,
+                        textCapitalization: TextCapitalization.characters,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  letterSpacing: 2,
+                                ),
+                        decoration: const InputDecoration(
+                          labelText: 'Invite code',
+                          hintText: 'e.g. A1B2C3D4',
+                          prefixIcon: Icon(Icons.confirmation_number_outlined),
+                        ),
+                        validator: (value) =>
+                            (value == null || value.trim().isEmpty)
+                                ? 'Invite code is required'
+                                : null,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  AppPrimaryButton(
+                    label: 'Send join request',
+                    isLoading: _isSubmitting,
+                    onPressed: _isSubmitting ? null : _submit,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -154,83 +171,88 @@ class _RequestSentView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Join ledger')),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight - 48,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: const BoxDecoration(
-                      color: AjopayColors.primaryTint,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.hourglass_top_rounded,
-                      size: 42,
-                      color: AjopayColors.primaryDark,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Request sent',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  const BrandUnderline(width: 32),
-                  const SizedBox(height: 16),
-                  Text(
-                    "You've asked to join",
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    ledger.name,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 20),
-                  Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.info_outline,
-                              size: 20, color: AjopayColors.primary),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              "The ledger's Admin has been notified and needs "
-                              "to approve your request. You'll be able to see "
-                              "this ledger here as soon as that happens.",
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                        ],
+      body: AppBackdrop(
+        child: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 48,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 88,
+                      height: 88,
+                      decoration: const BoxDecoration(
+                        color: AjopayColors.primaryTint,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.hourglass_top_rounded,
+                        size: 42,
+                        color: AjopayColors.primaryDark,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  ElevatedButton(
-                    onPressed: () => context.go('/'),
-                    child: const Text('Back to my ledgers'),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    Text(
+                      'Request sent',
+                      textAlign: TextAlign.center,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                    ),
+                    const SizedBox(height: 8),
+                    const BrandUnderline(width: 32),
+                    const SizedBox(height: 16),
+                    Text(
+                      "You've asked to join",
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AjopayColors.textSecondary,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      ledger.name,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 20),
+                    Card(
+                      margin: EdgeInsets.zero,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.info_outline,
+                                size: 20, color: AjopayColors.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                "The ledger's Admin has been notified and needs "
+                                "to approve your request. You'll be able to see "
+                                "this ledger here as soon as that happens.",
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    AppPrimaryButton(
+                      label: 'Back to my ledgers',
+                      onPressed: () => context.go('/'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

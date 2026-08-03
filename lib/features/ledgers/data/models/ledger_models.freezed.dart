@@ -1079,3 +1079,608 @@ abstract class _LedgerMemberResponse implements LedgerMemberResponse {
   _$$LedgerMemberResponseImplCopyWith<_$LedgerMemberResponseImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
+
+LedgerDirectoryEntryResponse _$LedgerDirectoryEntryResponseFromJson(
+    Map<String, dynamic> json) {
+  return _LedgerDirectoryEntryResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LedgerDirectoryEntryResponse {
+  String get id => throw _privateConstructorUsedError;
+  String get name => throw _privateConstructorUsedError;
+  String get contributionFrequency =>
+      throw _privateConstructorUsedError; // DAILY | WEEKLY | MONTHLY
+  double get contributionAmount => throw _privateConstructorUsedError;
+
+  /// 0.0 if never rated — always treat that as "no rating yet," never
+  /// as a genuine zero-star average.
+  double get averageRating => throw _privateConstructorUsedError;
+  int get ratingCount => throw _privateConstructorUsedError;
+  String get createdAt => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $LedgerDirectoryEntryResponseCopyWith<LedgerDirectoryEntryResponse>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LedgerDirectoryEntryResponseCopyWith<$Res> {
+  factory $LedgerDirectoryEntryResponseCopyWith(
+          LedgerDirectoryEntryResponse value,
+          $Res Function(LedgerDirectoryEntryResponse) then) =
+      _$LedgerDirectoryEntryResponseCopyWithImpl<$Res,
+          LedgerDirectoryEntryResponse>;
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      String contributionFrequency,
+      double contributionAmount,
+      double averageRating,
+      int ratingCount,
+      String createdAt});
+}
+
+/// @nodoc
+class _$LedgerDirectoryEntryResponseCopyWithImpl<$Res,
+        $Val extends LedgerDirectoryEntryResponse>
+    implements $LedgerDirectoryEntryResponseCopyWith<$Res> {
+  _$LedgerDirectoryEntryResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? contributionFrequency = null,
+    Object? contributionAmount = null,
+    Object? averageRating = null,
+    Object? ratingCount = null,
+    Object? createdAt = null,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      contributionFrequency: null == contributionFrequency
+          ? _value.contributionFrequency
+          : contributionFrequency // ignore: cast_nullable_to_non_nullable
+              as String,
+      contributionAmount: null == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double,
+      averageRating: null == averageRating
+          ? _value.averageRating
+          : averageRating // ignore: cast_nullable_to_non_nullable
+              as double,
+      ratingCount: null == ratingCount
+          ? _value.ratingCount
+          : ratingCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$LedgerDirectoryEntryResponseImplCopyWith<$Res>
+    implements $LedgerDirectoryEntryResponseCopyWith<$Res> {
+  factory _$$LedgerDirectoryEntryResponseImplCopyWith(
+          _$LedgerDirectoryEntryResponseImpl value,
+          $Res Function(_$LedgerDirectoryEntryResponseImpl) then) =
+      __$$LedgerDirectoryEntryResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      String contributionFrequency,
+      double contributionAmount,
+      double averageRating,
+      int ratingCount,
+      String createdAt});
+}
+
+/// @nodoc
+class __$$LedgerDirectoryEntryResponseImplCopyWithImpl<$Res>
+    extends _$LedgerDirectoryEntryResponseCopyWithImpl<$Res,
+        _$LedgerDirectoryEntryResponseImpl>
+    implements _$$LedgerDirectoryEntryResponseImplCopyWith<$Res> {
+  __$$LedgerDirectoryEntryResponseImplCopyWithImpl(
+      _$LedgerDirectoryEntryResponseImpl _value,
+      $Res Function(_$LedgerDirectoryEntryResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? contributionFrequency = null,
+    Object? contributionAmount = null,
+    Object? averageRating = null,
+    Object? ratingCount = null,
+    Object? createdAt = null,
+  }) {
+    return _then(_$LedgerDirectoryEntryResponseImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      contributionFrequency: null == contributionFrequency
+          ? _value.contributionFrequency
+          : contributionFrequency // ignore: cast_nullable_to_non_nullable
+              as String,
+      contributionAmount: null == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double,
+      averageRating: null == averageRating
+          ? _value.averageRating
+          : averageRating // ignore: cast_nullable_to_non_nullable
+              as double,
+      ratingCount: null == ratingCount
+          ? _value.ratingCount
+          : ratingCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LedgerDirectoryEntryResponseImpl
+    implements _LedgerDirectoryEntryResponse {
+  const _$LedgerDirectoryEntryResponseImpl(
+      {required this.id,
+      required this.name,
+      required this.contributionFrequency,
+      required this.contributionAmount,
+      required this.averageRating,
+      required this.ratingCount,
+      required this.createdAt});
+
+  factory _$LedgerDirectoryEntryResponseImpl.fromJson(
+          Map<String, dynamic> json) =>
+      _$$LedgerDirectoryEntryResponseImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String name;
+  @override
+  final String contributionFrequency;
+// DAILY | WEEKLY | MONTHLY
+  @override
+  final double contributionAmount;
+
+  /// 0.0 if never rated — always treat that as "no rating yet," never
+  /// as a genuine zero-star average.
+  @override
+  final double averageRating;
+  @override
+  final int ratingCount;
+  @override
+  final String createdAt;
+
+  @override
+  String toString() {
+    return 'LedgerDirectoryEntryResponse(id: $id, name: $name, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, averageRating: $averageRating, ratingCount: $ratingCount, createdAt: $createdAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LedgerDirectoryEntryResponseImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.contributionFrequency, contributionFrequency) ||
+                other.contributionFrequency == contributionFrequency) &&
+            (identical(other.contributionAmount, contributionAmount) ||
+                other.contributionAmount == contributionAmount) &&
+            (identical(other.averageRating, averageRating) ||
+                other.averageRating == averageRating) &&
+            (identical(other.ratingCount, ratingCount) ||
+                other.ratingCount == ratingCount) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, id, name, contributionFrequency,
+      contributionAmount, averageRating, ratingCount, createdAt);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LedgerDirectoryEntryResponseImplCopyWith<
+          _$LedgerDirectoryEntryResponseImpl>
+      get copyWith => __$$LedgerDirectoryEntryResponseImplCopyWithImpl<
+          _$LedgerDirectoryEntryResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LedgerDirectoryEntryResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LedgerDirectoryEntryResponse
+    implements LedgerDirectoryEntryResponse {
+  const factory _LedgerDirectoryEntryResponse(
+      {required final String id,
+      required final String name,
+      required final String contributionFrequency,
+      required final double contributionAmount,
+      required final double averageRating,
+      required final int ratingCount,
+      required final String createdAt}) = _$LedgerDirectoryEntryResponseImpl;
+
+  factory _LedgerDirectoryEntryResponse.fromJson(Map<String, dynamic> json) =
+      _$LedgerDirectoryEntryResponseImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get name;
+  @override
+  String get contributionFrequency;
+  @override // DAILY | WEEKLY | MONTHLY
+  double get contributionAmount;
+  @override
+
+  /// 0.0 if never rated — always treat that as "no rating yet," never
+  /// as a genuine zero-star average.
+  double get averageRating;
+  @override
+  int get ratingCount;
+  @override
+  String get createdAt;
+  @override
+  @JsonKey(ignore: true)
+  _$$LedgerDirectoryEntryResponseImplCopyWith<
+          _$LedgerDirectoryEntryResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+RateLedgerRequest _$RateLedgerRequestFromJson(Map<String, dynamic> json) {
+  return _RateLedgerRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$RateLedgerRequest {
+  int get stars => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $RateLedgerRequestCopyWith<RateLedgerRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $RateLedgerRequestCopyWith<$Res> {
+  factory $RateLedgerRequestCopyWith(
+          RateLedgerRequest value, $Res Function(RateLedgerRequest) then) =
+      _$RateLedgerRequestCopyWithImpl<$Res, RateLedgerRequest>;
+  @useResult
+  $Res call({int stars});
+}
+
+/// @nodoc
+class _$RateLedgerRequestCopyWithImpl<$Res, $Val extends RateLedgerRequest>
+    implements $RateLedgerRequestCopyWith<$Res> {
+  _$RateLedgerRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? stars = null,
+  }) {
+    return _then(_value.copyWith(
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$RateLedgerRequestImplCopyWith<$Res>
+    implements $RateLedgerRequestCopyWith<$Res> {
+  factory _$$RateLedgerRequestImplCopyWith(_$RateLedgerRequestImpl value,
+          $Res Function(_$RateLedgerRequestImpl) then) =
+      __$$RateLedgerRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({int stars});
+}
+
+/// @nodoc
+class __$$RateLedgerRequestImplCopyWithImpl<$Res>
+    extends _$RateLedgerRequestCopyWithImpl<$Res, _$RateLedgerRequestImpl>
+    implements _$$RateLedgerRequestImplCopyWith<$Res> {
+  __$$RateLedgerRequestImplCopyWithImpl(_$RateLedgerRequestImpl _value,
+      $Res Function(_$RateLedgerRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? stars = null,
+  }) {
+    return _then(_$RateLedgerRequestImpl(
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$RateLedgerRequestImpl implements _RateLedgerRequest {
+  const _$RateLedgerRequestImpl({required this.stars});
+
+  factory _$RateLedgerRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$RateLedgerRequestImplFromJson(json);
+
+  @override
+  final int stars;
+
+  @override
+  String toString() {
+    return 'RateLedgerRequest(stars: $stars)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$RateLedgerRequestImpl &&
+            (identical(other.stars, stars) || other.stars == stars));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, stars);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$RateLedgerRequestImplCopyWith<_$RateLedgerRequestImpl> get copyWith =>
+      __$$RateLedgerRequestImplCopyWithImpl<_$RateLedgerRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$RateLedgerRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _RateLedgerRequest implements RateLedgerRequest {
+  const factory _RateLedgerRequest({required final int stars}) =
+      _$RateLedgerRequestImpl;
+
+  factory _RateLedgerRequest.fromJson(Map<String, dynamic> json) =
+      _$RateLedgerRequestImpl.fromJson;
+
+  @override
+  int get stars;
+  @override
+  @JsonKey(ignore: true)
+  _$$RateLedgerRequestImplCopyWith<_$RateLedgerRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+LedgerRatingResponse _$LedgerRatingResponseFromJson(Map<String, dynamic> json) {
+  return _LedgerRatingResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LedgerRatingResponse {
+  String get ledgerId => throw _privateConstructorUsedError;
+  int get stars => throw _privateConstructorUsedError;
+  String get updatedAt => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $LedgerRatingResponseCopyWith<LedgerRatingResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LedgerRatingResponseCopyWith<$Res> {
+  factory $LedgerRatingResponseCopyWith(LedgerRatingResponse value,
+          $Res Function(LedgerRatingResponse) then) =
+      _$LedgerRatingResponseCopyWithImpl<$Res, LedgerRatingResponse>;
+  @useResult
+  $Res call({String ledgerId, int stars, String updatedAt});
+}
+
+/// @nodoc
+class _$LedgerRatingResponseCopyWithImpl<$Res,
+        $Val extends LedgerRatingResponse>
+    implements $LedgerRatingResponseCopyWith<$Res> {
+  _$LedgerRatingResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? ledgerId = null,
+    Object? stars = null,
+    Object? updatedAt = null,
+  }) {
+    return _then(_value.copyWith(
+      ledgerId: null == ledgerId
+          ? _value.ledgerId
+          : ledgerId // ignore: cast_nullable_to_non_nullable
+              as String,
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$LedgerRatingResponseImplCopyWith<$Res>
+    implements $LedgerRatingResponseCopyWith<$Res> {
+  factory _$$LedgerRatingResponseImplCopyWith(_$LedgerRatingResponseImpl value,
+          $Res Function(_$LedgerRatingResponseImpl) then) =
+      __$$LedgerRatingResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String ledgerId, int stars, String updatedAt});
+}
+
+/// @nodoc
+class __$$LedgerRatingResponseImplCopyWithImpl<$Res>
+    extends _$LedgerRatingResponseCopyWithImpl<$Res, _$LedgerRatingResponseImpl>
+    implements _$$LedgerRatingResponseImplCopyWith<$Res> {
+  __$$LedgerRatingResponseImplCopyWithImpl(_$LedgerRatingResponseImpl _value,
+      $Res Function(_$LedgerRatingResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? ledgerId = null,
+    Object? stars = null,
+    Object? updatedAt = null,
+  }) {
+    return _then(_$LedgerRatingResponseImpl(
+      ledgerId: null == ledgerId
+          ? _value.ledgerId
+          : ledgerId // ignore: cast_nullable_to_non_nullable
+              as String,
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+      updatedAt: null == updatedAt
+          ? _value.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LedgerRatingResponseImpl implements _LedgerRatingResponse {
+  const _$LedgerRatingResponseImpl(
+      {required this.ledgerId, required this.stars, required this.updatedAt});
+
+  factory _$LedgerRatingResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LedgerRatingResponseImplFromJson(json);
+
+  @override
+  final String ledgerId;
+  @override
+  final int stars;
+  @override
+  final String updatedAt;
+
+  @override
+  String toString() {
+    return 'LedgerRatingResponse(ledgerId: $ledgerId, stars: $stars, updatedAt: $updatedAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LedgerRatingResponseImpl &&
+            (identical(other.ledgerId, ledgerId) ||
+                other.ledgerId == ledgerId) &&
+            (identical(other.stars, stars) || other.stars == stars) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, ledgerId, stars, updatedAt);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LedgerRatingResponseImplCopyWith<_$LedgerRatingResponseImpl>
+      get copyWith =>
+          __$$LedgerRatingResponseImplCopyWithImpl<_$LedgerRatingResponseImpl>(
+              this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LedgerRatingResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LedgerRatingResponse implements LedgerRatingResponse {
+  const factory _LedgerRatingResponse(
+      {required final String ledgerId,
+      required final int stars,
+      required final String updatedAt}) = _$LedgerRatingResponseImpl;
+
+  factory _LedgerRatingResponse.fromJson(Map<String, dynamic> json) =
+      _$LedgerRatingResponseImpl.fromJson;
+
+  @override
+  String get ledgerId;
+  @override
+  int get stars;
+  @override
+  String get updatedAt;
+  @override
+  @JsonKey(ignore: true)
+  _$$LedgerRatingResponseImplCopyWith<_$LedgerRatingResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}

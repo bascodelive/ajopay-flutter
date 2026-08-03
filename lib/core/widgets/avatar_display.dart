@@ -174,7 +174,7 @@ class _AvatarPickerSheet extends StatelessWidget {
                           SizedBox(
                             height: 16,
                             child: isSelected
-                                ? Icon(Icons.check_circle,
+                                ? const Icon(Icons.check_circle,
                                     size: 16, color: AjopayColors.primary)
                                 : null,
                           ),

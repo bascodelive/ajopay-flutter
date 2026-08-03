@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_feedback.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -23,11 +26,15 @@ class EditLedgerRoute extends ConsumerWidget {
     return ledgerAsync.when(
       loading: () => Scaffold(
         appBar: AppBar(title: const Text('Edit ledger')),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const AppBackdrop(
+          child: Center(child: CircularProgressIndicator()),
+        ),
       ),
       error: (error, _) => Scaffold(
         appBar: AppBar(title: const Text('Edit ledger')),
-        body: const Center(child: Text('Could not load this ledger.')),
+        body: const AppBackdrop(
+          child: Center(child: Text('Could not load this ledger.')),
+        ),
       ),
       data: (ledger) => EditLedgerScreen(ledger: ledger),
     );
@@ -90,78 +97,110 @@ class _EditLedgerScreenState extends ConsumerState<EditLedgerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Edit ledger')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Changing the amount only affects contributions scheduled '
-                  'after this change — nothing already scheduled is retroactively '
-                  'affected.',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _nameController,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Ledger name'),
-                  validator: (value) => (value == null || value.trim().isEmpty)
-                      ? 'Ledger name is required'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: _frequency,
-                  decoration: const InputDecoration(
-                      labelText: 'Contribution frequency'),
-                  items: _frequencies
-                      .map((f) => DropdownMenuItem(
-                            value: f,
-                            child:
-                                Text('${f[0]}${f.substring(1).toLowerCase()}'),
-                          ))
-                      .toList(),
-                  onChanged: (value) =>
-                      setState(() => _frequency = value ?? _frequency),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _amountController,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: 'Contribution amount',
-                    prefixText: '₦ ',
-                  ),
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Amount is required';
-                    final parsed = double.tryParse(v);
-                    if (parsed == null || parsed <= 0) {
-                      return 'Enter an amount greater than 0';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
+      body: AppBackdrop(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Card(
+                    color: AjopayColors.primaryTint,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.info_outline,
+                              size: 20, color: AjopayColors.primaryDark),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Changing the amount only affects contributions '
+                              'scheduled after this change — nothing already '
+                              'scheduled is retroactively affected.',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AjopayColors.primaryDark,
+                                  ),
+                            ),
                           ),
-                        )
-                      : const Text('Save changes'),
-                ),
-              ],
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _nameController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              labelText: 'Ledger name',
+                              prefixIcon: Icon(Icons.badge_outlined),
+                            ),
+                            validator: (value) =>
+                                (value == null || value.trim().isEmpty)
+                                    ? 'Ledger name is required'
+                                    : null,
+                          ),
+                          const SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            initialValue: _frequency,
+                            decoration: const InputDecoration(
+                              labelText: 'Contribution frequency',
+                              prefixIcon: Icon(Icons.repeat),
+                            ),
+                            items: _frequencies
+                                .map((f) => DropdownMenuItem(
+                                      value: f,
+                                      child: Text(
+                                          '${f[0]}${f.substring(1).toLowerCase()}'),
+                                    ))
+                                .toList(),
+                            onChanged: (value) => setState(
+                                () => _frequency = value ?? _frequency),
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _amountController,
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            decoration: const InputDecoration(
+                              labelText: 'Contribution amount',
+                              prefixIcon: Icon(Icons.payments_outlined),
+                              prefixText: '₦ ',
+                            ),
+                            validator: (value) {
+                              final v = value?.trim() ?? '';
+                              if (v.isEmpty) return 'Amount is required';
+                              final parsed = double.tryParse(v);
+                              if (parsed == null || parsed <= 0) {
+                                return 'Enter an amount greater than 0';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  AppPrimaryButton(
+                    label: 'Save changes',
+                    isLoading: _isSubmitting,
+                    onPressed: _isSubmitting ? null : _submit,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

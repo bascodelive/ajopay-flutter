@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:cross_file/cross_file.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Hands the OS share sheet an in-memory CSV file — no disk write, no

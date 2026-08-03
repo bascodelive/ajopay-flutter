@@ -94,3 +94,55 @@ Map<String, dynamic> _$$LedgerMemberResponseImplToJson(
       'status': instance.status,
       'joinedAt': instance.joinedAt,
     };
+
+_$LedgerDirectoryEntryResponseImpl _$$LedgerDirectoryEntryResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LedgerDirectoryEntryResponseImpl(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      contributionFrequency: json['contributionFrequency'] as String,
+      contributionAmount: (json['contributionAmount'] as num).toDouble(),
+      averageRating: (json['averageRating'] as num).toDouble(),
+      ratingCount: (json['ratingCount'] as num).toInt(),
+      createdAt: json['createdAt'] as String,
+    );
+
+Map<String, dynamic> _$$LedgerDirectoryEntryResponseImplToJson(
+        _$LedgerDirectoryEntryResponseImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'contributionFrequency': instance.contributionFrequency,
+      'contributionAmount': instance.contributionAmount,
+      'averageRating': instance.averageRating,
+      'ratingCount': instance.ratingCount,
+      'createdAt': instance.createdAt,
+    };
+
+_$RateLedgerRequestImpl _$$RateLedgerRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$RateLedgerRequestImpl(
+      stars: (json['stars'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$$RateLedgerRequestImplToJson(
+        _$RateLedgerRequestImpl instance) =>
+    <String, dynamic>{
+      'stars': instance.stars,
+    };
+
+_$LedgerRatingResponseImpl _$$LedgerRatingResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LedgerRatingResponseImpl(
+      ledgerId: json['ledgerId'] as String,
+      stars: (json['stars'] as num).toInt(),
+      updatedAt: json['updatedAt'] as String,
+    );
+
+Map<String, dynamic> _$$LedgerRatingResponseImplToJson(
+        _$LedgerRatingResponseImpl instance) =>
+    <String, dynamic>{
+      'ledgerId': instance.ledgerId,
+      'stars': instance.stars,
+      'updatedAt': instance.updatedAt,
+    };

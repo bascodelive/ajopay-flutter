@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/auth_hero_header.dart';
+import '../../../../core/widgets/auth_text_field.dart';
+import '../../../../core/widgets/auth_primary_button.dart';
 import '../../application/account_controller.dart';
 
 class ForgotPasswordScreen extends ConsumerStatefulWidget {
@@ -42,55 +46,68 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot password')),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
+      backgroundColor: AjopayColors.surface,
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AjopayColors.surfaceAlt, AjopayColors.surface],
+            stops: [0.0, 0.4],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Reset your password',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
+                AuthHeroHeader(
+                  title: 'Reset your password',
+                  subtitle: "Enter your email and we'll send a 6-digit code "
+                      'to reset your password, if an account exists for it.',
+                  trailing: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => context.pop(),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  "Enter your email and we'll send a 6-digit code to reset "
-                  'your password, if an account exists for it.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(height: 32),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  autocorrect: false,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) {
-                    final v = value?.trim() ?? '';
-                    if (v.isEmpty) return 'Email is required';
-                    if (!v.contains('@') || !v.contains('.')) {
-                      return 'Enter a valid email address';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Send reset code'),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        AuthTextField(
+                          controller: _emailController,
+                          label: 'Email',
+                          icon: Icons.mail_outline,
+                          keyboardType: TextInputType.emailAddress,
+                          autocorrect: false,
+                          textInputAction: TextInputAction.done,
+                          validator: (value) {
+                            final v = value?.trim() ?? '';
+                            if (v.isEmpty) return 'Email is required';
+                            if (!v.contains('@') || !v.contains('.')) {
+                              return 'Enter a valid email address';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 28),
+                        AuthPrimaryButton(
+                          label: 'Send reset code',
+                          isLoading: _isSubmitting,
+                          onPressed: _isSubmitting ? null : _submit,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
