@@ -48,9 +48,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // the AuthController status change on its own — no explicit
     // navigation needed here.
     if (!ok) {
-      final message = ref.read(authControllerProvider).errorMessage;
+      final controllerState = ref.read(authControllerProvider);
+      final message = controllerState.errorMessage;
       final email = _emailController.text.trim();
-      final isUnverified = message?.toLowerCase().contains('verif') ?? false;
+
+      // Reverted from the errorCode-based check — that version depended
+      // on AuthState growing an `errorCode` field (String?) that was
+      // never actually added to auth_controller.dart, so it didn't
+      // compile. Back to the substring match alone until that field
+      // exists. Matches the fuller phrase the backend actually sends
+      // for this case ("...verify your email address before logging
+      // in"), not a bare 'verif' substring — that used to also match
+      // unrelated text (e.g. Dio's own default exception message says
+      // "...you typically have either to verify and fix your request
+      // code", which contains 'verif' too).
+      final isUnverified =
+          message?.toLowerCase().contains('verify your email') ?? false;
 
       AppFeedback.showError(
         context,

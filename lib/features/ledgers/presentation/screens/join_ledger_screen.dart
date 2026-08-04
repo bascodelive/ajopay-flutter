@@ -63,6 +63,7 @@ class _JoinLedgerScreenState extends ConsumerState<JoinLedgerScreen> {
       // this ledger before (server treats a repeat join as a no-op) —
       // safe to go straight in.
       ref.invalidate(myLedgersProvider);
+      ref.invalidate(ledgerLimitProvider);
       if (!mounted) return;
       context.pushReplacement('/ledgers/${ledger.id}');
       return;

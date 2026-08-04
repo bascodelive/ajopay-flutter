@@ -29,6 +29,20 @@ class LedgerRepository {
     }
   }
 
+  /// The caller's own current standing against their tier's active-ledger
+  /// limit — lets the client show/gate Create+Join proactively (accurate
+  /// numbers, before ever attempting a request that would just 400)
+  /// instead of only finding out via a failed POST.
+  Future<LedgerLimitResponse> getLedgerLimit() async {
+    try {
+      final response = await _dio.get('/api/ledgers/limit');
+      return LedgerLimitResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<LedgerResponse> createLedger(CreateLedgerRequest request) async {
     try {
       final response = await _dio.post('/api/ledgers', data: request.toJson());

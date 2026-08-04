@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/brand_underline.dart';
 import '../../../../core/widgets/app_backdrop.dart';
+import '../../../../core/widgets/app_primary_button.dart';
+import '../../../subscriptions/application/subscription_controller.dart';
 import '../../data/models/ledger_models.dart';
 import '../../application/ledger_controller.dart';
 
@@ -14,6 +16,16 @@ class LedgerHomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ledgersAsync = ref.watch(myLedgersProvider);
+    final limitAsync = ref.watch(ledgerLimitProvider);
+    final isPremium =
+        ref.watch(subscriptionControllerProvider).valueOrNull?.isPremium ??
+            false;
+    // Fails open on loading/error — a transient hiccup fetching the
+    // limit shouldn't block someone from even opening the sheet; the
+    // backend's own enforceGroupLimit is still the real gate regardless
+    // of what this client-side check shows.
+    final limit = limitAsync.valueOrNull;
+    final isAtLimit = limit?.isAtLimit ?? false;
 
     return Scaffold(
       appBar: AppBar(
@@ -84,12 +96,106 @@ class LedgerHomeScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: ledgersAsync.maybeWhen(
-        data: (_) => FloatingActionButton.extended(
-          onPressed: () => _showCreateOrJoinSheet(context),
-          icon: const Icon(Icons.add),
-          label: const Text('New / Join'),
-        ),
+        data: (_) => isAtLimit
+            ? FloatingActionButton.extended(
+                onPressed: () =>
+                    _showLimitReachedSheet(context, isPremium, limit!),
+                backgroundColor: AjopayColors.gold,
+                icon: const Icon(Icons.workspace_premium_outlined),
+                label: Text(isPremium ? 'At your limit' : 'Upgrade for more'),
+              )
+            : FloatingActionButton.extended(
+                onPressed: () => _showCreateOrJoinSheet(context),
+                icon: const Icon(Icons.add),
+                label: const Text('New / Join'),
+              ),
         orElse: () => null,
+      ),
+    );
+  }
+
+  /// Shown instead of the Create/Join sheet once the caller is at their
+  /// tier's active-ledger limit — explains why, and only offers an
+  /// Upgrade path if there's actually a higher tier to upgrade TO. A
+  /// Premium caller already at THEIR cap has nothing to upgrade into,
+  /// so that case is purely informational, no CTA.
+  void _showLimitReachedSheet(
+    BuildContext context,
+    bool isPremium,
+    LedgerLimitResponse limit,
+  ) {
+    final noun = limit.maxActiveGroups == 1 ? 'ledger' : 'ledgers';
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: AjopayColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AjopayColors.gold.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.workspace_premium_rounded,
+                    color: AjopayColors.gold, size: 32),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                isPremium
+                    ? "You're at your Premium limit"
+                    : "You've reached your ledger limit",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                isPremium
+                    ? "Your Premium plan allows up to ${limit.maxActiveGroups} "
+                        'active $noun, and you already have '
+                        '${limit.activeGroupCount}.'
+                    : 'Free accounts can have ${limit.maxActiveGroups} active '
+                        '$noun at a time. Upgrade to Premium to create or '
+                        'join more.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AjopayColors.textSecondary,
+                    ),
+              ),
+              const SizedBox(height: 24),
+              if (!isPremium)
+                AppPrimaryButton(
+                  label: 'Upgrade to Premium',
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    context.push('/subscription');
+                  },
+                )
+              else
+                OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Got it'),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

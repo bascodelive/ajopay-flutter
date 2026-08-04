@@ -31,6 +31,7 @@ import '../../features/ledgers/presentation/screens/ledger_home_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_members_screen.dart';
 import '../../features/messages/presentation/screens/messages_home_screen.dart';
 import '../../features/messages/presentation/screens/private_message_thread_screen.dart';
+import '../../features/subscriptions/presentation/screens/subscription_screen.dart';
 
 /// go_router needs a Listenable to know when to re-run `redirect` — Riverpod
 /// state changes aren't one by default, so this bridges AuthController's
@@ -112,6 +113,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/change-password',
         builder: (context, state) => const ChangePasswordScreen(),
+      ),
+      // Protected — Subscriptions. Registered here (not under Phase 2/3
+      // sections above/below) since it's reached from multiple places —
+      // Profile today, Messages' upsell banner already calling
+      // context.push('/subscription') since the earlier Messages pass,
+      // more premium-gated screens later — not owned by any one feature.
+      GoRoute(
+        path: '/subscription',
+        builder: (context, state) => const SubscriptionScreen(),
       ),
       // Protected — Phase 3.
       GoRoute(

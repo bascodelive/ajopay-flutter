@@ -44,6 +44,12 @@ dependencies:
   share_plus: ^10.1.4
   cross_file: ^0.3.4+2
 
+  # --- Opens Paystack's hosted checkout page (Subscriptions feature) —
+  # the backend's SubscriptionService.initiateUpgrade doesn't set a
+  # callback_url, so this is external-browser only, not an in-app
+  # webview with redirect detection. See subscription_screen.dart.
+  url_launcher: ^6.3.1
+
   # --- Typography ---
   # Deliberate two-font pairing: Sora for headlines/titles (more
   # character, used with restraint), Inter for body/labels (dense

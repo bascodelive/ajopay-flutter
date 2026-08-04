@@ -47,6 +47,7 @@ class _CreateLedgerScreenState extends ConsumerState<CreateLedgerScreen> {
 
     if (ledger != null) {
       ref.invalidate(myLedgersProvider);
+      ref.invalidate(ledgerLimitProvider);
       if (!mounted) return;
       context.pushReplacement('/ledgers/${ledger.id}');
     } else {
