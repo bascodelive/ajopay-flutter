@@ -146,3 +146,17 @@ Map<String, dynamic> _$$LedgerRatingResponseImplToJson(
       'stars': instance.stars,
       'updatedAt': instance.updatedAt,
     };
+
+_$LedgerLimitResponseImpl _$$LedgerLimitResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LedgerLimitResponseImpl(
+      maxActiveGroups: (json['maxActiveGroups'] as num).toInt(),
+      activeGroupCount: (json['activeGroupCount'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$$LedgerLimitResponseImplToJson(
+        _$LedgerLimitResponseImpl instance) =>
+    <String, dynamic>{
+      'maxActiveGroups': instance.maxActiveGroups,
+      'activeGroupCount': instance.activeGroupCount,
+    };

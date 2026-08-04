@@ -97,6 +97,7 @@ class LedgerDirectoryEntryResponse with _$LedgerDirectoryEntryResponse {
     required String name,
     required String contributionFrequency, // DAILY | WEEKLY | MONTHLY
     required double contributionAmount,
+
     /// 0.0 if never rated — always treat that as "no rating yet," never
     /// as a genuine zero-star average.
     required double averageRating,
@@ -126,4 +127,23 @@ class LedgerRatingResponse with _$LedgerRatingResponse {
 
   factory LedgerRatingResponse.fromJson(Map<String, dynamic> json) =>
       _$LedgerRatingResponseFromJson(json);
+}
+
+/// The caller's own current standing against their tier's active-ledger
+/// limit — `GET /api/ledgers/limit`. Deliberately caller-scoped, not a
+/// static "here are both tiers' numbers" shape — matches the backend's
+/// own `LedgerLimitResponse` exactly, same reasoning documented there.
+@freezed
+class LedgerLimitResponse with _$LedgerLimitResponse {
+  const LedgerLimitResponse._();
+
+  const factory LedgerLimitResponse({
+    required int maxActiveGroups,
+    required int activeGroupCount,
+  }) = _LedgerLimitResponse;
+
+  factory LedgerLimitResponse.fromJson(Map<String, dynamic> json) =>
+      _$LedgerLimitResponseFromJson(json);
+
+  bool get isAtLimit => activeGroupCount >= maxActiveGroups;
 }

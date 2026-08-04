@@ -170,6 +170,20 @@ final myLedgersProvider =
       ref, () => ref.read(ledgerRepositoryProvider).getMyLedgers());
 });
 
+/// The caller's own current standing against their tier's active-ledger
+/// limit — drives `LedgerHomeScreen`'s Create/Join gate. Same
+/// `.autoDispose` + `requireAuthenticated` reasoning as `myLedgersProvider`
+/// above, and the same "screen owns invalidation" pattern: screens should
+/// `ref.invalidate(ledgerLimitProvider)` alongside
+/// `ref.invalidate(myLedgersProvider)` after a successful create/join —
+/// not handled inside `LedgerController` itself, consistent with how
+/// `myLedgersProvider` is already invalidated from the screens, not here.
+final ledgerLimitProvider =
+    FutureProvider.autoDispose<LedgerLimitResponse>((ref) {
+  return requireAuthenticated(
+      ref, () => ref.read(ledgerRepositoryProvider).getLedgerLimit());
+});
+
 /// The Ledger Detail screen's data source — pure fetch by ID, deliberately
 /// separate from LedgerController above so viewing a ledger never
 /// interferes with an in-progress create/join/update mutation elsewhere.

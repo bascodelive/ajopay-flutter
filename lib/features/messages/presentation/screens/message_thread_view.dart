@@ -8,6 +8,7 @@ import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_backdrop.dart';
 import '../../../account/application/account_controller.dart';
+import '../../../subscriptions/application/subscription_controller.dart';
 import '../../application/message_thread_pager.dart';
 import '../../data/message_repository.dart';
 import '../../data/models/message_models.dart';
@@ -107,7 +108,13 @@ class _MessageThreadViewState extends ConsumerState<MessageThreadView> {
     final pageAsync = ref.watch(messageThreadPagerProvider(widget.threadKey));
     final profileAsync = ref.watch(accountControllerProvider);
     final myUserId = profileAsync.valueOrNull?.id;
-    final isPremium = profileAsync.valueOrNull?.subscriptionTier == 'PREMIUM';
+    // Was: profileAsync.valueOrNull?.subscriptionTier == 'PREMIUM' — a
+    // guessed field on the account profile that was never confirmed to
+    // exist. Subscription status has its own dedicated endpoint
+    // (GET /api/subscriptions/status) and its own controller; this was
+    // wrong from when this screen was first written, before that existed.
+    final subscriptionAsync = ref.watch(subscriptionControllerProvider);
+    final isPremium = subscriptionAsync.valueOrNull?.isPremium ?? false;
 
     return Column(
       children: [

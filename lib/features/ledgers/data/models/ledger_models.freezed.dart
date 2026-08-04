@@ -1684,3 +1684,164 @@ abstract class _LedgerRatingResponse implements LedgerRatingResponse {
   _$$LedgerRatingResponseImplCopyWith<_$LedgerRatingResponseImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
+
+LedgerLimitResponse _$LedgerLimitResponseFromJson(Map<String, dynamic> json) {
+  return _LedgerLimitResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LedgerLimitResponse {
+  int get maxActiveGroups => throw _privateConstructorUsedError;
+  int get activeGroupCount => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $LedgerLimitResponseCopyWith<LedgerLimitResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LedgerLimitResponseCopyWith<$Res> {
+  factory $LedgerLimitResponseCopyWith(
+          LedgerLimitResponse value, $Res Function(LedgerLimitResponse) then) =
+      _$LedgerLimitResponseCopyWithImpl<$Res, LedgerLimitResponse>;
+  @useResult
+  $Res call({int maxActiveGroups, int activeGroupCount});
+}
+
+/// @nodoc
+class _$LedgerLimitResponseCopyWithImpl<$Res, $Val extends LedgerLimitResponse>
+    implements $LedgerLimitResponseCopyWith<$Res> {
+  _$LedgerLimitResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? maxActiveGroups = null,
+    Object? activeGroupCount = null,
+  }) {
+    return _then(_value.copyWith(
+      maxActiveGroups: null == maxActiveGroups
+          ? _value.maxActiveGroups
+          : maxActiveGroups // ignore: cast_nullable_to_non_nullable
+              as int,
+      activeGroupCount: null == activeGroupCount
+          ? _value.activeGroupCount
+          : activeGroupCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$LedgerLimitResponseImplCopyWith<$Res>
+    implements $LedgerLimitResponseCopyWith<$Res> {
+  factory _$$LedgerLimitResponseImplCopyWith(_$LedgerLimitResponseImpl value,
+          $Res Function(_$LedgerLimitResponseImpl) then) =
+      __$$LedgerLimitResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({int maxActiveGroups, int activeGroupCount});
+}
+
+/// @nodoc
+class __$$LedgerLimitResponseImplCopyWithImpl<$Res>
+    extends _$LedgerLimitResponseCopyWithImpl<$Res, _$LedgerLimitResponseImpl>
+    implements _$$LedgerLimitResponseImplCopyWith<$Res> {
+  __$$LedgerLimitResponseImplCopyWithImpl(_$LedgerLimitResponseImpl _value,
+      $Res Function(_$LedgerLimitResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? maxActiveGroups = null,
+    Object? activeGroupCount = null,
+  }) {
+    return _then(_$LedgerLimitResponseImpl(
+      maxActiveGroups: null == maxActiveGroups
+          ? _value.maxActiveGroups
+          : maxActiveGroups // ignore: cast_nullable_to_non_nullable
+              as int,
+      activeGroupCount: null == activeGroupCount
+          ? _value.activeGroupCount
+          : activeGroupCount // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LedgerLimitResponseImpl extends _LedgerLimitResponse {
+  const _$LedgerLimitResponseImpl(
+      {required this.maxActiveGroups, required this.activeGroupCount})
+      : super._();
+
+  factory _$LedgerLimitResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LedgerLimitResponseImplFromJson(json);
+
+  @override
+  final int maxActiveGroups;
+  @override
+  final int activeGroupCount;
+
+  @override
+  String toString() {
+    return 'LedgerLimitResponse(maxActiveGroups: $maxActiveGroups, activeGroupCount: $activeGroupCount)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LedgerLimitResponseImpl &&
+            (identical(other.maxActiveGroups, maxActiveGroups) ||
+                other.maxActiveGroups == maxActiveGroups) &&
+            (identical(other.activeGroupCount, activeGroupCount) ||
+                other.activeGroupCount == activeGroupCount));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, maxActiveGroups, activeGroupCount);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LedgerLimitResponseImplCopyWith<_$LedgerLimitResponseImpl> get copyWith =>
+      __$$LedgerLimitResponseImplCopyWithImpl<_$LedgerLimitResponseImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LedgerLimitResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LedgerLimitResponse extends LedgerLimitResponse {
+  const factory _LedgerLimitResponse(
+      {required final int maxActiveGroups,
+      required final int activeGroupCount}) = _$LedgerLimitResponseImpl;
+  const _LedgerLimitResponse._() : super._();
+
+  factory _LedgerLimitResponse.fromJson(Map<String, dynamic> json) =
+      _$LedgerLimitResponseImpl.fromJson;
+
+  @override
+  int get maxActiveGroups;
+  @override
+  int get activeGroupCount;
+  @override
+  @JsonKey(ignore: true)
+  _$$LedgerLimitResponseImplCopyWith<_$LedgerLimitResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
