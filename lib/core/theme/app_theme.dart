@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Single source of truth for Ajopay's brand palette.
 ///
@@ -113,8 +112,22 @@ class AppTheme {
     // stock scale throughout, with tighter letter-spacing on headlines —
     // the stock scale reads as noticeably small/timid for a financial app
     // that wants to feel confident, not just correct.
-    final displayFace = GoogleFonts.sora(fontWeight: FontWeight.w700);
-    final bodyFace = GoogleFonts.inter();
+    // Was GoogleFonts.sora()/GoogleFonts.inter() — fetched over the
+    // network at runtime by default, which this app's own users can't
+    // be assumed to have a reliable connection for on first launch.
+    // Both are now bundled locally as their real Google Fonts variable
+    // TTF files (assets/fonts/, declared in pubspec.yaml) — same two
+    // weights each still in use below (Sora: 700/600, Inter: 400/600),
+    // resolved from the single variable file via ordinary
+    // TextStyle(fontWeight:), no FontVariation/fontVariations needed.
+    // Confirm on-device that both weights render distinctly once built
+    // — variable font weight resolution is the one part of this that's
+    // worth a visual spot-check, not just a compile check.
+    const displayFace = TextStyle(
+      fontFamily: 'Sora',
+      fontWeight: FontWeight.w700,
+    );
+    const bodyFace = TextStyle(fontFamily: 'Inter');
 
     final textTheme = TextTheme(
       displayLarge:

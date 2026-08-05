@@ -55,7 +55,10 @@ dependencies:
   # character, used with restraint), Inter for body/labels (dense
   # legibility). BRAND.md locks colors only, not typefaces — this is a
   # considered choice on top of that, not a placeholder default.
-  google_fonts: ^6.2.1
+  # Bundled locally as real font files (see flutter.fonts: below) rather
+  # than via the google_fonts package, which fetches them over the
+  # network at runtime by default — not something to assume for this
+  # app's actual users. No google_fonts dependency needed anymore.
 
   cupertino_icons: ^1.0.8
 
@@ -89,6 +92,26 @@ flutter:
   uses-material-design: true
   assets:
     - assets/brand/
+  fonts:
+    # Sora — variable font, single file, registered at both weights
+    # app_theme.dart actually uses (700 for display/headline, 600 for
+    # title). Skia resolves the correct instance from the file's own
+    # weight axis at render time — no separate static-weight files
+    # needed.
+    - family: Sora
+      fonts:
+        - asset: assets/fonts/Sora-Variable.ttf
+          weight: 700
+        - asset: assets/fonts/Sora-Variable.ttf
+          weight: 600
+    # Inter — same pattern. 400 (body) and 600 (labels) are the only
+    # two weights app_theme.dart requests.
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Variable.ttf
+          weight: 600
 
 # Run: dart run flutter_launcher_icons
 flutter_launcher_icons:

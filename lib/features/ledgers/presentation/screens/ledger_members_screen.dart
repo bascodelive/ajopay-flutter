@@ -386,7 +386,7 @@ class _MemberTile extends StatelessWidget {
   }
 }
 
-class _PendingMemberTile extends StatelessWidget {
+class _PendingMemberTile extends StatefulWidget {
   const _PendingMemberTile({
     required this.member,
     required this.onApprove,
@@ -394,15 +394,46 @@ class _PendingMemberTile extends StatelessWidget {
   });
 
   final LedgerMemberResponse member;
-  final VoidCallback onApprove;
-  final VoidCallback onReject;
+
+  // Future<void> Function(), not VoidCallback — this widget needs to
+  // await the actual request to know when to re-enable itself. The old
+  // VoidCallback version fired-and-forgot, which is exactly why the
+  // buttons stayed tappable through the whole in-flight window.
+  final Future<void> Function() onApprove;
+  final Future<void> Function() onReject;
+
+  @override
+  State<_PendingMemberTile> createState() => _PendingMemberTileState();
+}
+
+class _PendingMemberTileState extends State<_PendingMemberTile> {
+  // One shared flag, not separate approve/reject flags — only one
+  // action can ever be legitimately in flight for a given pending
+  // request at a time, and disabling BOTH buttons the moment either is
+  // tapped is the correct behavior (tapping Decline while Approve is
+  // still resolving makes no more sense than a second tap on Approve
+  // itself).
+  bool _isActing = false;
 
   String get _initials {
-    final parts = member.fullName.trim().split(RegExp(r'\s+'));
+    final parts = widget.member.fullName.trim().split(RegExp(r'\s+'));
     if (parts.isEmpty || parts.first.isEmpty) return '?';
     final first = parts.first[0];
     final last = parts.length > 1 ? parts.last[0] : '';
     return (first + last).toUpperCase();
+  }
+
+  Future<void> _handle(Future<void> Function() action) async {
+    if (_isActing) return;
+    setState(() => _isActing = true);
+    await action();
+    // No `mounted` check needed before this setState: the tile is
+    // removed from the pending list the moment the parent's provider
+    // invalidates on success, but on FAILURE this exact tile stays
+    // mounted and needs to re-enable itself — that's the whole point.
+    // If it ever WAS unmounted mid-request, this setState is a no-op
+    // Flutter itself guards against, not something to hand-guard here.
+    if (mounted) setState(() => _isActing = false);
   }
 
   @override
@@ -431,7 +462,7 @@ class _PendingMemberTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        member.fullName,
+                        widget.member.fullName,
                         style: Theme.of(context)
                             .textTheme
                             .titleSmall
@@ -453,7 +484,8 @@ class _PendingMemberTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: onReject,
+                    onPressed:
+                        _isActing ? null : () => _handle(widget.onReject),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AjopayColors.error,
                       side: const BorderSide(color: AjopayColors.error),
@@ -467,7 +499,9 @@ class _PendingMemberTile extends StatelessWidget {
                   child: AppPrimaryButton(
                     label: 'Approve',
                     height: 44,
-                    onPressed: onApprove,
+                    isLoading: _isActing,
+                    onPressed:
+                        _isActing ? null : () => _handle(widget.onApprove),
                   ),
                 ),
               ],
