@@ -171,6 +171,7 @@ class LedgerRepository {
   /// (no inviteCode leak to non-members).
   Future<PageResponse<LedgerDirectoryEntryResponse>> getDirectory({
     String? search,
+    DirectorySort orderBy = DirectorySort.newest,
     int page = 0,
     int size = 20,
   }) async {
@@ -179,6 +180,9 @@ class LedgerRepository {
         '/api/ledgers/directory',
         queryParameters: {
           if (search != null && search.isNotEmpty) 'search': search,
+          // 'orderBy', not 'sort' — that name collides with Spring's
+          // own Pageable sort binding on the backend.
+          'orderBy': orderBy.wireValue,
           'page': page,
           'size': size,
         },

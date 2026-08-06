@@ -7,7 +7,7 @@ part of 'ledger_directory_pager.dart';
 // **************************************************************************
 
 String _$ledgerDirectoryPagerHash() =>
-    r'19738aa79c677e4102e648a181a2cc241781efef';
+    r'5b1836fc5a7b833f1cc1a4325afd5271417a2bf6';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -32,61 +32,29 @@ class _SystemHash {
 
 abstract class _$LedgerDirectoryPager
     extends BuildlessAutoDisposeAsyncNotifier<LedgerDirectoryPageState> {
-  late final String search;
+  late final ({DirectorySort orderBy, String search}) key;
 
   FutureOr<LedgerDirectoryPageState> build(
-    String search,
+    ({DirectorySort orderBy, String search}) key,
   );
 }
 
-/// Keyed by the search term alone ('' for no filter) — a new search
-/// resets to a fresh page-0 fetch under its own key, same as
-/// ContributionsPager is keyed by (ledgerId, scope). Riverpod's family
-/// caching means switching between two search terms and back reuses
-/// whatever was already fetched, rather than re-fetching every keystroke
-/// (paired with the screen's own debounce before it ever updates this
-/// key — see LedgerDirectoryScreen).
-///
-/// Copied from [LedgerDirectoryPager].
+/// See also [LedgerDirectoryPager].
 @ProviderFor(LedgerDirectoryPager)
 const ledgerDirectoryPagerProvider = LedgerDirectoryPagerFamily();
 
-/// Keyed by the search term alone ('' for no filter) — a new search
-/// resets to a fresh page-0 fetch under its own key, same as
-/// ContributionsPager is keyed by (ledgerId, scope). Riverpod's family
-/// caching means switching between two search terms and back reuses
-/// whatever was already fetched, rather than re-fetching every keystroke
-/// (paired with the screen's own debounce before it ever updates this
-/// key — see LedgerDirectoryScreen).
-///
-/// Copied from [LedgerDirectoryPager].
+/// See also [LedgerDirectoryPager].
 class LedgerDirectoryPagerFamily
     extends Family<AsyncValue<LedgerDirectoryPageState>> {
-  /// Keyed by the search term alone ('' for no filter) — a new search
-  /// resets to a fresh page-0 fetch under its own key, same as
-  /// ContributionsPager is keyed by (ledgerId, scope). Riverpod's family
-  /// caching means switching between two search terms and back reuses
-  /// whatever was already fetched, rather than re-fetching every keystroke
-  /// (paired with the screen's own debounce before it ever updates this
-  /// key — see LedgerDirectoryScreen).
-  ///
-  /// Copied from [LedgerDirectoryPager].
+  /// See also [LedgerDirectoryPager].
   const LedgerDirectoryPagerFamily();
 
-  /// Keyed by the search term alone ('' for no filter) — a new search
-  /// resets to a fresh page-0 fetch under its own key, same as
-  /// ContributionsPager is keyed by (ledgerId, scope). Riverpod's family
-  /// caching means switching between two search terms and back reuses
-  /// whatever was already fetched, rather than re-fetching every keystroke
-  /// (paired with the screen's own debounce before it ever updates this
-  /// key — see LedgerDirectoryScreen).
-  ///
-  /// Copied from [LedgerDirectoryPager].
+  /// See also [LedgerDirectoryPager].
   LedgerDirectoryPagerProvider call(
-    String search,
+    ({DirectorySort orderBy, String search}) key,
   ) {
     return LedgerDirectoryPagerProvider(
-      search,
+      key,
     );
   }
 
@@ -95,7 +63,7 @@ class LedgerDirectoryPagerFamily
     covariant LedgerDirectoryPagerProvider provider,
   ) {
     return call(
-      provider.search,
+      provider.key,
     );
   }
 
@@ -114,30 +82,14 @@ class LedgerDirectoryPagerFamily
   String? get name => r'ledgerDirectoryPagerProvider';
 }
 
-/// Keyed by the search term alone ('' for no filter) — a new search
-/// resets to a fresh page-0 fetch under its own key, same as
-/// ContributionsPager is keyed by (ledgerId, scope). Riverpod's family
-/// caching means switching between two search terms and back reuses
-/// whatever was already fetched, rather than re-fetching every keystroke
-/// (paired with the screen's own debounce before it ever updates this
-/// key — see LedgerDirectoryScreen).
-///
-/// Copied from [LedgerDirectoryPager].
+/// See also [LedgerDirectoryPager].
 class LedgerDirectoryPagerProvider extends AutoDisposeAsyncNotifierProviderImpl<
     LedgerDirectoryPager, LedgerDirectoryPageState> {
-  /// Keyed by the search term alone ('' for no filter) — a new search
-  /// resets to a fresh page-0 fetch under its own key, same as
-  /// ContributionsPager is keyed by (ledgerId, scope). Riverpod's family
-  /// caching means switching between two search terms and back reuses
-  /// whatever was already fetched, rather than re-fetching every keystroke
-  /// (paired with the screen's own debounce before it ever updates this
-  /// key — see LedgerDirectoryScreen).
-  ///
-  /// Copied from [LedgerDirectoryPager].
+  /// See also [LedgerDirectoryPager].
   LedgerDirectoryPagerProvider(
-    String search,
+    ({DirectorySort orderBy, String search}) key,
   ) : this._internal(
-          () => LedgerDirectoryPager()..search = search,
+          () => LedgerDirectoryPager()..key = key,
           from: ledgerDirectoryPagerProvider,
           name: r'ledgerDirectoryPagerProvider',
           debugGetCreateSourceHash:
@@ -147,7 +99,7 @@ class LedgerDirectoryPagerProvider extends AutoDisposeAsyncNotifierProviderImpl<
           dependencies: LedgerDirectoryPagerFamily._dependencies,
           allTransitiveDependencies:
               LedgerDirectoryPagerFamily._allTransitiveDependencies,
-          search: search,
+          key: key,
         );
 
   LedgerDirectoryPagerProvider._internal(
@@ -157,17 +109,17 @@ class LedgerDirectoryPagerProvider extends AutoDisposeAsyncNotifierProviderImpl<
     required super.allTransitiveDependencies,
     required super.debugGetCreateSourceHash,
     required super.from,
-    required this.search,
+    required this.key,
   }) : super.internal();
 
-  final String search;
+  final ({DirectorySort orderBy, String search}) key;
 
   @override
   FutureOr<LedgerDirectoryPageState> runNotifierBuild(
     covariant LedgerDirectoryPager notifier,
   ) {
     return notifier.build(
-      search,
+      key,
     );
   }
 
@@ -176,13 +128,13 @@ class LedgerDirectoryPagerProvider extends AutoDisposeAsyncNotifierProviderImpl<
     return ProviderOverride(
       origin: this,
       override: LedgerDirectoryPagerProvider._internal(
-        () => create()..search = search,
+        () => create()..key = key,
         from: from,
         name: null,
         dependencies: null,
         allTransitiveDependencies: null,
         debugGetCreateSourceHash: null,
-        search: search,
+        key: key,
       ),
     );
   }
@@ -195,13 +147,13 @@ class LedgerDirectoryPagerProvider extends AutoDisposeAsyncNotifierProviderImpl<
 
   @override
   bool operator ==(Object other) {
-    return other is LedgerDirectoryPagerProvider && other.search == search;
+    return other is LedgerDirectoryPagerProvider && other.key == key;
   }
 
   @override
   int get hashCode {
     var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, search.hashCode);
+    hash = _SystemHash.combine(hash, key.hashCode);
 
     return _SystemHash.finish(hash);
   }
@@ -209,8 +161,8 @@ class LedgerDirectoryPagerProvider extends AutoDisposeAsyncNotifierProviderImpl<
 
 mixin LedgerDirectoryPagerRef
     on AutoDisposeAsyncNotifierProviderRef<LedgerDirectoryPageState> {
-  /// The parameter `search` of this provider.
-  String get search;
+  /// The parameter `key` of this provider.
+  ({DirectorySort orderBy, String search}) get key;
 }
 
 class _LedgerDirectoryPagerProviderElement
@@ -219,7 +171,8 @@ class _LedgerDirectoryPagerProviderElement
   _LedgerDirectoryPagerProviderElement(super.provider);
 
   @override
-  String get search => (origin as LedgerDirectoryPagerProvider).search;
+  ({DirectorySort orderBy, String search}) get key =>
+      (origin as LedgerDirectoryPagerProvider).key;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member
