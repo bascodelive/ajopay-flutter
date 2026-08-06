@@ -117,6 +117,31 @@ class RateLedgerRequest with _$RateLedgerRequest {
       _$RateLedgerRequestFromJson(json);
 }
 
+/// Mirrors the backend's `DirectorySort` enum exactly — sent as the
+/// `orderBy` query parameter on `GET /api/ledgers/directory` (NOT
+/// `sort`; that name collides with Spring's own Pageable sort binding
+/// on the backend, see the backend's own DirectorySort Javadoc).
+///
+/// Lives here rather than in `ledger_directory_pager.dart` (unlike
+/// `ContributionScope`/`MessageThreadType`, which live in their own
+/// pager files) — those two represent genuinely separate backend
+/// endpoints the repository exposes as separate methods, so their
+/// repository never needs to know the enum exists. This one is a
+/// single query parameter on a single endpoint that BOTH the
+/// repository and the pager need to reference directly.
+enum DirectorySort {
+  newest,
+  topRated;
+
+  /// The exact string the backend expects — matches its Java enum's
+  /// `.name()` exactly, since Spring's default query-param-to-enum
+  /// binding is case-sensitive to the literal constant name.
+  String get wireValue => switch (this) {
+        DirectorySort.newest => 'NEWEST',
+        DirectorySort.topRated => 'TOP_RATED',
+      };
+}
+
 @freezed
 class LedgerRatingResponse with _$LedgerRatingResponse {
   const factory LedgerRatingResponse({

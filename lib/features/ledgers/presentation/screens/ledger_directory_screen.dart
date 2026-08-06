@@ -25,6 +25,10 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
   final _scrollController = ScrollController();
   Timer? _debounce;
   String _activeSearch = '';
+  DirectorySort _orderBy = DirectorySort.newest;
+
+  LedgerDirectoryPagerKey get _key =>
+      (search: _activeSearch, orderBy: _orderBy);
 
   @override
   void initState() {
@@ -44,9 +48,7 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
-      ref
-          .read(ledgerDirectoryPagerProvider(_activeSearch).notifier)
-          .loadMore(_activeSearch);
+      ref.read(ledgerDirectoryPagerProvider(_key).notifier).loadMore(_key);
     }
   }
 
@@ -71,7 +73,7 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final pageAsync = ref.watch(ledgerDirectoryPagerProvider(_activeSearch));
+    final pageAsync = ref.watch(ledgerDirectoryPagerProvider(_key));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Browse ledgers')),
@@ -100,6 +102,32 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
                 ),
               ),
             ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _SortChip(
+                      label: 'Newest',
+                      icon: Icons.schedule,
+                      selected: _orderBy == DirectorySort.newest,
+                      onTap: () =>
+                          setState(() => _orderBy = DirectorySort.newest),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _SortChip(
+                      label: 'Top rated',
+                      icon: Icons.star_rounded,
+                      selected: _orderBy == DirectorySort.topRated,
+                      onTap: () =>
+                          setState(() => _orderBy = DirectorySort.topRated),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: pageAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -115,8 +143,8 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
                         const Text('Could not load the ledger directory.'),
                         const SizedBox(height: 16),
                         OutlinedButton(
-                          onPressed: () => ref.invalidate(
-                              ledgerDirectoryPagerProvider(_activeSearch)),
+                          onPressed: () => ref
+                              .invalidate(ledgerDirectoryPagerProvider(_key)),
                           child: const Text('Retry'),
                         ),
                       ],
@@ -143,7 +171,9 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
                             const SizedBox(height: 16),
                             Text(
                               _activeSearch.isEmpty
-                                  ? 'No ledgers to show yet.'
+                                  ? (_orderBy == DirectorySort.topRated
+                                      ? 'No ledgers have enough ratings yet.'
+                                      : 'No ledgers to show yet.')
                                   : 'No ledgers match "$_activeSearch".',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.bodyMedium,
@@ -156,9 +186,8 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
 
                   return RefreshIndicator(
                     onRefresh: () => ref
-                        .read(ledgerDirectoryPagerProvider(_activeSearch)
-                            .notifier)
-                        .refresh(_activeSearch),
+                        .read(ledgerDirectoryPagerProvider(_key).notifier)
+                        .refresh(_key),
                     child: ListView.separated(
                       controller: _scrollController,
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -183,6 +212,66 @@ class _LedgerDirectoryScreenState extends ConsumerState<LedgerDirectoryScreen> {
                   );
                 },
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The Newest/Top rated toggle chip — a simple selectable pill rather
+/// than a SegmentedButton, matching this app's existing pill-shaped
+/// button/chip language (AppPrimaryButton, ChipTheme) instead of
+/// introducing Material's own segmented-control look for the first time
+/// in one place.
+class _SortChip extends StatelessWidget {
+  const _SortChip({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AjopayColors.primaryTint : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? AjopayColors.primary : AjopayColors.border,
+            width: selected ? 1.4 : 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color:
+                  selected ? AjopayColors.primaryDark : AjopayColors.textMuted,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: selected
+                        ? AjopayColors.primaryDark
+                        : AjopayColors.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
             ),
           ],
         ),
