@@ -108,6 +108,17 @@ class LedgerDetailScreen extends ConsumerWidget {
                       onTap: () => context.push('/ledgers/$ledgerId/messages'),
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.rate_review_outlined),
+                      title: const Text('Reviews'),
+                      subtitle: const Text(
+                          'What people are saying about this ledger'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.push('/ledgers/$ledgerId/reviews'),
+                    ),
+                  ),
                 ],
               ),
             ),

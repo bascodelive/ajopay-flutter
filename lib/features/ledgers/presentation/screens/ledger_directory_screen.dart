@@ -366,16 +366,26 @@ class _RateLedgerSheet extends ConsumerStatefulWidget {
 
 class _RateLedgerSheetState extends ConsumerState<_RateLedgerSheet> {
   int? _selectedStars;
+  final _reviewController = TextEditingController();
   bool _isSaving = false;
+
+  @override
+  void dispose() {
+    _reviewController.dispose();
+    super.dispose();
+  }
 
   Future<void> _save() async {
     final stars = _selectedStars;
     if (stars == null) return;
 
     setState(() => _isSaving = true);
-    final ok = await ref
-        .read(ledgerControllerProvider.notifier)
-        .rateLedger(widget.ledger.id, stars);
+    final reviewText = _reviewController.text.trim();
+    final ok = await ref.read(ledgerControllerProvider.notifier).rateLedger(
+          widget.ledger.id,
+          stars,
+          reviewText: reviewText.isEmpty ? null : reviewText,
+        );
 
     if (!mounted) return;
     setState(() => _isSaving = false);
@@ -408,11 +418,17 @@ class _RateLedgerSheetState extends ConsumerState<_RateLedgerSheet> {
           ),
           error: (_, __) => _buildContent(context, initialStars: null),
           data: (myRating) {
-            // Seed the picker from the caller's existing rating exactly
-            // once — never on a rebuild after they've already tapped a
-            // star, or their in-progress selection would keep getting
-            // clobbered back to whatever was originally fetched.
-            _selectedStars ??= myRating?.stars;
+            // Seed the picker AND the review text from the caller's
+            // existing rating exactly once — never on a rebuild after
+            // they've already started typing/tapping, or their
+            // in-progress input would keep getting clobbered back to
+            // whatever was originally fetched. Guarded by _selectedStars
+            // alone (not a separate flag for the text field) since both
+            // are seeded together, from the same one-time branch.
+            if (_selectedStars == null && myRating != null) {
+              _selectedStars = myRating.stars;
+              _reviewController.text = myRating.reviewText ?? '';
+            }
             return _buildContent(context, initialStars: myRating?.stars);
           },
         ),
@@ -455,7 +471,20 @@ class _RateLedgerSheetState extends ConsumerState<_RateLedgerSheet> {
           initialStars: _selectedStars,
           onChanged: (stars) => setState(() => _selectedStars = stars),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
+        TextField(
+          controller: _reviewController,
+          maxLength: 500,
+          maxLines: 3,
+          minLines: 2,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Write a review (optional)',
+            hintText: 'What was your experience with this ledger?',
+            alignLabelWithHint: true,
+          ),
+        ),
+        const SizedBox(height: 8),
         AppPrimaryButton(
           label: initialStars != null ? 'Update rating' : 'Save rating',
           isLoading: _isSaving,
