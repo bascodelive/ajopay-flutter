@@ -1378,6 +1378,9 @@ RateLedgerRequest _$RateLedgerRequestFromJson(Map<String, dynamic> json) {
 mixin _$RateLedgerRequest {
   int get stars => throw _privateConstructorUsedError;
 
+  /// Optional — null/omitted means "just a star rating, no comment."
+  String? get reviewText => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $RateLedgerRequestCopyWith<RateLedgerRequest> get copyWith =>
@@ -1390,7 +1393,7 @@ abstract class $RateLedgerRequestCopyWith<$Res> {
           RateLedgerRequest value, $Res Function(RateLedgerRequest) then) =
       _$RateLedgerRequestCopyWithImpl<$Res, RateLedgerRequest>;
   @useResult
-  $Res call({int stars});
+  $Res call({int stars, String? reviewText});
 }
 
 /// @nodoc
@@ -1407,12 +1410,17 @@ class _$RateLedgerRequestCopyWithImpl<$Res, $Val extends RateLedgerRequest>
   @override
   $Res call({
     Object? stars = null,
+    Object? reviewText = freezed,
   }) {
     return _then(_value.copyWith(
       stars: null == stars
           ? _value.stars
           : stars // ignore: cast_nullable_to_non_nullable
               as int,
+      reviewText: freezed == reviewText
+          ? _value.reviewText
+          : reviewText // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -1425,7 +1433,7 @@ abstract class _$$RateLedgerRequestImplCopyWith<$Res>
       __$$RateLedgerRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({int stars});
+  $Res call({int stars, String? reviewText});
 }
 
 /// @nodoc
@@ -1440,12 +1448,17 @@ class __$$RateLedgerRequestImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? stars = null,
+    Object? reviewText = freezed,
   }) {
     return _then(_$RateLedgerRequestImpl(
       stars: null == stars
           ? _value.stars
           : stars // ignore: cast_nullable_to_non_nullable
               as int,
+      reviewText: freezed == reviewText
+          ? _value.reviewText
+          : reviewText // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -1453,7 +1466,7 @@ class __$$RateLedgerRequestImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$RateLedgerRequestImpl implements _RateLedgerRequest {
-  const _$RateLedgerRequestImpl({required this.stars});
+  const _$RateLedgerRequestImpl({required this.stars, this.reviewText});
 
   factory _$RateLedgerRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$RateLedgerRequestImplFromJson(json);
@@ -1461,9 +1474,13 @@ class _$RateLedgerRequestImpl implements _RateLedgerRequest {
   @override
   final int stars;
 
+  /// Optional — null/omitted means "just a star rating, no comment."
+  @override
+  final String? reviewText;
+
   @override
   String toString() {
-    return 'RateLedgerRequest(stars: $stars)';
+    return 'RateLedgerRequest(stars: $stars, reviewText: $reviewText)';
   }
 
   @override
@@ -1471,12 +1488,14 @@ class _$RateLedgerRequestImpl implements _RateLedgerRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$RateLedgerRequestImpl &&
-            (identical(other.stars, stars) || other.stars == stars));
+            (identical(other.stars, stars) || other.stars == stars) &&
+            (identical(other.reviewText, reviewText) ||
+                other.reviewText == reviewText));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, stars);
+  int get hashCode => Object.hash(runtimeType, stars, reviewText);
 
   @JsonKey(ignore: true)
   @override
@@ -1494,14 +1513,19 @@ class _$RateLedgerRequestImpl implements _RateLedgerRequest {
 }
 
 abstract class _RateLedgerRequest implements RateLedgerRequest {
-  const factory _RateLedgerRequest({required final int stars}) =
-      _$RateLedgerRequestImpl;
+  const factory _RateLedgerRequest(
+      {required final int stars,
+      final String? reviewText}) = _$RateLedgerRequestImpl;
 
   factory _RateLedgerRequest.fromJson(Map<String, dynamic> json) =
       _$RateLedgerRequestImpl.fromJson;
 
   @override
   int get stars;
+  @override
+
+  /// Optional — null/omitted means "just a star rating, no comment."
+  String? get reviewText;
   @override
   @JsonKey(ignore: true)
   _$$RateLedgerRequestImplCopyWith<_$RateLedgerRequestImpl> get copyWith =>
@@ -1516,6 +1540,7 @@ LedgerRatingResponse _$LedgerRatingResponseFromJson(Map<String, dynamic> json) {
 mixin _$LedgerRatingResponse {
   String get ledgerId => throw _privateConstructorUsedError;
   int get stars => throw _privateConstructorUsedError;
+  String? get reviewText => throw _privateConstructorUsedError;
   String get updatedAt => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1530,7 +1555,7 @@ abstract class $LedgerRatingResponseCopyWith<$Res> {
           $Res Function(LedgerRatingResponse) then) =
       _$LedgerRatingResponseCopyWithImpl<$Res, LedgerRatingResponse>;
   @useResult
-  $Res call({String ledgerId, int stars, String updatedAt});
+  $Res call({String ledgerId, int stars, String? reviewText, String updatedAt});
 }
 
 /// @nodoc
@@ -1549,6 +1574,7 @@ class _$LedgerRatingResponseCopyWithImpl<$Res,
   $Res call({
     Object? ledgerId = null,
     Object? stars = null,
+    Object? reviewText = freezed,
     Object? updatedAt = null,
   }) {
     return _then(_value.copyWith(
@@ -1560,6 +1586,10 @@ class _$LedgerRatingResponseCopyWithImpl<$Res,
           ? _value.stars
           : stars // ignore: cast_nullable_to_non_nullable
               as int,
+      reviewText: freezed == reviewText
+          ? _value.reviewText
+          : reviewText // ignore: cast_nullable_to_non_nullable
+              as String?,
       updatedAt: null == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -1576,7 +1606,7 @@ abstract class _$$LedgerRatingResponseImplCopyWith<$Res>
       __$$LedgerRatingResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String ledgerId, int stars, String updatedAt});
+  $Res call({String ledgerId, int stars, String? reviewText, String updatedAt});
 }
 
 /// @nodoc
@@ -1592,6 +1622,7 @@ class __$$LedgerRatingResponseImplCopyWithImpl<$Res>
   $Res call({
     Object? ledgerId = null,
     Object? stars = null,
+    Object? reviewText = freezed,
     Object? updatedAt = null,
   }) {
     return _then(_$LedgerRatingResponseImpl(
@@ -1603,6 +1634,10 @@ class __$$LedgerRatingResponseImplCopyWithImpl<$Res>
           ? _value.stars
           : stars // ignore: cast_nullable_to_non_nullable
               as int,
+      reviewText: freezed == reviewText
+          ? _value.reviewText
+          : reviewText // ignore: cast_nullable_to_non_nullable
+              as String?,
       updatedAt: null == updatedAt
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
@@ -1615,7 +1650,10 @@ class __$$LedgerRatingResponseImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$LedgerRatingResponseImpl implements _LedgerRatingResponse {
   const _$LedgerRatingResponseImpl(
-      {required this.ledgerId, required this.stars, required this.updatedAt});
+      {required this.ledgerId,
+      required this.stars,
+      this.reviewText,
+      required this.updatedAt});
 
   factory _$LedgerRatingResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$LedgerRatingResponseImplFromJson(json);
@@ -1625,11 +1663,13 @@ class _$LedgerRatingResponseImpl implements _LedgerRatingResponse {
   @override
   final int stars;
   @override
+  final String? reviewText;
+  @override
   final String updatedAt;
 
   @override
   String toString() {
-    return 'LedgerRatingResponse(ledgerId: $ledgerId, stars: $stars, updatedAt: $updatedAt)';
+    return 'LedgerRatingResponse(ledgerId: $ledgerId, stars: $stars, reviewText: $reviewText, updatedAt: $updatedAt)';
   }
 
   @override
@@ -1640,13 +1680,16 @@ class _$LedgerRatingResponseImpl implements _LedgerRatingResponse {
             (identical(other.ledgerId, ledgerId) ||
                 other.ledgerId == ledgerId) &&
             (identical(other.stars, stars) || other.stars == stars) &&
+            (identical(other.reviewText, reviewText) ||
+                other.reviewText == reviewText) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, ledgerId, stars, updatedAt);
+  int get hashCode =>
+      Object.hash(runtimeType, ledgerId, stars, reviewText, updatedAt);
 
   @JsonKey(ignore: true)
   @override
@@ -1668,6 +1711,7 @@ abstract class _LedgerRatingResponse implements LedgerRatingResponse {
   const factory _LedgerRatingResponse(
       {required final String ledgerId,
       required final int stars,
+      final String? reviewText,
       required final String updatedAt}) = _$LedgerRatingResponseImpl;
 
   factory _LedgerRatingResponse.fromJson(Map<String, dynamic> json) =
@@ -1678,10 +1722,239 @@ abstract class _LedgerRatingResponse implements LedgerRatingResponse {
   @override
   int get stars;
   @override
+  String? get reviewText;
+  @override
   String get updatedAt;
   @override
   @JsonKey(ignore: true)
   _$$LedgerRatingResponseImplCopyWith<_$LedgerRatingResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+LedgerReviewResponse _$LedgerReviewResponseFromJson(Map<String, dynamic> json) {
+  return _LedgerReviewResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$LedgerReviewResponse {
+  String get userId => throw _privateConstructorUsedError;
+  String get reviewerFullName => throw _privateConstructorUsedError;
+  int get stars => throw _privateConstructorUsedError;
+  String? get reviewText => throw _privateConstructorUsedError;
+  String get createdAt => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $LedgerReviewResponseCopyWith<LedgerReviewResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $LedgerReviewResponseCopyWith<$Res> {
+  factory $LedgerReviewResponseCopyWith(LedgerReviewResponse value,
+          $Res Function(LedgerReviewResponse) then) =
+      _$LedgerReviewResponseCopyWithImpl<$Res, LedgerReviewResponse>;
+  @useResult
+  $Res call(
+      {String userId,
+      String reviewerFullName,
+      int stars,
+      String? reviewText,
+      String createdAt});
+}
+
+/// @nodoc
+class _$LedgerReviewResponseCopyWithImpl<$Res,
+        $Val extends LedgerReviewResponse>
+    implements $LedgerReviewResponseCopyWith<$Res> {
+  _$LedgerReviewResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? userId = null,
+    Object? reviewerFullName = null,
+    Object? stars = null,
+    Object? reviewText = freezed,
+    Object? createdAt = null,
+  }) {
+    return _then(_value.copyWith(
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      reviewerFullName: null == reviewerFullName
+          ? _value.reviewerFullName
+          : reviewerFullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+      reviewText: freezed == reviewText
+          ? _value.reviewText
+          : reviewText // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$LedgerReviewResponseImplCopyWith<$Res>
+    implements $LedgerReviewResponseCopyWith<$Res> {
+  factory _$$LedgerReviewResponseImplCopyWith(_$LedgerReviewResponseImpl value,
+          $Res Function(_$LedgerReviewResponseImpl) then) =
+      __$$LedgerReviewResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String userId,
+      String reviewerFullName,
+      int stars,
+      String? reviewText,
+      String createdAt});
+}
+
+/// @nodoc
+class __$$LedgerReviewResponseImplCopyWithImpl<$Res>
+    extends _$LedgerReviewResponseCopyWithImpl<$Res, _$LedgerReviewResponseImpl>
+    implements _$$LedgerReviewResponseImplCopyWith<$Res> {
+  __$$LedgerReviewResponseImplCopyWithImpl(_$LedgerReviewResponseImpl _value,
+      $Res Function(_$LedgerReviewResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? userId = null,
+    Object? reviewerFullName = null,
+    Object? stars = null,
+    Object? reviewText = freezed,
+    Object? createdAt = null,
+  }) {
+    return _then(_$LedgerReviewResponseImpl(
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      reviewerFullName: null == reviewerFullName
+          ? _value.reviewerFullName
+          : reviewerFullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      stars: null == stars
+          ? _value.stars
+          : stars // ignore: cast_nullable_to_non_nullable
+              as int,
+      reviewText: freezed == reviewText
+          ? _value.reviewText
+          : reviewText // ignore: cast_nullable_to_non_nullable
+              as String?,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$LedgerReviewResponseImpl implements _LedgerReviewResponse {
+  const _$LedgerReviewResponseImpl(
+      {required this.userId,
+      required this.reviewerFullName,
+      required this.stars,
+      this.reviewText,
+      required this.createdAt});
+
+  factory _$LedgerReviewResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$LedgerReviewResponseImplFromJson(json);
+
+  @override
+  final String userId;
+  @override
+  final String reviewerFullName;
+  @override
+  final int stars;
+  @override
+  final String? reviewText;
+  @override
+  final String createdAt;
+
+  @override
+  String toString() {
+    return 'LedgerReviewResponse(userId: $userId, reviewerFullName: $reviewerFullName, stars: $stars, reviewText: $reviewText, createdAt: $createdAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$LedgerReviewResponseImpl &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.reviewerFullName, reviewerFullName) ||
+                other.reviewerFullName == reviewerFullName) &&
+            (identical(other.stars, stars) || other.stars == stars) &&
+            (identical(other.reviewText, reviewText) ||
+                other.reviewText == reviewText) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, userId, reviewerFullName, stars, reviewText, createdAt);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$LedgerReviewResponseImplCopyWith<_$LedgerReviewResponseImpl>
+      get copyWith =>
+          __$$LedgerReviewResponseImplCopyWithImpl<_$LedgerReviewResponseImpl>(
+              this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$LedgerReviewResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _LedgerReviewResponse implements LedgerReviewResponse {
+  const factory _LedgerReviewResponse(
+      {required final String userId,
+      required final String reviewerFullName,
+      required final int stars,
+      final String? reviewText,
+      required final String createdAt}) = _$LedgerReviewResponseImpl;
+
+  factory _LedgerReviewResponse.fromJson(Map<String, dynamic> json) =
+      _$LedgerReviewResponseImpl.fromJson;
+
+  @override
+  String get userId;
+  @override
+  String get reviewerFullName;
+  @override
+  int get stars;
+  @override
+  String? get reviewText;
+  @override
+  String get createdAt;
+  @override
+  @JsonKey(ignore: true)
+  _$$LedgerReviewResponseImplCopyWith<_$LedgerReviewResponseImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
 

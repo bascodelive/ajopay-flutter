@@ -123,12 +123,14 @@ _$RateLedgerRequestImpl _$$RateLedgerRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$RateLedgerRequestImpl(
       stars: (json['stars'] as num).toInt(),
+      reviewText: json['reviewText'] as String?,
     );
 
 Map<String, dynamic> _$$RateLedgerRequestImplToJson(
         _$RateLedgerRequestImpl instance) =>
     <String, dynamic>{
       'stars': instance.stars,
+      'reviewText': instance.reviewText,
     };
 
 _$LedgerRatingResponseImpl _$$LedgerRatingResponseImplFromJson(
@@ -136,6 +138,7 @@ _$LedgerRatingResponseImpl _$$LedgerRatingResponseImplFromJson(
     _$LedgerRatingResponseImpl(
       ledgerId: json['ledgerId'] as String,
       stars: (json['stars'] as num).toInt(),
+      reviewText: json['reviewText'] as String?,
       updatedAt: json['updatedAt'] as String,
     );
 
@@ -144,7 +147,28 @@ Map<String, dynamic> _$$LedgerRatingResponseImplToJson(
     <String, dynamic>{
       'ledgerId': instance.ledgerId,
       'stars': instance.stars,
+      'reviewText': instance.reviewText,
       'updatedAt': instance.updatedAt,
+    };
+
+_$LedgerReviewResponseImpl _$$LedgerReviewResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$LedgerReviewResponseImpl(
+      userId: json['userId'] as String,
+      reviewerFullName: json['reviewerFullName'] as String,
+      stars: (json['stars'] as num).toInt(),
+      reviewText: json['reviewText'] as String?,
+      createdAt: json['createdAt'] as String,
+    );
+
+Map<String, dynamic> _$$LedgerReviewResponseImplToJson(
+        _$LedgerReviewResponseImpl instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+      'reviewerFullName': instance.reviewerFullName,
+      'stars': instance.stars,
+      'reviewText': instance.reviewText,
+      'createdAt': instance.createdAt,
     };
 
 _$LedgerLimitResponseImpl _$$LedgerLimitResponseImplFromJson(

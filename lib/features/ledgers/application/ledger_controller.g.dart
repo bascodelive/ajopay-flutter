@@ -6,7 +6,7 @@ part of 'ledger_controller.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$ledgerControllerHash() => r'02bdd859131609872fa0d9dfafa953bb5d330f74';
+String _$ledgerControllerHash() => r'31fa6239adb5d014fe9522e5893976b6336fdae2';
 
 /// Holds the ledger currently being created/joined/viewed/edited, plus
 /// every ledger-membership mutation (create/join/update/approve/reject/

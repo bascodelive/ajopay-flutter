@@ -4,6 +4,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/session/require_authenticated.dart';
 import '../data/ledger_repository.dart';
 import '../data/models/ledger_models.dart';
+import 'ledger_reviews_pager.dart';
 
 part 'ledger_controller.g.dart';
 
@@ -137,11 +138,20 @@ class LedgerController extends _$LedgerController {
   /// (the new average only becomes visible on that ledger's next
   /// natural refetch — acceptable staleness for a browsable list, same
   /// tradeoff the Contributions pager already accepts elsewhere).
-  Future<bool> rateLedger(String ledgerId, int stars) async {
+  Future<bool> rateLedger(
+    String ledgerId,
+    int stars, {
+    String? reviewText,
+  }) async {
     final repository = ref.read(ledgerRepositoryProvider);
     try {
-      await repository.rateLedger(ledgerId, stars);
+      await repository.rateLedger(ledgerId, stars, reviewText: reviewText);
       ref.invalidate(myLedgerRatingProvider(ledgerId));
+      // Only meaningfully changes what the reviews list shows when
+      // reviewText is non-empty, but invalidating unconditionally is
+      // cheap and correct either way (a re-rate that REMOVES review
+      // text should also make that review disappear from the list).
+      ref.invalidate(ledgerReviewsPagerProvider(ledgerId));
       return true;
     } on ApiException catch (e) {
       _lastError = e.message;

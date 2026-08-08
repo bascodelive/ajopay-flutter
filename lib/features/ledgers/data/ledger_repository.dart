@@ -197,14 +197,19 @@ class LedgerRepository {
     }
   }
 
-  /// Upserts the caller's own 1-5 star rating on this ledger. Same
-  /// membership gate as getDirectory; additionally rejected (403) if the
-  /// caller is this ledger's own Admin.
-  Future<LedgerRatingResponse> rateLedger(String ledgerId, int stars) async {
+  /// Upserts the caller's own 1-5 star rating on this ledger, with an
+  /// optional written review alongside it. Same membership gate as
+  /// getDirectory; additionally rejected (403) if the caller is this
+  /// ledger's own Admin.
+  Future<LedgerRatingResponse> rateLedger(
+    String ledgerId,
+    int stars, {
+    String? reviewText,
+  }) async {
     try {
       final response = await _dio.put(
         '/api/ledgers/$ledgerId/rating',
-        data: RateLedgerRequest(stars: stars).toJson(),
+        data: RateLedgerRequest(stars: stars, reviewText: reviewText).toJson(),
       );
       return LedgerRatingResponse.fromJson(
           response.data as Map<String, dynamic>);
@@ -225,6 +230,29 @@ class LedgerRepository {
       final apiException = ApiException.fromDioException(e);
       if (apiException.isNotFound) return null;
       throw apiException;
+    }
+  }
+
+  /// A ledger's written reviews — only ratings with actual review text,
+  /// newest first. Same membership gate as the rest of this feature.
+  /// Route is `/ratings` (plural) — distinct from `/rating` (singular,
+  /// PUT, above) and `/rating/me` (singular, GET, above).
+  Future<PageResponse<LedgerReviewResponse>> getReviews(
+    String ledgerId, {
+    int page = 0,
+    int size = 20,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/api/ledgers/$ledgerId/ratings',
+        queryParameters: {'page': page, 'size': size},
+      );
+      return PageResponse<LedgerReviewResponse>.fromJson(
+        response.data as Map<String, dynamic>,
+        (json) => LedgerReviewResponse.fromJson(json as Map<String, dynamic>),
+      );
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
     }
   }
 }

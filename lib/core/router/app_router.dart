@@ -30,6 +30,7 @@ import '../../features/ledgers/presentation/screens/ledger_detail_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_home_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_members_screen.dart';
 import '../../features/messages/presentation/screens/messages_home_screen.dart';
+import '../../features/ledgers/presentation/screens/ledger_reviews_screen.dart';
 import '../../features/messages/presentation/screens/private_message_thread_screen.dart';
 import '../../features/subscriptions/presentation/screens/subscription_screen.dart';
 
@@ -281,6 +282,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             otherUserFullName: otherUserFullName,
           );
         },
+      ),
+      GoRoute(
+        path: '/ledgers/:id/reviews',
+        builder: (context, state) => LedgerReviewsScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
       ),
     ],
   );

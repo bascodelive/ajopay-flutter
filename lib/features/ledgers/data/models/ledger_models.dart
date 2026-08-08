@@ -111,7 +111,12 @@ class LedgerDirectoryEntryResponse with _$LedgerDirectoryEntryResponse {
 
 @freezed
 class RateLedgerRequest with _$RateLedgerRequest {
-  const factory RateLedgerRequest({required int stars}) = _RateLedgerRequest;
+  const factory RateLedgerRequest({
+    required int stars,
+
+    /// Optional — null/omitted means "just a star rating, no comment."
+    String? reviewText,
+  }) = _RateLedgerRequest;
 
   factory RateLedgerRequest.fromJson(Map<String, dynamic> json) =>
       _$RateLedgerRequestFromJson(json);
@@ -147,11 +152,31 @@ class LedgerRatingResponse with _$LedgerRatingResponse {
   const factory LedgerRatingResponse({
     required String ledgerId,
     required int stars,
+    String? reviewText,
     required String updatedAt,
   }) = _LedgerRatingResponse;
 
   factory LedgerRatingResponse.fromJson(Map<String, dynamic> json) =>
       _$LedgerRatingResponseFromJson(json);
+}
+
+/// One entry in a ledger's reviews list — deliberately a different
+/// shape from `LedgerRatingResponse` (which is always "the caller's
+/// OWN rating," never needs to say who wrote it). This is other
+/// people's reviews, so it names the reviewer — reviews are
+/// deliberately named, not anonymous.
+@freezed
+class LedgerReviewResponse with _$LedgerReviewResponse {
+  const factory LedgerReviewResponse({
+    required String userId,
+    required String reviewerFullName,
+    required int stars,
+    String? reviewText,
+    required String createdAt,
+  }) = _LedgerReviewResponse;
+
+  factory LedgerReviewResponse.fromJson(Map<String, dynamic> json) =>
+      _$LedgerReviewResponseFromJson(json);
 }
 
 /// The caller's own current standing against their tier's active-ledger
