@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,11 +36,6 @@ class CircleHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Circle'),
         actions: [
-          // Always visible, regardless of the CURRENT circle's state —
-          // this is the fix for a completed circle becoming unreachable:
-          // currentCircleProvider only ever returns PENDING/ACTIVE (404
-          // otherwise), so this is the one entry point that survives a
-          // circle completing.
           IconButton(
             tooltip: 'Past circles',
             icon: const Icon(Icons.event_repeat_outlined),
@@ -158,6 +155,58 @@ class _PendingCircleView extends ConsumerStatefulWidget {
 class _PendingCircleViewState extends ConsumerState<_PendingCircleView> {
   bool _isStarting = false;
 
+  // Day-granularity data (startDate has no time-of-day), so this only
+  // ever needs to catch a midnight rollover while the screen happens to
+  // be left open — not a live ticking clock, which would be false
+  // precision the underlying data doesn't have. Only rebuilds when the
+  // computed label actually changes, not every tick.
+  Timer? _countdownTimer;
+  String? _lastLabel;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastLabel = _countdownLabel(widget.circle.startDate);
+    _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      final label = _countdownLabel(widget.circle.startDate);
+      if (label != _lastLabel) {
+        _lastLabel = label;
+        if (mounted) setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Day-difference between `startDate` (ISO date, no time-of-day — see
+  /// circle_models.dart) and today, phrased for a human rather than
+  /// shown as a raw number. Handles the real "overdue" case explicitly:
+  /// start is always a manual Admin action (CircleController.start()),
+  /// so a PENDING circle can genuinely sit past its own startDate
+  /// waiting on that tap — this isn't a bug state, just a normal one
+  /// worth phrasing calmly rather than as a red error.
+  String _countdownLabel(String startDate) {
+    final date = DateTime.tryParse(startDate);
+    if (date == null) return 'Starts $startDate';
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final start = DateTime(date.year, date.month, date.day);
+    final daysUntil = start.difference(today).inDays;
+
+    if (daysUntil > 1) return 'Starts in $daysUntil days';
+    if (daysUntil == 1) return 'Starts tomorrow';
+    if (daysUntil == 0) return 'Starts today';
+    final daysAgo = -daysUntil;
+    return daysAgo == 1
+        ? 'Was due to start yesterday — ready when you are'
+        : 'Was due to start $daysAgo days ago — ready when you are';
+  }
+
   Future<void> _start() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -235,7 +284,7 @@ class _PendingCircleViewState extends ConsumerState<_PendingCircleView> {
                                   ),
                         ),
                         Text(
-                          'Starts ${circle.startDate}',
+                          _countdownLabel(circle.startDate),
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: AjopayColors.primaryDark,
