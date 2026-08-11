@@ -8,11 +8,45 @@ import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/widgets/app_backdrop.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
+import '../../../account/application/account_controller.dart';
+import '../../../messages/application/message_read_tracker.dart';
+import '../../../messages/application/message_thread_pager.dart';
 
 class LedgerDetailScreen extends ConsumerWidget {
   const LedgerDetailScreen({super.key, required this.ledgerId});
 
   final String ledgerId;
+
+  /// Same Group-thread-only unread count as MessagesHomeScreen's own —
+  /// see that screen's doc comment for why this doesn't extend to an
+  /// aggregate Direct-messages count. One extra fetch (the group
+  /// thread) when opening Ledger Detail — acceptable, bounded to one
+  /// thread per ledger, same "realistically bounded" reasoning already
+  /// applied elsewhere in this app.
+  int _groupUnreadCount(WidgetRef ref) {
+    final myUserId = ref.watch(accountControllerProvider).valueOrNull?.id;
+    ref.watch(messageReadTrackerProvider); // forces rebuild once init resolves
+    final storageKey =
+        messageThreadStorageKey(ledgerId: ledgerId, isGroup: true);
+    final lastRead =
+        ref.read(messageReadTrackerProvider.notifier).getLastRead(storageKey);
+
+    final groupKey = (
+      ledgerId: ledgerId,
+      type: MessageThreadType.group,
+      otherUserId: null,
+    );
+    final items =
+        ref.watch(messageThreadPagerProvider(groupKey)).valueOrNull?.items;
+    if (items == null) return 0;
+
+    return items.where((m) {
+      if (m.senderId == myUserId) return false;
+      if (lastRead == null) return true;
+      final sentAt = DateTime.tryParse(m.sentAt);
+      return sentAt != null && sentAt.isAfter(lastRead);
+    }).length;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -104,7 +138,33 @@ class LedgerDetailScreen extends ConsumerWidget {
                       leading: const Icon(Icons.chat_bubble_outline_rounded),
                       title: const Text('Messages'),
                       subtitle: const Text('Group chat and direct messages'),
-                      trailing: const Icon(Icons.chevron_right),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_groupUnreadCount(ref) > 0) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AjopayColors.gold,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                _groupUnreadCount(ref) > 99
+                                    ? '99+'
+                                    : '${_groupUnreadCount(ref)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
                       onTap: () => context.push('/ledgers/$ledgerId/messages'),
                     ),
                   ),
