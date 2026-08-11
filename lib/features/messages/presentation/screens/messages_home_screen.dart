@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_backdrop.dart';
 import '../../../account/application/account_controller.dart';
 import '../../../ledgers/application/ledger_controller.dart';
+import '../../application/message_read_tracker.dart';
 import '../../application/message_stream_controller.dart';
 import '../../application/message_thread_pager.dart';
 import 'message_thread_view.dart';
@@ -23,6 +24,9 @@ class _MessagesHomeScreenState extends ConsumerState<MessagesHomeScreen>
     with SingleTickerProviderStateMixin {
   late final _tabController = TabController(length: 2, vsync: this);
 
+  String get _groupStorageKey =>
+      messageThreadStorageKey(ledgerId: widget.ledgerId, isGroup: true);
+
   @override
   void initState() {
     super.initState();
@@ -34,18 +38,73 @@ class _MessagesHomeScreenState extends ConsumerState<MessagesHomeScreen>
       ref
           .read(messageStreamControllerProvider.notifier)
           .connect(widget.ledgerId);
+      // Group is index 0 (the default tab) — opening Messages onto it
+      // counts as "looked at it," same as WhatsApp marking a chat read
+      // the moment it's opened, not on some separate timer.
+      _markGroupReadIfOnGroupTab();
     });
+    _tabController.addListener(_markGroupReadIfOnGroupTab);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_markGroupReadIfOnGroupTab);
     _tabController.dispose();
     ref.read(messageStreamControllerProvider.notifier).disconnect();
     super.dispose();
   }
 
+  void _markGroupReadIfOnGroupTab() {
+    if (_tabController.index == 0) {
+      ref
+          .read(messageReadTrackerProvider.notifier)
+          .markReadNow(_groupStorageKey);
+    }
+  }
+
+  /// Unread count for the Group thread only. Cheap and accurate: one
+  /// thread per ledger, already fetched for the tab's own content —
+  /// this is just counting what's already in memory, not an extra
+  /// fetch.
+  ///
+  /// Deliberately NOT extended to an aggregate Direct-tab badge: there's
+  /// no server-side "unread count per thread" endpoint, so an accurate
+  /// Direct badge would mean fetching every OTHER member's private
+  /// thread just to check for new messages — the same N+1 pattern this
+  /// app has consistently avoided elsewhere (Ledger Ratings, Circle
+  /// history). A fake/approximate badge would be worse than none; this
+  /// stays honestly scoped to what's cheap and correct today.
+  int _groupUnreadCount() {
+    final myUserId = ref.watch(accountControllerProvider).valueOrNull?.id;
+    // Forces a rebuild once MessageReadTracker's async init resolves —
+    // see that provider's own doc comment on why a call before that
+    // point would otherwise silently under-count.
+    ref.watch(messageReadTrackerProvider);
+    final lastRead = ref
+        .read(messageReadTrackerProvider.notifier)
+        .getLastRead(_groupStorageKey);
+
+    final groupKey = (
+      ledgerId: widget.ledgerId,
+      type: MessageThreadType.group,
+      otherUserId: null,
+    );
+    final items =
+        ref.watch(messageThreadPagerProvider(groupKey)).valueOrNull?.items;
+    if (items == null) return 0;
+
+    return items.where((m) {
+      if (m.senderId == myUserId) return false; // never counts own messages
+      if (lastRead == null) return true; // never opened on this device
+      final sentAt = DateTime.tryParse(m.sentAt);
+      return sentAt != null && sentAt.isAfter(lastRead);
+    }).length;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final unread = _groupUnreadCount();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Messages'),
@@ -55,9 +114,20 @@ class _MessagesHomeScreenState extends ConsumerState<MessagesHomeScreen>
           indicatorWeight: 3,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Group'),
-            Tab(text: 'Direct'),
+          tabs: [
+            Tab(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Group'),
+                  if (unread > 0) ...[
+                    const SizedBox(width: 6),
+                    _UnreadBadge(count: unread),
+                  ],
+                ],
+              ),
+            ),
+            const Tab(text: 'Direct'),
           ],
         ),
       ),
@@ -74,6 +144,34 @@ class _MessagesHomeScreenState extends ConsumerState<MessagesHomeScreen>
           ),
           _DirectMessagesTab(ledgerId: widget.ledgerId),
         ],
+      ),
+    );
+  }
+}
+
+/// Small gold count pill — same visual convention already established
+/// for LedgerMembersScreen's Pending-tab badge, reused here rather than
+/// inventing a second badge style.
+class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        color: AjopayColors.gold,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 11,
+        ),
       ),
     );
   }
