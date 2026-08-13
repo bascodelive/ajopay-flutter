@@ -36,7 +36,20 @@ mixin _$LedgerResponse {
   /// a LedgerResponse (create/get/update/getMyLedgers) only ever does
   /// so for an ACTIVE caller server-side, so this is always 'ACTIVE'
   /// there — only the join response can meaningfully be 'PENDING'.
-  String get membershipStatus => throw _privateConstructorUsedError;
+  String get membershipStatus =>
+      throw _privateConstructorUsedError; // ACTIVE | PENDING | INVALIDATED | REMOVED
+  /// True when this is one of the caller's OWN ledgers beyond their
+  /// tier's active-ledger cap — only possible for a FREE-tier caller
+  /// after a Premium subscription lapsed while more ledgers than Free
+  /// allows were still active. NOT an access check by itself — a
+  /// locked ledger still carries its real name/status/etc. here, on
+  /// purpose, so the client can gray it out rather than hide it (see
+  /// `LedgerHomeScreen`'s `_LedgerCard`). `@Default(false)` rather than
+  /// `required` — defensive against any response this client fetches
+  /// that predates this field (create/join flows, directory entries
+  /// mapped through a different DTO), not because the backend ever
+  /// omits it on `getMyLedgers`/`getLedger`.
+  bool get locked => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -58,7 +71,8 @@ abstract class $LedgerResponseCopyWith<$Res> {
       double contributionAmount,
       String status,
       String callerRole,
-      String membershipStatus});
+      String membershipStatus,
+      bool locked});
 }
 
 /// @nodoc
@@ -82,6 +96,7 @@ class _$LedgerResponseCopyWithImpl<$Res, $Val extends LedgerResponse>
     Object? status = null,
     Object? callerRole = null,
     Object? membershipStatus = null,
+    Object? locked = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -116,6 +131,10 @@ class _$LedgerResponseCopyWithImpl<$Res, $Val extends LedgerResponse>
           ? _value.membershipStatus
           : membershipStatus // ignore: cast_nullable_to_non_nullable
               as String,
+      locked: null == locked
+          ? _value.locked
+          : locked // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -136,7 +155,8 @@ abstract class _$$LedgerResponseImplCopyWith<$Res>
       double contributionAmount,
       String status,
       String callerRole,
-      String membershipStatus});
+      String membershipStatus,
+      bool locked});
 }
 
 /// @nodoc
@@ -158,6 +178,7 @@ class __$$LedgerResponseImplCopyWithImpl<$Res>
     Object? status = null,
     Object? callerRole = null,
     Object? membershipStatus = null,
+    Object? locked = null,
   }) {
     return _then(_$LedgerResponseImpl(
       id: null == id
@@ -192,6 +213,10 @@ class __$$LedgerResponseImplCopyWithImpl<$Res>
           ? _value.membershipStatus
           : membershipStatus // ignore: cast_nullable_to_non_nullable
               as String,
+      locked: null == locked
+          ? _value.locked
+          : locked // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -207,7 +232,8 @@ class _$LedgerResponseImpl implements _LedgerResponse {
       required this.contributionAmount,
       required this.status,
       required this.callerRole,
-      required this.membershipStatus});
+      required this.membershipStatus,
+      this.locked = false});
 
   factory _$LedgerResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$LedgerResponseImplFromJson(json);
@@ -238,10 +264,25 @@ class _$LedgerResponseImpl implements _LedgerResponse {
   /// there — only the join response can meaningfully be 'PENDING'.
   @override
   final String membershipStatus;
+// ACTIVE | PENDING | INVALIDATED | REMOVED
+  /// True when this is one of the caller's OWN ledgers beyond their
+  /// tier's active-ledger cap — only possible for a FREE-tier caller
+  /// after a Premium subscription lapsed while more ledgers than Free
+  /// allows were still active. NOT an access check by itself — a
+  /// locked ledger still carries its real name/status/etc. here, on
+  /// purpose, so the client can gray it out rather than hide it (see
+  /// `LedgerHomeScreen`'s `_LedgerCard`). `@Default(false)` rather than
+  /// `required` — defensive against any response this client fetches
+  /// that predates this field (create/join flows, directory entries
+  /// mapped through a different DTO), not because the backend ever
+  /// omits it on `getMyLedgers`/`getLedger`.
+  @override
+  @JsonKey()
+  final bool locked;
 
   @override
   String toString() {
-    return 'LedgerResponse(id: $id, name: $name, inviteCode: $inviteCode, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, status: $status, callerRole: $callerRole, membershipStatus: $membershipStatus)';
+    return 'LedgerResponse(id: $id, name: $name, inviteCode: $inviteCode, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, status: $status, callerRole: $callerRole, membershipStatus: $membershipStatus, locked: $locked)';
   }
 
   @override
@@ -261,7 +302,8 @@ class _$LedgerResponseImpl implements _LedgerResponse {
             (identical(other.callerRole, callerRole) ||
                 other.callerRole == callerRole) &&
             (identical(other.membershipStatus, membershipStatus) ||
-                other.membershipStatus == membershipStatus));
+                other.membershipStatus == membershipStatus) &&
+            (identical(other.locked, locked) || other.locked == locked));
   }
 
   @JsonKey(ignore: true)
@@ -275,7 +317,8 @@ class _$LedgerResponseImpl implements _LedgerResponse {
       contributionAmount,
       status,
       callerRole,
-      membershipStatus);
+      membershipStatus,
+      locked);
 
   @JsonKey(ignore: true)
   @override
@@ -301,7 +344,8 @@ abstract class _LedgerResponse implements LedgerResponse {
       required final double contributionAmount,
       required final String status,
       required final String callerRole,
-      required final String membershipStatus}) = _$LedgerResponseImpl;
+      required final String membershipStatus,
+      final bool locked}) = _$LedgerResponseImpl;
 
   factory _LedgerResponse.fromJson(Map<String, dynamic> json) =
       _$LedgerResponseImpl.fromJson;
@@ -329,6 +373,19 @@ abstract class _LedgerResponse implements LedgerResponse {
   /// so for an ACTIVE caller server-side, so this is always 'ACTIVE'
   /// there — only the join response can meaningfully be 'PENDING'.
   String get membershipStatus;
+  @override // ACTIVE | PENDING | INVALIDATED | REMOVED
+  /// True when this is one of the caller's OWN ledgers beyond their
+  /// tier's active-ledger cap — only possible for a FREE-tier caller
+  /// after a Premium subscription lapsed while more ledgers than Free
+  /// allows were still active. NOT an access check by itself — a
+  /// locked ledger still carries its real name/status/etc. here, on
+  /// purpose, so the client can gray it out rather than hide it (see
+  /// `LedgerHomeScreen`'s `_LedgerCard`). `@Default(false)` rather than
+  /// `required` — defensive against any response this client fetches
+  /// that predates this field (create/join flows, directory entries
+  /// mapped through a different DTO), not because the backend ever
+  /// omits it on `getMyLedgers`/`getLedger`.
+  bool get locked;
   @override
   @JsonKey(ignore: true)
   _$$LedgerResponseImplCopyWith<_$LedgerResponseImpl> get copyWith =>

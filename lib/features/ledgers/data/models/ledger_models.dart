@@ -22,6 +22,18 @@ class LedgerResponse with _$LedgerResponse {
     /// there — only the join response can meaningfully be 'PENDING'.
     required String
         membershipStatus, // ACTIVE | PENDING | INVALIDATED | REMOVED
+    /// True when this is one of the caller's OWN ledgers beyond their
+    /// tier's active-ledger cap — only possible for a FREE-tier caller
+    /// after a Premium subscription lapsed while more ledgers than Free
+    /// allows were still active. NOT an access check by itself — a
+    /// locked ledger still carries its real name/status/etc. here, on
+    /// purpose, so the client can gray it out rather than hide it (see
+    /// `LedgerHomeScreen`'s `_LedgerCard`). `@Default(false)` rather than
+    /// `required` — defensive against any response this client fetches
+    /// that predates this field (create/join flows, directory entries
+    /// mapped through a different DTO), not because the backend ever
+    /// omits it on `getMyLedgers`/`getLedger`.
+    @Default(false) bool locked,
   }) = _LedgerResponse;
 
   factory LedgerResponse.fromJson(Map<String, dynamic> json) =>

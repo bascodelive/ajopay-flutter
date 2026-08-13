@@ -93,6 +93,23 @@ class LedgerRepository {
     }
   }
 
+  /// Self-service — picks which ONE of the caller's own ledgers stays
+  /// unlocked while FREE and over the tier cap (see
+  /// `LedgerResponse.locked`). A harmless no-op with no observable
+  /// effect while Premium or at/under the cap — safe to call regardless
+  /// of current tier, since the backend honors it again the next time
+  /// it's actually relevant. Void return: the caller should re-fetch
+  /// `getMyLedgers()` afterward (invalidate `myLedgersProvider`) to see
+  /// the new lock state reflected, same pattern as every other mutating
+  /// call in this app.
+  Future<void> chooseKeptLedger(String ledgerId) async {
+    try {
+      await _dio.post('/api/ledgers/$ledgerId/keep-free');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   /// Any active member can call this now (API.md updated — used to be
   /// ADMIN-only). Every ACTIVE member of the ledger, not paginated
   /// (API.md: bounded list, realistically dozens of rows). PENDING and

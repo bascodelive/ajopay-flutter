@@ -8,6 +8,7 @@ import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_backdrop.dart';
 import '../../../account/application/account_controller.dart';
+import '../../../ledgers/application/ledger_controller.dart';
 import '../../../subscriptions/application/subscription_controller.dart';
 import '../../application/message_thread_pager.dart';
 import '../../data/message_repository.dart';
@@ -105,6 +106,21 @@ class _MessageThreadViewState extends ConsumerState<MessageThreadView> {
 
   @override
   Widget build(BuildContext context) {
+    // Checked FIRST, before touching the message pager at all — the
+    // backend now blocks listGroupThread/listPrivateThread/subscribe on
+    // a locked ledger (see MessageService.requireLedgerNotLocked), so
+    // watching the pager here would just surface as a raw fetch error.
+    // Fails open on loading/error, same convention as
+    // LedgerHomeScreen's limit gate — a transient hiccup fetching the
+    // ledger shouldn't block an otherwise-unlocked chat from opening.
+    final ledgerAsync =
+        ref.watch(ledgerDetailProvider(widget.threadKey.ledgerId));
+    final isLocked = ledgerAsync.valueOrNull?.locked ?? false;
+
+    if (isLocked) {
+      return _LockedThreadView(ledgerName: ledgerAsync.valueOrNull?.name);
+    }
+
     final pageAsync = ref.watch(messageThreadPagerProvider(widget.threadKey));
     final profileAsync = ref.watch(accountControllerProvider);
     final myUserId = profileAsync.valueOrNull?.id;
@@ -284,6 +300,82 @@ class _MessageThreadViewState extends ConsumerState<MessageThreadView> {
     return dateA.year == dateB.year &&
         dateA.month == dateB.month &&
         dateA.day == dateB.day;
+  }
+}
+
+/// Replaces the ENTIRE thread — history and composer both — when this
+/// ledger is locked. Deliberately not the same shape as `_ComposerBar`'s
+/// Premium-gate banner below: a locked ledger's chat is meant to read as
+/// closed, full stop, not "read-only, upgrade to send" — see
+/// MessageService's Javadoc on the backend for why reading, not just
+/// sending, is blocked here specifically. Visually distinguished on
+/// purpose too, so a downgraded user can't mistake "I'm on Free" (the
+/// ordinary, permanent state, banner below) for "this ledger got locked"
+/// (this one, tied to a fixable expired subscription).
+class _LockedThreadView extends StatelessWidget {
+  const _LockedThreadView({this.ledgerName});
+
+  final String? ledgerName;
+
+  @override
+  Widget build(BuildContext context) {
+    final subject = ledgerName == null ? 'This ledger' : '"$ledgerName"';
+
+    return AppBackdrop(
+      stops: const [0.0, 0.12],
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AjopayColors.gold.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.lock_outline_rounded,
+                    color: AjopayColors.gold, size: 32),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'This chat is locked',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$subject is locked because your Premium subscription '
+                'expired. Renew Premium, or make this your free ledger, '
+                'to unlock its chat.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AjopayColors.textSecondary,
+                    ),
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: AjopayColors.primaryDark,
+                  backgroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                onPressed: () => context.push('/subscription'),
+                child: const Text('Renew Premium',
+                    style: TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -490,7 +582,8 @@ class _MessageBubble extends StatelessWidget {
 /// The input bar — swapped for an upsell banner when the caller isn't
 /// Premium, per API.md/MessageService: sending is Premium-gated,
 /// reading never is. Thread history stays fully visible either way;
-/// only the ability to compose is affected.
+/// only the ability to compose is affected. (A LOCKED ledger never
+/// reaches this widget at all — see `_LockedThreadView` above.)
 class _ComposerBar extends StatelessWidget {
   const _ComposerBar({
     required this.controller,
