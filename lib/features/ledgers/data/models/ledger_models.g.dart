@@ -16,6 +16,7 @@ _$LedgerResponseImpl _$$LedgerResponseImplFromJson(Map<String, dynamic> json) =>
       status: json['status'] as String,
       callerRole: json['callerRole'] as String,
       membershipStatus: json['membershipStatus'] as String,
+      locked: json['locked'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$LedgerResponseImplToJson(
@@ -29,6 +30,7 @@ Map<String, dynamic> _$$LedgerResponseImplToJson(
       'status': instance.status,
       'callerRole': instance.callerRole,
       'membershipStatus': instance.membershipStatus,
+      'locked': instance.locked,
     };
 
 _$CreateLedgerRequestImpl _$$CreateLedgerRequestImplFromJson(

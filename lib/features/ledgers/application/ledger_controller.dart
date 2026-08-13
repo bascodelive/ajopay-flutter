@@ -99,6 +99,28 @@ class LedgerController extends _$LedgerController {
     }
   }
 
+  /// Self-service — picks which of the caller's OWN ledgers stays
+  /// unlocked while FREE and over the tier cap (see
+  /// `LedgerResponse.locked`). A harmless no-op with no observable
+  /// effect while Premium or at/under the cap; still safe and worth
+  /// calling regardless of current tier since the backend honors it
+  /// again the next time it's actually relevant.
+  /// <p>
+  /// Deliberately does NOT invalidate `myLedgersProvider` itself — same
+  /// convention already documented on that provider below: the SCREEN
+  /// invalidates after a successful mutating call, this controller
+  /// doesn't reach out to a home-screen-level provider on its own.
+  Future<bool> chooseKeptLedger(String ledgerId) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      await repository.chooseKeptLedger(ledgerId);
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
   /// ADMIN action — approves a PENDING join request. Refreshes both the
   /// pending list (this row disappears from it) and the active member
   /// list (this row appears in it) so the Members screen's two tabs stay
@@ -173,7 +195,9 @@ class LedgerController extends _$LedgerController {
 /// Screens should `ref.invalidate(myLedgersProvider)` after a successful
 /// create/join so the list picks up the new membership immediately —
 /// note a PENDING join won't actually appear here until approved (see
-/// LedgerRepository.getMyLedgers's Javadoc-equivalent comment).
+/// LedgerRepository.getMyLedgers's Javadoc-equivalent comment). Same
+/// invalidation convention applies after a successful
+/// `LedgerController.chooseKeptLedger` call — see that method's doc.
 final myLedgersProvider =
     FutureProvider.autoDispose<List<LedgerResponse>>((ref) {
   return requireAuthenticated(
@@ -203,6 +227,12 @@ final ledgerLimitProvider =
 /// Server-side this is ACTIVE-membership-gated — a still-PENDING caller
 /// gets a 403 here, by design. Nothing in this app should route a
 /// still-PENDING user into this screen; see JoinLedgerScreen.
+///
+/// Also the source `MessageThreadView` watches for `.locked` — a locked
+/// ledger's basic detail still returns happily here (never a 403; see
+/// LedgerService.getLedger's Javadoc on the backend), which is exactly
+/// what lets a chat screen show a proper "this chat is locked" state
+/// instead of a bare fetch error.
 final ledgerDetailProvider =
     FutureProvider.autoDispose.family<LedgerResponse, String>((ref, ledgerId) {
   return requireAuthenticated(

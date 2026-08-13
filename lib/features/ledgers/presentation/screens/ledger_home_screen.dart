@@ -293,21 +293,26 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _LedgerCard extends StatelessWidget {
+class _LedgerCard extends ConsumerWidget {
   const _LedgerCard({required this.ledger});
 
   final LedgerResponse ledger;
 
-  Color get _statusColor =>
-      ledger.status == 'ACTIVE' ? AjopayColors.primary : AjopayColors.error;
+  Color _statusColor(bool locked) => locked
+      ? AjopayColors.textMuted
+      : (ledger.status == 'ACTIVE' ? AjopayColors.primary : AjopayColors.error);
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locked = ledger.locked;
+
+    final card = Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => context.push('/ledgers/${ledger.id}'),
+        onTap: locked
+            ? () => _showLockedLedgerSheet(context, ref)
+            : () => context.push('/ledgers/${ledger.id}'),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -316,16 +321,24 @@ class _LedgerCard extends StatelessWidget {
               // Same rounded-icon language as the new Directory screen's
               // tiles, so a ledger reads as the same kind of "object"
               // whether the caller's browsing their own list or the
-              // public directory.
+              // public directory. Locked swaps the savings icon for a
+              // lock, gray instead of Primary Tint — a glance should
+              // tell locked apart from ordinary ACTIVE/SUSPENDED status.
               Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
-                  color: AjopayColors.primaryTint,
+                decoration: BoxDecoration(
+                  color:
+                      locked ? AjopayColors.border : AjopayColors.primaryTint,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.savings_rounded,
-                    color: AjopayColors.primaryDark, size: 22),
+                child: Icon(
+                  locked ? Icons.lock_outline_rounded : Icons.savings_rounded,
+                  color: locked
+                      ? AjopayColors.textMuted
+                      : AjopayColors.primaryDark,
+                  size: 22,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -342,35 +355,50 @@ class _LedgerCard extends StatelessWidget {
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: locked ? AjopayColors.textMuted : null,
+                                ),
                           ),
                         ),
-                        _RoleBadge(role: ledger.callerRole),
+                        if (locked)
+                          _LockedBadge()
+                        else
+                          _RoleBadge(role: ledger.callerRole),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.repeat,
-                            size: 16, color: AjopayColors.textMuted),
+                        Icon(Icons.repeat,
+                            size: 16,
+                            color: locked
+                                ? AjopayColors.textMuted
+                                : AjopayColors.textMuted),
                         const SizedBox(width: 6),
                         Text(
                           '${ledger.contributionFrequency[0]}${ledger.contributionFrequency.substring(1).toLowerCase()} · ₦${ledger.contributionAmount.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: locked ? AjopayColors.textMuted : null,
+                              ),
                         ),
                         const Spacer(),
                         Container(
                           width: 8,
                           height: 8,
                           decoration: BoxDecoration(
-                              color: _statusColor, shape: BoxShape.circle),
+                              color: _statusColor(locked),
+                              shape: BoxShape.circle),
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          ledger.status,
+                          locked ? 'LOCKED' : ledger.status,
                           style:
                               Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: _statusColor,
+                                    color: _statusColor(locked),
                                     fontWeight: FontWeight.w600,
                                   ),
                         ),
@@ -382,6 +410,79 @@ class _LedgerCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+
+    // Desaturated, not just dimmed — a plain Opacity() on a still-green
+    // icon/badge still reads as "this ledger, slightly faded," which
+    // isn't a strong enough signal next to normal cards in the same
+    // list. Grayscale is the "this is unavailable" signal every OS uses
+    // for disabled UI; cheap here since this list is realistically a
+    // handful of items, not a hot scroll path.
+    if (!locked) return card;
+    return ColorFiltered(
+      colorFilter: const ColorFilter.matrix(<double>[
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0.2126,
+        0.7152,
+        0.0722,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+      ]),
+      child: card,
+    );
+  }
+
+  void _showLockedLedgerSheet(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => _LockedLedgerSheet(ledger: ledger),
+    );
+  }
+}
+
+class _LockedBadge extends StatelessWidget {
+  const _LockedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AjopayColors.border,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.lock_outline_rounded,
+              size: 12, color: AjopayColors.textMuted),
+          const SizedBox(width: 4),
+          Text(
+            'LOCKED',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AjopayColors.textMuted,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -406,6 +507,112 @@ class _RoleBadge extends StatelessWidget {
               color: AjopayColors.primaryDark,
               fontWeight: FontWeight.w700,
             ),
+      ),
+    );
+  }
+}
+
+/// Shown when a locked ledger's card is tapped. Explains why (in the
+/// same words the backend's LedgerAccessLockedException already uses,
+/// so nothing here can drift out of sync with the real 403 message a
+/// stray write attempt would show), and offers the two real ways out:
+/// renew, or make THIS ledger the one that stays free.
+class _LockedLedgerSheet extends ConsumerStatefulWidget {
+  const _LockedLedgerSheet({required this.ledger});
+
+  final LedgerResponse ledger;
+
+  @override
+  ConsumerState<_LockedLedgerSheet> createState() => _LockedLedgerSheetState();
+}
+
+class _LockedLedgerSheetState extends ConsumerState<_LockedLedgerSheet> {
+  bool _submitting = false;
+
+  Future<void> _makeThisFree() async {
+    setState(() => _submitting = true);
+    final notifier = ref.read(ledgerControllerProvider.notifier);
+    final success = await notifier.chooseKeptLedger(widget.ledger.id);
+    if (success) {
+      ref.invalidate(myLedgersProvider);
+      if (mounted) Navigator.of(context).pop();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              notifier.lastError ?? 'Something went wrong. Please try again.'),
+        ),
+      );
+    }
+    if (mounted) setState(() => _submitting = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: AjopayColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: AjopayColors.gold.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.lock_outline_rounded,
+                  color: AjopayColors.gold, size: 32),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'This ledger is locked',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${widget.ledger.name} is locked because your Premium '
+              'subscription expired. Renew Premium, or make this your '
+              'free ledger, to unlock it.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AjopayColors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 24),
+            AppPrimaryButton(
+              label: 'Renew Premium',
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.push('/subscription');
+              },
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: _submitting ? null : _makeThisFree,
+              child: _submitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Make this my free ledger'),
+            ),
+          ],
+        ),
       ),
     );
   }
