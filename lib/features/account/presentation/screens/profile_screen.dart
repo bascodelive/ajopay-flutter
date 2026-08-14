@@ -1,3 +1,4 @@
+import 'package:ajopay/core/widgets/app_primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +7,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/widgets/avatar_display.dart';
 import '../../../../core/widgets/premium_badge.dart';
-import '../../../../core/widgets/app_primary_button.dart';
 import '../../../auth/application/auth_controller.dart';
 import '../../application/account_controller.dart';
 import '../../data/models/account_models.dart';
@@ -157,10 +157,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(accountControllerProvider);
 
     return Scaffold(
-      // No explicit backgroundColor override — inherits the theme's
-      // Surface alt scaffold background (2026-07-30 app-wide polish pass),
-      // same as every other screen. The gradient header below still
-      // supplies its own background for the area behind the AppBar.
+      backgroundColor: AjopayColors.surface,
       appBar: AppBar(
         title: const Text('Profile'),
         backgroundColor: Colors.transparent,
@@ -223,6 +220,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           formKey: _formKey,
                           fullNameController: _fullNameController,
                           phoneController: _phoneController,
+                          originalFullName: profile.fullName,
+                          originalPhone: profile.phone,
                           isSaving: _isSaving,
                           onSave: _save,
                           onCancel: () => setState(() => _isEditing = false),
@@ -231,6 +230,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         const _SectionLabel('Contact'),
                         const SizedBox(height: 10),
                         _InfoCard(profile: profile),
+                        const SizedBox(height: 12),
+                        Card(
+                          margin: EdgeInsets.zero,
+                          child: ListTile(
+                            leading: const Icon(Icons.help_outline_rounded,
+                                color: AjopayColors.primary),
+                            title: const Text('Help & User Guide'),
+                            subtitle: const Text('How Ajopay works'),
+                            trailing: const Icon(Icons.chevron_right,
+                                color: AjopayColors.textMuted),
+                            onTap: () => context.push('/help'),
+                          ),
+                        ),
                         const SizedBox(height: 28),
                         const _SectionLabel('Account'),
                         const SizedBox(height: 10),
@@ -644,11 +656,13 @@ class _DangerCard extends StatelessWidget {
   }
 }
 
-class _EditForm extends StatelessWidget {
+class _EditForm extends StatefulWidget {
   const _EditForm({
     required this.formKey,
     required this.fullNameController,
     required this.phoneController,
+    required this.originalFullName,
+    required this.originalPhone,
     required this.isSaving,
     required this.onSave,
     required this.onCancel,
@@ -657,18 +671,52 @@ class _EditForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController fullNameController;
   final TextEditingController phoneController;
+  final String originalFullName;
+  final String? originalPhone;
   final bool isSaving;
   final VoidCallback onSave;
   final VoidCallback onCancel;
 
   @override
+  State<_EditForm> createState() => _EditFormState();
+}
+
+class _EditFormState extends State<_EditForm> {
+  bool _isDirty = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.fullNameController.addListener(_onChanged);
+    widget.phoneController.addListener(_onChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.fullNameController.removeListener(_onChanged);
+    widget.phoneController.removeListener(_onChanged);
+    super.dispose();
+  }
+
+  void _onChanged() {
+    final nameChanged =
+        widget.fullNameController.text.trim() != widget.originalFullName.trim();
+    final phoneChanged = widget.phoneController.text.trim() !=
+        (widget.originalPhone ?? '').trim();
+    final dirty = nameChanged || phoneChanged;
+    if (dirty != _isDirty) setState(() => _isDirty = dirty);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final canSave = _isDirty && !widget.isSaving;
+
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
-          key: formKey,
+          key: widget.formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -676,7 +724,7 @@ class _EditForm extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 16),
               TextFormField(
-                controller: fullNameController,
+                controller: widget.fullNameController,
                 textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(labelText: 'Full name'),
                 validator: (value) => (value == null || value.trim().isEmpty)
@@ -685,7 +733,7 @@ class _EditForm extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: phoneController,
+                controller: widget.phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
                   labelText: 'Phone (optional)',
@@ -697,7 +745,7 @@ class _EditForm extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: isSaving ? null : onCancel,
+                      onPressed: widget.isSaving ? null : widget.onCancel,
                       child: const Text('Cancel'),
                     ),
                   ),
@@ -706,8 +754,8 @@ class _EditForm extends StatelessWidget {
                     child: AppPrimaryButton(
                       label: 'Save',
                       height: 48,
-                      isLoading: isSaving,
-                      onPressed: isSaving ? null : onSave,
+                      isLoading: widget.isSaving,
+                      onPressed: canSave ? widget.onSave : null,
                     ),
                   ),
                 ],
