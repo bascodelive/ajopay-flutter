@@ -33,6 +33,7 @@ import '../../features/messages/presentation/screens/messages_home_screen.dart';
 import '../../features/ledgers/presentation/screens/ledger_reviews_screen.dart';
 import '../../features/messages/presentation/screens/private_message_thread_screen.dart';
 import '../../features/subscriptions/presentation/screens/subscription_screen.dart';
+import '../../features/help/presentation/screens/help_screen.dart';
 
 /// go_router needs a Listenable to know when to re-run `redirect` — Riverpod
 /// state changes aren't one by default, so this bridges AuthController's
@@ -288,6 +289,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => LedgerReviewsScreen(
           ledgerId: state.pathParameters['id']!,
         ),
+      ),
+      GoRoute(
+        path: '/help',
+        builder: (context, state) => const HelpScreen(),
       ),
     ],
   );
