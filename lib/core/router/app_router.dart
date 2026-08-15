@@ -34,6 +34,7 @@ import '../../features/ledgers/presentation/screens/ledger_reviews_screen.dart';
 import '../../features/messages/presentation/screens/private_message_thread_screen.dart';
 import '../../features/subscriptions/presentation/screens/subscription_screen.dart';
 import '../../features/help/presentation/screens/help_screen.dart';
+import '../../features/circles/presentation/screens/transfer_offers_screen.dart';
 
 /// go_router needs a Listenable to know when to re-run `redirect` — Riverpod
 /// state changes aren't one by default, so this bridges AuthController's
@@ -186,6 +187,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ledgers/:id/circle/:circleId/rotation',
         builder: (context, state) => RotationQueueScreen(
+          ledgerId: state.pathParameters['id']!,
+          circleId: state.pathParameters['circleId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/ledgers/:id/circle/:circleId/transfer-offers',
+        builder: (context, state) => TransferOffersScreen(
           ledgerId: state.pathParameters['id']!,
           circleId: state.pathParameters['circleId']!,
         ),

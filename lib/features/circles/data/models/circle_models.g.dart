@@ -170,3 +170,63 @@ Map<String, dynamic> _$$CircleActivityLogEntryImplToJson(
       'note': instance.note,
       'createdAt': instance.createdAt,
     };
+
+_$PayoutSlotTransferResponseImpl _$$PayoutSlotTransferResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$PayoutSlotTransferResponseImpl(
+      id: json['id'] as String,
+      circleId: json['circleId'] as String,
+      offeringSlotId: json['offeringSlotId'] as String,
+      offeredByUserId: json['offeredByUserId'] as String,
+      offeredByFullName: json['offeredByFullName'] as String,
+      targetUserId: json['targetUserId'] as String?,
+      targetUserFullName: json['targetUserFullName'] as String?,
+      acceptingSlotId: json['acceptingSlotId'] as String?,
+      acceptedByUserId: json['acceptedByUserId'] as String?,
+      acceptedByFullName: json['acceptedByFullName'] as String?,
+      status: json['status'] as String,
+      createdAt: json['createdAt'] as String,
+      resolvedAt: json['resolvedAt'] as String?,
+    );
+
+Map<String, dynamic> _$$PayoutSlotTransferResponseImplToJson(
+        _$PayoutSlotTransferResponseImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'circleId': instance.circleId,
+      'offeringSlotId': instance.offeringSlotId,
+      'offeredByUserId': instance.offeredByUserId,
+      'offeredByFullName': instance.offeredByFullName,
+      'targetUserId': instance.targetUserId,
+      'targetUserFullName': instance.targetUserFullName,
+      'acceptingSlotId': instance.acceptingSlotId,
+      'acceptedByUserId': instance.acceptedByUserId,
+      'acceptedByFullName': instance.acceptedByFullName,
+      'status': instance.status,
+      'createdAt': instance.createdAt,
+      'resolvedAt': instance.resolvedAt,
+    };
+
+_$OfferSlotTransferRequestImpl _$$OfferSlotTransferRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$OfferSlotTransferRequestImpl(
+      userId: json['userId'] as String?,
+    );
+
+Map<String, dynamic> _$$OfferSlotTransferRequestImplToJson(
+        _$OfferSlotTransferRequestImpl instance) =>
+    <String, dynamic>{
+      'userId': instance.userId,
+    };
+
+_$AcceptSlotTransferRequestImpl _$$AcceptSlotTransferRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$AcceptSlotTransferRequestImpl(
+      acceptingSlotId: json['acceptingSlotId'] as String,
+    );
+
+Map<String, dynamic> _$$AcceptSlotTransferRequestImplToJson(
+        _$AcceptSlotTransferRequestImpl instance) =>
+    <String, dynamic>{
+      'acceptingSlotId': instance.acceptingSlotId,
+    };

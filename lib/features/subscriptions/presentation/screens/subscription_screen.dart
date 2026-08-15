@@ -269,9 +269,26 @@ class _FreeStatusCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
             ),
-            const SizedBox(height: 12),
-            const _BenefitRow(text: 'Send messages in your ledgers'),
-            const _BenefitRow(text: 'Create or join more than one ledger'),
+            const SizedBox(height: 4),
+            Text(
+              "Here's everything that unlocks:",
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AjopayColors.textSecondary,
+                  ),
+            ),
+            const SizedBox(height: 14),
+            const _BenefitRow(
+              icon: Icons.groups_outlined,
+              text: 'Up to 10 active ledgers, instead of 1',
+            ),
+            const _BenefitRow(
+              icon: Icons.chat_bubble_outline,
+              text: 'Send messages — group chat and private messages',
+            ),
+            const _BenefitRow(
+              icon: Icons.swap_horiz,
+              text: 'Offer or accept a payout-turn transfer in your circles',
+            ),
             const SizedBox(height: 24),
             if (isAwaitingConfirmation) ...[
               const Center(
@@ -300,18 +317,20 @@ class _FreeStatusCard extends StatelessWidget {
 }
 
 class _BenefitRow extends StatelessWidget {
-  const _BenefitRow({required this.text});
+  const _BenefitRow({required this.icon, required this.text});
 
+  final IconData icon;
   final String text;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.check_circle, size: 18, color: AjopayColors.primary),
-          const SizedBox(width: 8),
+          Icon(icon, size: 18, color: AjopayColors.gold),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(text, style: Theme.of(context).textTheme.bodyMedium),
           ),
