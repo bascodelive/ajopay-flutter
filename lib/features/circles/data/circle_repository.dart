@@ -258,6 +258,101 @@ class CircleRepository {
       throw ApiException.fromDioException(e);
     }
   }
+
+  /// PREMIUM feature. Offers the caller's own PENDING slot for transfer
+  /// — open (`targetUserId` null) or targeted at one specific
+  /// participant. See PREMIUM-FEATURE-payout-slot-transfer.md.
+  Future<PayoutSlotTransferResponse> offerSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String slotId, {
+    String? targetUserId,
+  }) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/rotation/$slotId/transfer-offers',
+        data: OfferSlotTransferRequest(userId: targetUserId).toJson(),
+      );
+      return PayoutSlotTransferResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Any active participant — full transparency, open and resolved
+  /// offers alike.
+  Future<List<PayoutSlotTransferResponse>> listSlotTransfers(
+    String ledgerId,
+    String circleId,
+  ) async {
+    try {
+      final response = await _dio
+          .get('/api/ledgers/$ledgerId/circles/$circleId/transfer-offers');
+      return (response.data as List)
+          .map((e) =>
+              PayoutSlotTransferResponse.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// PREMIUM feature. Accepts an open offer, swapping which user holds
+  /// the offering slot and the caller's own `acceptingSlotId`.
+  Future<PayoutSlotTransferResponse> acceptSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String transferId,
+    String acceptingSlotId,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/transfer-offers/$transferId/accept',
+        data: AcceptSlotTransferRequest(acceptingSlotId: acceptingSlotId)
+            .toJson(),
+      );
+      return PayoutSlotTransferResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// NOT Premium-gated — same reasoning as the backend: saying no
+  /// shouldn't require the paid tier that saying yes does.
+  Future<PayoutSlotTransferResponse> declineSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String transferId,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/transfer-offers/$transferId/decline',
+      );
+      return PayoutSlotTransferResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// The offerer withdraws their own still-open offer. Not Premium-gated.
+  Future<PayoutSlotTransferResponse> cancelSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String transferId,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/transfer-offers/$transferId/cancel',
+      );
+      return PayoutSlotTransferResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
 }
 
 final circleRepositoryProvider = Provider<CircleRepository>((ref) {

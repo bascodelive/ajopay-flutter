@@ -123,3 +123,52 @@ class CircleActivityLogEntry with _$CircleActivityLogEntry {
   factory CircleActivityLogEntry.fromJson(Map<String, dynamic> json) =>
       _$CircleActivityLogEntryFromJson(json);
 }
+
+/// PREMIUM feature — see PREMIUM-FEATURE-payout-slot-transfer.md.
+/// Mirrors the backend's PayoutSlotTransferResponse field-for-field —
+/// no existing Dart shape to match against, this is a new construction.
+@freezed
+class PayoutSlotTransferResponse with _$PayoutSlotTransferResponse {
+  const factory PayoutSlotTransferResponse({
+    required String id,
+    required String circleId,
+    required String offeringSlotId,
+    required String offeredByUserId,
+    required String offeredByFullName,
+
+    /// Null = an open offer, any eligible participant can accept.
+    String? targetUserId,
+    String? targetUserFullName,
+
+    /// Set only once ACCEPTED — the other slot involved in the swap.
+    String? acceptingSlotId,
+    String? acceptedByUserId,
+    String? acceptedByFullName,
+    required String
+        status, // OFFERED | ACCEPTED | DECLINED | CANCELLED | EXPIRED
+    required String createdAt,
+    String? resolvedAt,
+  }) = _PayoutSlotTransferResponse;
+
+  factory PayoutSlotTransferResponse.fromJson(Map<String, dynamic> json) =>
+      _$PayoutSlotTransferResponseFromJson(json);
+}
+
+@freezed
+class OfferSlotTransferRequest with _$OfferSlotTransferRequest {
+  /// Null userId = an open offer, any eligible participant can accept.
+  const factory OfferSlotTransferRequest({String? userId}) =
+      _OfferSlotTransferRequest;
+
+  factory OfferSlotTransferRequest.fromJson(Map<String, dynamic> json) =>
+      _$OfferSlotTransferRequestFromJson(json);
+}
+
+@freezed
+class AcceptSlotTransferRequest with _$AcceptSlotTransferRequest {
+  const factory AcceptSlotTransferRequest({required String acceptingSlotId}) =
+      _AcceptSlotTransferRequest;
+
+  factory AcceptSlotTransferRequest.fromJson(Map<String, dynamic> json) =>
+      _$AcceptSlotTransferRequestFromJson(json);
+}

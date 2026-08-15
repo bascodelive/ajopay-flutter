@@ -1924,3 +1924,719 @@ abstract class _CircleActivityLogEntry implements CircleActivityLogEntry {
   _$$CircleActivityLogEntryImplCopyWith<_$CircleActivityLogEntryImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
+
+PayoutSlotTransferResponse _$PayoutSlotTransferResponseFromJson(
+    Map<String, dynamic> json) {
+  return _PayoutSlotTransferResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PayoutSlotTransferResponse {
+  String get id => throw _privateConstructorUsedError;
+  String get circleId => throw _privateConstructorUsedError;
+  String get offeringSlotId => throw _privateConstructorUsedError;
+  String get offeredByUserId => throw _privateConstructorUsedError;
+  String get offeredByFullName => throw _privateConstructorUsedError;
+
+  /// Null = an open offer, any eligible participant can accept.
+  String? get targetUserId => throw _privateConstructorUsedError;
+  String? get targetUserFullName => throw _privateConstructorUsedError;
+
+  /// Set only once ACCEPTED — the other slot involved in the swap.
+  String? get acceptingSlotId => throw _privateConstructorUsedError;
+  String? get acceptedByUserId => throw _privateConstructorUsedError;
+  String? get acceptedByFullName => throw _privateConstructorUsedError;
+  String get status =>
+      throw _privateConstructorUsedError; // OFFERED | ACCEPTED | DECLINED | CANCELLED | EXPIRED
+  String get createdAt => throw _privateConstructorUsedError;
+  String? get resolvedAt => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $PayoutSlotTransferResponseCopyWith<PayoutSlotTransferResponse>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PayoutSlotTransferResponseCopyWith<$Res> {
+  factory $PayoutSlotTransferResponseCopyWith(PayoutSlotTransferResponse value,
+          $Res Function(PayoutSlotTransferResponse) then) =
+      _$PayoutSlotTransferResponseCopyWithImpl<$Res,
+          PayoutSlotTransferResponse>;
+  @useResult
+  $Res call(
+      {String id,
+      String circleId,
+      String offeringSlotId,
+      String offeredByUserId,
+      String offeredByFullName,
+      String? targetUserId,
+      String? targetUserFullName,
+      String? acceptingSlotId,
+      String? acceptedByUserId,
+      String? acceptedByFullName,
+      String status,
+      String createdAt,
+      String? resolvedAt});
+}
+
+/// @nodoc
+class _$PayoutSlotTransferResponseCopyWithImpl<$Res,
+        $Val extends PayoutSlotTransferResponse>
+    implements $PayoutSlotTransferResponseCopyWith<$Res> {
+  _$PayoutSlotTransferResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? circleId = null,
+    Object? offeringSlotId = null,
+    Object? offeredByUserId = null,
+    Object? offeredByFullName = null,
+    Object? targetUserId = freezed,
+    Object? targetUserFullName = freezed,
+    Object? acceptingSlotId = freezed,
+    Object? acceptedByUserId = freezed,
+    Object? acceptedByFullName = freezed,
+    Object? status = null,
+    Object? createdAt = null,
+    Object? resolvedAt = freezed,
+  }) {
+    return _then(_value.copyWith(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      circleId: null == circleId
+          ? _value.circleId
+          : circleId // ignore: cast_nullable_to_non_nullable
+              as String,
+      offeringSlotId: null == offeringSlotId
+          ? _value.offeringSlotId
+          : offeringSlotId // ignore: cast_nullable_to_non_nullable
+              as String,
+      offeredByUserId: null == offeredByUserId
+          ? _value.offeredByUserId
+          : offeredByUserId // ignore: cast_nullable_to_non_nullable
+              as String,
+      offeredByFullName: null == offeredByFullName
+          ? _value.offeredByFullName
+          : offeredByFullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetUserId: freezed == targetUserId
+          ? _value.targetUserId
+          : targetUserId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      targetUserFullName: freezed == targetUserFullName
+          ? _value.targetUserFullName
+          : targetUserFullName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      acceptingSlotId: freezed == acceptingSlotId
+          ? _value.acceptingSlotId
+          : acceptingSlotId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      acceptedByUserId: freezed == acceptedByUserId
+          ? _value.acceptedByUserId
+          : acceptedByUserId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      acceptedByFullName: freezed == acceptedByFullName
+          ? _value.acceptedByFullName
+          : acceptedByFullName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+      resolvedAt: freezed == resolvedAt
+          ? _value.resolvedAt
+          : resolvedAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PayoutSlotTransferResponseImplCopyWith<$Res>
+    implements $PayoutSlotTransferResponseCopyWith<$Res> {
+  factory _$$PayoutSlotTransferResponseImplCopyWith(
+          _$PayoutSlotTransferResponseImpl value,
+          $Res Function(_$PayoutSlotTransferResponseImpl) then) =
+      __$$PayoutSlotTransferResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String circleId,
+      String offeringSlotId,
+      String offeredByUserId,
+      String offeredByFullName,
+      String? targetUserId,
+      String? targetUserFullName,
+      String? acceptingSlotId,
+      String? acceptedByUserId,
+      String? acceptedByFullName,
+      String status,
+      String createdAt,
+      String? resolvedAt});
+}
+
+/// @nodoc
+class __$$PayoutSlotTransferResponseImplCopyWithImpl<$Res>
+    extends _$PayoutSlotTransferResponseCopyWithImpl<$Res,
+        _$PayoutSlotTransferResponseImpl>
+    implements _$$PayoutSlotTransferResponseImplCopyWith<$Res> {
+  __$$PayoutSlotTransferResponseImplCopyWithImpl(
+      _$PayoutSlotTransferResponseImpl _value,
+      $Res Function(_$PayoutSlotTransferResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? id = null,
+    Object? circleId = null,
+    Object? offeringSlotId = null,
+    Object? offeredByUserId = null,
+    Object? offeredByFullName = null,
+    Object? targetUserId = freezed,
+    Object? targetUserFullName = freezed,
+    Object? acceptingSlotId = freezed,
+    Object? acceptedByUserId = freezed,
+    Object? acceptedByFullName = freezed,
+    Object? status = null,
+    Object? createdAt = null,
+    Object? resolvedAt = freezed,
+  }) {
+    return _then(_$PayoutSlotTransferResponseImpl(
+      id: null == id
+          ? _value.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      circleId: null == circleId
+          ? _value.circleId
+          : circleId // ignore: cast_nullable_to_non_nullable
+              as String,
+      offeringSlotId: null == offeringSlotId
+          ? _value.offeringSlotId
+          : offeringSlotId // ignore: cast_nullable_to_non_nullable
+              as String,
+      offeredByUserId: null == offeredByUserId
+          ? _value.offeredByUserId
+          : offeredByUserId // ignore: cast_nullable_to_non_nullable
+              as String,
+      offeredByFullName: null == offeredByFullName
+          ? _value.offeredByFullName
+          : offeredByFullName // ignore: cast_nullable_to_non_nullable
+              as String,
+      targetUserId: freezed == targetUserId
+          ? _value.targetUserId
+          : targetUserId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      targetUserFullName: freezed == targetUserFullName
+          ? _value.targetUserFullName
+          : targetUserFullName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      acceptingSlotId: freezed == acceptingSlotId
+          ? _value.acceptingSlotId
+          : acceptingSlotId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      acceptedByUserId: freezed == acceptedByUserId
+          ? _value.acceptedByUserId
+          : acceptedByUserId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      acceptedByFullName: freezed == acceptedByFullName
+          ? _value.acceptedByFullName
+          : acceptedByFullName // ignore: cast_nullable_to_non_nullable
+              as String?,
+      status: null == status
+          ? _value.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as String,
+      createdAt: null == createdAt
+          ? _value.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as String,
+      resolvedAt: freezed == resolvedAt
+          ? _value.resolvedAt
+          : resolvedAt // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PayoutSlotTransferResponseImpl implements _PayoutSlotTransferResponse {
+  const _$PayoutSlotTransferResponseImpl(
+      {required this.id,
+      required this.circleId,
+      required this.offeringSlotId,
+      required this.offeredByUserId,
+      required this.offeredByFullName,
+      this.targetUserId,
+      this.targetUserFullName,
+      this.acceptingSlotId,
+      this.acceptedByUserId,
+      this.acceptedByFullName,
+      required this.status,
+      required this.createdAt,
+      this.resolvedAt});
+
+  factory _$PayoutSlotTransferResponseImpl.fromJson(
+          Map<String, dynamic> json) =>
+      _$$PayoutSlotTransferResponseImplFromJson(json);
+
+  @override
+  final String id;
+  @override
+  final String circleId;
+  @override
+  final String offeringSlotId;
+  @override
+  final String offeredByUserId;
+  @override
+  final String offeredByFullName;
+
+  /// Null = an open offer, any eligible participant can accept.
+  @override
+  final String? targetUserId;
+  @override
+  final String? targetUserFullName;
+
+  /// Set only once ACCEPTED — the other slot involved in the swap.
+  @override
+  final String? acceptingSlotId;
+  @override
+  final String? acceptedByUserId;
+  @override
+  final String? acceptedByFullName;
+  @override
+  final String status;
+// OFFERED | ACCEPTED | DECLINED | CANCELLED | EXPIRED
+  @override
+  final String createdAt;
+  @override
+  final String? resolvedAt;
+
+  @override
+  String toString() {
+    return 'PayoutSlotTransferResponse(id: $id, circleId: $circleId, offeringSlotId: $offeringSlotId, offeredByUserId: $offeredByUserId, offeredByFullName: $offeredByFullName, targetUserId: $targetUserId, targetUserFullName: $targetUserFullName, acceptingSlotId: $acceptingSlotId, acceptedByUserId: $acceptedByUserId, acceptedByFullName: $acceptedByFullName, status: $status, createdAt: $createdAt, resolvedAt: $resolvedAt)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PayoutSlotTransferResponseImpl &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.circleId, circleId) ||
+                other.circleId == circleId) &&
+            (identical(other.offeringSlotId, offeringSlotId) ||
+                other.offeringSlotId == offeringSlotId) &&
+            (identical(other.offeredByUserId, offeredByUserId) ||
+                other.offeredByUserId == offeredByUserId) &&
+            (identical(other.offeredByFullName, offeredByFullName) ||
+                other.offeredByFullName == offeredByFullName) &&
+            (identical(other.targetUserId, targetUserId) ||
+                other.targetUserId == targetUserId) &&
+            (identical(other.targetUserFullName, targetUserFullName) ||
+                other.targetUserFullName == targetUserFullName) &&
+            (identical(other.acceptingSlotId, acceptingSlotId) ||
+                other.acceptingSlotId == acceptingSlotId) &&
+            (identical(other.acceptedByUserId, acceptedByUserId) ||
+                other.acceptedByUserId == acceptedByUserId) &&
+            (identical(other.acceptedByFullName, acceptedByFullName) ||
+                other.acceptedByFullName == acceptedByFullName) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.resolvedAt, resolvedAt) ||
+                other.resolvedAt == resolvedAt));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      circleId,
+      offeringSlotId,
+      offeredByUserId,
+      offeredByFullName,
+      targetUserId,
+      targetUserFullName,
+      acceptingSlotId,
+      acceptedByUserId,
+      acceptedByFullName,
+      status,
+      createdAt,
+      resolvedAt);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PayoutSlotTransferResponseImplCopyWith<_$PayoutSlotTransferResponseImpl>
+      get copyWith => __$$PayoutSlotTransferResponseImplCopyWithImpl<
+          _$PayoutSlotTransferResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PayoutSlotTransferResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PayoutSlotTransferResponse
+    implements PayoutSlotTransferResponse {
+  const factory _PayoutSlotTransferResponse(
+      {required final String id,
+      required final String circleId,
+      required final String offeringSlotId,
+      required final String offeredByUserId,
+      required final String offeredByFullName,
+      final String? targetUserId,
+      final String? targetUserFullName,
+      final String? acceptingSlotId,
+      final String? acceptedByUserId,
+      final String? acceptedByFullName,
+      required final String status,
+      required final String createdAt,
+      final String? resolvedAt}) = _$PayoutSlotTransferResponseImpl;
+
+  factory _PayoutSlotTransferResponse.fromJson(Map<String, dynamic> json) =
+      _$PayoutSlotTransferResponseImpl.fromJson;
+
+  @override
+  String get id;
+  @override
+  String get circleId;
+  @override
+  String get offeringSlotId;
+  @override
+  String get offeredByUserId;
+  @override
+  String get offeredByFullName;
+  @override
+
+  /// Null = an open offer, any eligible participant can accept.
+  String? get targetUserId;
+  @override
+  String? get targetUserFullName;
+  @override
+
+  /// Set only once ACCEPTED — the other slot involved in the swap.
+  String? get acceptingSlotId;
+  @override
+  String? get acceptedByUserId;
+  @override
+  String? get acceptedByFullName;
+  @override
+  String get status;
+  @override // OFFERED | ACCEPTED | DECLINED | CANCELLED | EXPIRED
+  String get createdAt;
+  @override
+  String? get resolvedAt;
+  @override
+  @JsonKey(ignore: true)
+  _$$PayoutSlotTransferResponseImplCopyWith<_$PayoutSlotTransferResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+OfferSlotTransferRequest _$OfferSlotTransferRequestFromJson(
+    Map<String, dynamic> json) {
+  return _OfferSlotTransferRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$OfferSlotTransferRequest {
+  String? get userId => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $OfferSlotTransferRequestCopyWith<OfferSlotTransferRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $OfferSlotTransferRequestCopyWith<$Res> {
+  factory $OfferSlotTransferRequestCopyWith(OfferSlotTransferRequest value,
+          $Res Function(OfferSlotTransferRequest) then) =
+      _$OfferSlotTransferRequestCopyWithImpl<$Res, OfferSlotTransferRequest>;
+  @useResult
+  $Res call({String? userId});
+}
+
+/// @nodoc
+class _$OfferSlotTransferRequestCopyWithImpl<$Res,
+        $Val extends OfferSlotTransferRequest>
+    implements $OfferSlotTransferRequestCopyWith<$Res> {
+  _$OfferSlotTransferRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? userId = freezed,
+  }) {
+    return _then(_value.copyWith(
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$OfferSlotTransferRequestImplCopyWith<$Res>
+    implements $OfferSlotTransferRequestCopyWith<$Res> {
+  factory _$$OfferSlotTransferRequestImplCopyWith(
+          _$OfferSlotTransferRequestImpl value,
+          $Res Function(_$OfferSlotTransferRequestImpl) then) =
+      __$$OfferSlotTransferRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String? userId});
+}
+
+/// @nodoc
+class __$$OfferSlotTransferRequestImplCopyWithImpl<$Res>
+    extends _$OfferSlotTransferRequestCopyWithImpl<$Res,
+        _$OfferSlotTransferRequestImpl>
+    implements _$$OfferSlotTransferRequestImplCopyWith<$Res> {
+  __$$OfferSlotTransferRequestImplCopyWithImpl(
+      _$OfferSlotTransferRequestImpl _value,
+      $Res Function(_$OfferSlotTransferRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? userId = freezed,
+  }) {
+    return _then(_$OfferSlotTransferRequestImpl(
+      userId: freezed == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$OfferSlotTransferRequestImpl implements _OfferSlotTransferRequest {
+  const _$OfferSlotTransferRequestImpl({this.userId});
+
+  factory _$OfferSlotTransferRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$OfferSlotTransferRequestImplFromJson(json);
+
+  @override
+  final String? userId;
+
+  @override
+  String toString() {
+    return 'OfferSlotTransferRequest(userId: $userId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$OfferSlotTransferRequestImpl &&
+            (identical(other.userId, userId) || other.userId == userId));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, userId);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$OfferSlotTransferRequestImplCopyWith<_$OfferSlotTransferRequestImpl>
+      get copyWith => __$$OfferSlotTransferRequestImplCopyWithImpl<
+          _$OfferSlotTransferRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$OfferSlotTransferRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _OfferSlotTransferRequest implements OfferSlotTransferRequest {
+  const factory _OfferSlotTransferRequest({final String? userId}) =
+      _$OfferSlotTransferRequestImpl;
+
+  factory _OfferSlotTransferRequest.fromJson(Map<String, dynamic> json) =
+      _$OfferSlotTransferRequestImpl.fromJson;
+
+  @override
+  String? get userId;
+  @override
+  @JsonKey(ignore: true)
+  _$$OfferSlotTransferRequestImplCopyWith<_$OfferSlotTransferRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+AcceptSlotTransferRequest _$AcceptSlotTransferRequestFromJson(
+    Map<String, dynamic> json) {
+  return _AcceptSlotTransferRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$AcceptSlotTransferRequest {
+  String get acceptingSlotId => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $AcceptSlotTransferRequestCopyWith<AcceptSlotTransferRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $AcceptSlotTransferRequestCopyWith<$Res> {
+  factory $AcceptSlotTransferRequestCopyWith(AcceptSlotTransferRequest value,
+          $Res Function(AcceptSlotTransferRequest) then) =
+      _$AcceptSlotTransferRequestCopyWithImpl<$Res, AcceptSlotTransferRequest>;
+  @useResult
+  $Res call({String acceptingSlotId});
+}
+
+/// @nodoc
+class _$AcceptSlotTransferRequestCopyWithImpl<$Res,
+        $Val extends AcceptSlotTransferRequest>
+    implements $AcceptSlotTransferRequestCopyWith<$Res> {
+  _$AcceptSlotTransferRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? acceptingSlotId = null,
+  }) {
+    return _then(_value.copyWith(
+      acceptingSlotId: null == acceptingSlotId
+          ? _value.acceptingSlotId
+          : acceptingSlotId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$AcceptSlotTransferRequestImplCopyWith<$Res>
+    implements $AcceptSlotTransferRequestCopyWith<$Res> {
+  factory _$$AcceptSlotTransferRequestImplCopyWith(
+          _$AcceptSlotTransferRequestImpl value,
+          $Res Function(_$AcceptSlotTransferRequestImpl) then) =
+      __$$AcceptSlotTransferRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String acceptingSlotId});
+}
+
+/// @nodoc
+class __$$AcceptSlotTransferRequestImplCopyWithImpl<$Res>
+    extends _$AcceptSlotTransferRequestCopyWithImpl<$Res,
+        _$AcceptSlotTransferRequestImpl>
+    implements _$$AcceptSlotTransferRequestImplCopyWith<$Res> {
+  __$$AcceptSlotTransferRequestImplCopyWithImpl(
+      _$AcceptSlotTransferRequestImpl _value,
+      $Res Function(_$AcceptSlotTransferRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? acceptingSlotId = null,
+  }) {
+    return _then(_$AcceptSlotTransferRequestImpl(
+      acceptingSlotId: null == acceptingSlotId
+          ? _value.acceptingSlotId
+          : acceptingSlotId // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$AcceptSlotTransferRequestImpl implements _AcceptSlotTransferRequest {
+  const _$AcceptSlotTransferRequestImpl({required this.acceptingSlotId});
+
+  factory _$AcceptSlotTransferRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$AcceptSlotTransferRequestImplFromJson(json);
+
+  @override
+  final String acceptingSlotId;
+
+  @override
+  String toString() {
+    return 'AcceptSlotTransferRequest(acceptingSlotId: $acceptingSlotId)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$AcceptSlotTransferRequestImpl &&
+            (identical(other.acceptingSlotId, acceptingSlotId) ||
+                other.acceptingSlotId == acceptingSlotId));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, acceptingSlotId);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$AcceptSlotTransferRequestImplCopyWith<_$AcceptSlotTransferRequestImpl>
+      get copyWith => __$$AcceptSlotTransferRequestImplCopyWithImpl<
+          _$AcceptSlotTransferRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$AcceptSlotTransferRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _AcceptSlotTransferRequest implements AcceptSlotTransferRequest {
+  const factory _AcceptSlotTransferRequest(
+          {required final String acceptingSlotId}) =
+      _$AcceptSlotTransferRequestImpl;
+
+  factory _AcceptSlotTransferRequest.fromJson(Map<String, dynamic> json) =
+      _$AcceptSlotTransferRequestImpl.fromJson;
+
+  @override
+  String get acceptingSlotId;
+  @override
+  @JsonKey(ignore: true)
+  _$$AcceptSlotTransferRequestImplCopyWith<_$AcceptSlotTransferRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}

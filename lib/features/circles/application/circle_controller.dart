@@ -179,6 +179,98 @@ class CircleController extends _$CircleController {
       return false;
     }
   }
+
+  /// PREMIUM feature. Offers the caller's own PENDING slot for transfer
+  /// — open (`targetUserId` null) or targeted at one specific
+  /// participant. Returns the created transfer on success so a caller
+  /// can act on it immediately (e.g. show its id); null on failure,
+  /// check `lastError`. Invalidates the transfer-offers list for this
+  /// circle so both this screen and the rotation queue's "already has
+  /// an open offer" check refresh immediately.
+  Future<PayoutSlotTransferResponse?> offerSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String slotId, {
+    String? targetUserId,
+  }) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      final transfer = await repository.offerSlotTransfer(
+        ledgerId,
+        circleId,
+        slotId,
+        targetUserId: targetUserId,
+      );
+      ref.invalidate(
+          circleSlotTransfersProvider((ledgerId: ledgerId, circleId: circleId)));
+      return transfer;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return null;
+    }
+  }
+
+  /// PREMIUM feature. Accepts an open offer — swaps which user holds the
+  /// offering slot and the caller's own `acceptingSlotId`. Invalidates
+  /// both the transfer list AND the rotation queue itself, since
+  /// ownership of two slots just changed — unlike confirmReceived above,
+  /// this genuinely does affect what the rotation queue shows.
+  Future<bool> acceptSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String transferId,
+    String acceptingSlotId,
+  ) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      await repository.acceptSlotTransfer(
+          ledgerId, circleId, transferId, acceptingSlotId);
+      final key = (ledgerId: ledgerId, circleId: circleId);
+      ref.invalidate(circleSlotTransfersProvider(key));
+      ref.invalidate(circleRotationProvider(key));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
+  /// NOT Premium-gated — see CircleRepository.declineSlotTransfer's doc:
+  /// saying no shouldn't require the paid tier that saying yes does.
+  Future<bool> declineSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String transferId,
+  ) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      await repository.declineSlotTransfer(ledgerId, circleId, transferId);
+      ref.invalidate(
+          circleSlotTransfersProvider((ledgerId: ledgerId, circleId: circleId)));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
+  /// The offerer withdraws their own open offer. Not Premium-gated.
+  Future<bool> cancelSlotTransfer(
+    String ledgerId,
+    String circleId,
+    String transferId,
+  ) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      await repository.cancelSlotTransfer(ledgerId, circleId, transferId);
+      ref.invalidate(
+          circleSlotTransfersProvider((ledgerId: ledgerId, circleId: circleId)));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
 }
 
 /// The entry point for discovering a ledger's circle without already
@@ -253,5 +345,19 @@ final circleHistoryProvider = FutureProvider.autoDispose
     () => ref
         .read(circleRepositoryProvider)
         .getHistory(key.ledgerId, key.circleId),
+  );
+});
+
+/// PREMIUM feature. Any active participant — full transparency, open
+/// and resolved offers alike (see CircleRepository.listSlotTransfers's
+/// doc). Same `.autoDispose` + `requireAuthenticated` pattern as every
+/// other read provider here.
+final circleSlotTransfersProvider = FutureProvider.autoDispose
+    .family<List<PayoutSlotTransferResponse>, CircleKey>((ref, key) {
+  return requireAuthenticated(
+    ref,
+    () => ref
+        .read(circleRepositoryProvider)
+        .listSlotTransfers(key.ledgerId, key.circleId),
   );
 });
