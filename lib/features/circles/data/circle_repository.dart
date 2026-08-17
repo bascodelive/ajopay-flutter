@@ -40,11 +40,43 @@ class CircleRepository {
     }
   }
 
-  Future<CircleResponse> createCircle(String ledgerId, String startDate) async {
+  /// `contributionAmount` is optional — omit it to let the backend
+  /// default this circle's amount to the ledger's current
+  /// contributionAmount at schedule time.
+  Future<CircleResponse> createCircle(
+    String ledgerId,
+    String startDate, {
+    double? contributionAmount,
+  }) async {
     try {
       final response = await _dio.post(
         '/api/ledgers/$ledgerId/circles',
-        data: CreateCircleRequest(startDate: startDate).toJson(),
+        data: CreateCircleRequest(
+          startDate: startDate,
+          contributionAmount: contributionAmount,
+        ).toJson(),
+      );
+      return CircleResponse.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// ADMIN-only, PENDING-only. Revises this circle's OWN agreed amount
+  /// — see CircleResponse.contributionAmount's doc for why this is
+  /// independent of the ledger's own amount. 400 once the circle is
+  /// ACTIVE or COMPLETED (locked at start, same timing as participants
+  /// and hand counts).
+  Future<CircleResponse> updateCircleAmount(
+    String ledgerId,
+    String circleId,
+    double contributionAmount,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/circles/$circleId/amount',
+        data: UpdateCircleAmountRequest(contributionAmount: contributionAmount)
+            .toJson(),
       );
       return CircleResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {

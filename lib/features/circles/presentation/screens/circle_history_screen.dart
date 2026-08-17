@@ -46,6 +46,7 @@ class _CircleHistoryScreenState extends ConsumerState<CircleHistoryScreen> {
 
   static const _actionLabels = {
     'CIRCLE_SCHEDULED': 'Circle scheduled',
+    'AMOUNT_UPDATED': 'Contribution amount updated',
     'PARTICIPANT_ADDED': 'Participant added',
     'PARTICIPANT_REMOVED': 'Participant removed',
     'HAND_COUNT_CHANGED': 'Hand count changed',
@@ -60,6 +61,7 @@ class _CircleHistoryScreenState extends ConsumerState<CircleHistoryScreen> {
 
   static const _actionIcons = {
     'CIRCLE_SCHEDULED': Icons.event_note,
+    'AMOUNT_UPDATED': Icons.payments_outlined,
     'PARTICIPANT_ADDED': Icons.person_add_alt,
     'PARTICIPANT_REMOVED': Icons.person_remove_alt_1,
     'HAND_COUNT_CHANGED': Icons.tune,

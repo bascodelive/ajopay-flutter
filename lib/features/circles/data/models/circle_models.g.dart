@@ -12,6 +12,7 @@ _$CircleResponseImpl _$$CircleResponseImplFromJson(Map<String, dynamic> json) =>
       ledgerId: json['ledgerId'] as String,
       startDate: json['startDate'] as String,
       endDate: json['endDate'] as String?,
+      contributionAmount: (json['contributionAmount'] as num).toDouble(),
       status: json['status'] as String,
       createdAt: json['createdAt'] as String,
     );
@@ -23,6 +24,7 @@ Map<String, dynamic> _$$CircleResponseImplToJson(
       'ledgerId': instance.ledgerId,
       'startDate': instance.startDate,
       'endDate': instance.endDate,
+      'contributionAmount': instance.contributionAmount,
       'status': instance.status,
       'createdAt': instance.createdAt,
     };
@@ -31,12 +33,26 @@ _$CreateCircleRequestImpl _$$CreateCircleRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$CreateCircleRequestImpl(
       startDate: json['startDate'] as String,
+      contributionAmount: (json['contributionAmount'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$$CreateCircleRequestImplToJson(
         _$CreateCircleRequestImpl instance) =>
     <String, dynamic>{
       'startDate': instance.startDate,
+      'contributionAmount': instance.contributionAmount,
+    };
+
+_$UpdateCircleAmountRequestImpl _$$UpdateCircleAmountRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$UpdateCircleAmountRequestImpl(
+      contributionAmount: (json['contributionAmount'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$$UpdateCircleAmountRequestImplToJson(
+        _$UpdateCircleAmountRequestImpl instance) =>
+    <String, dynamic>{
+      'contributionAmount': instance.contributionAmount,
     };
 
 _$CircleParticipantResponseImpl _$$CircleParticipantResponseImplFromJson(
@@ -123,6 +139,7 @@ _$CurrentPayoutResponseImpl _$$CurrentPayoutResponseImplFromJson(
       scheduledDate: json['scheduledDate'] as String,
       confirmedSoFar: (json['confirmedSoFar'] as num).toDouble(),
       targetAmount: (json['targetAmount'] as num).toDouble(),
+      alreadyGeneratedThisCycle: json['alreadyGeneratedThisCycle'] as bool,
     );
 
 Map<String, dynamic> _$$CurrentPayoutResponseImplToJson(
@@ -135,6 +152,7 @@ Map<String, dynamic> _$$CurrentPayoutResponseImplToJson(
       'scheduledDate': instance.scheduledDate,
       'confirmedSoFar': instance.confirmedSoFar,
       'targetAmount': instance.targetAmount,
+      'alreadyGeneratedThisCycle': instance.alreadyGeneratedThisCycle,
     };
 
 _$ConfirmPayoutRequestImpl _$$ConfirmPayoutRequestImplFromJson(

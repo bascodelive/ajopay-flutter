@@ -207,6 +207,54 @@ class _PendingCircleViewState extends ConsumerState<_PendingCircleView> {
         : 'Was due to start $daysAgo days ago — ready when you are';
   }
 
+  Future<void> _editAmount() async {
+    final controller = TextEditingController(
+        text: widget.circle.contributionAmount == 0
+            ? ''
+            : widget.circle.contributionAmount.toStringAsFixed(0));
+
+    final newAmount = await showDialog<double>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Contribution amount'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(prefixText: '₦ '),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final parsed = double.tryParse(controller.text.trim());
+              Navigator.of(context).pop(parsed);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (newAmount == null || newAmount <= 0) return;
+    if (!mounted) return;
+
+    final ok = await ref
+        .read(circleControllerProvider.notifier)
+        .updateAmount(widget.ledgerId, widget.circle.id, newAmount);
+
+    if (!mounted) return;
+    if (ok) {
+      ref.invalidate(currentCircleProvider(widget.ledgerId));
+      AppFeedback.showSuccess(context, 'Contribution amount updated');
+    } else {
+      final message = ref.read(circleControllerProvider.notifier).lastError;
+      AppFeedback.showError(context, message ?? 'Could not update the amount.');
+    }
+  }
+
   Future<void> _start() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -292,6 +340,30 @@ class _PendingCircleViewState extends ConsumerState<_PendingCircleView> {
                         ),
                       ],
                     ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.payments_outlined),
+              title: const Text('Contribution amount'),
+              subtitle: const Text(
+                  'This circle\'s own agreed amount — can differ from the ledger\'s default'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '₦${circle.contributionAmount.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: _editAmount,
                   ),
                 ],
               ),
@@ -418,6 +490,17 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
     final ledgerAsync = ref.watch(ledgerDetailProvider(ledgerId));
     final isAdmin = ledgerAsync.valueOrNull?.callerRole == 'ADMIN';
 
+    final payoutAsync = ref.watch(
+        currentPayoutProvider((ledgerId: ledgerId, circleId: circle.id)));
+    final alreadyGenerated =
+        payoutAsync.valueOrNull?.alreadyGeneratedThisCycle ?? false;
+    // 404 here means no pending slot remains at all (API.md) — every hand
+    // already paid, so there's nothing left to generate for either.
+    final noPendingSlot = payoutAsync.hasError &&
+        payoutAsync.error is ApiException &&
+        (payoutAsync.error as ApiException).isNotFound;
+    final canGenerate = !_isGenerating && !alreadyGenerated && !noPendingSlot;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -438,6 +521,20 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.payments_outlined),
+              title: const Text('Contribution amount'),
+              subtitle: const Text('Locked for the life of this circle'),
+              trailing: Text(
+                '₦${circle.contributionAmount.toStringAsFixed(0)}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
             ),
           ),
@@ -513,17 +610,23 @@ class _ActiveCircleViewState extends ConsumerState<_ActiveCircleView> {
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed:
-                          _isGenerating ? null : _generateCycleContributions,
+                          canGenerate ? _generateCycleContributions : null,
                       icon: _isGenerating
                           ? const SizedBox(
                               width: 16,
                               height: 16,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Icon(Icons.add_task),
+                          : Icon(alreadyGenerated || noPendingSlot
+                              ? Icons.check_circle_outline
+                              : Icons.add_task),
                       label: Text(_isGenerating
                           ? 'Generating...'
-                          : 'Generate this cycle\'s contributions'),
+                          : alreadyGenerated
+                              ? 'Already generated for this cycle'
+                              : noPendingSlot
+                                  ? 'Nothing left to generate'
+                                  : 'Generate this cycle\'s contributions'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AjopayColors.primaryDark,
                         side: const BorderSide(color: AjopayColors.primaryDark),
@@ -568,6 +671,19 @@ class _CompletedCircleView extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.payments_outlined),
+              title: const Text('Contribution amount'),
+              trailing: Text(
+                '₦${circle.contributionAmount.toStringAsFixed(0)}',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
               ),
             ),
           ),
