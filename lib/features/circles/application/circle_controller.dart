@@ -30,15 +30,49 @@ class CircleController extends _$CircleController {
   @override
   CircleResponse? build() => null;
 
-  Future<CircleResponse?> create(String ledgerId, String startDate) async {
+  Future<CircleResponse?> create(
+    String ledgerId,
+    String startDate, {
+    double? contributionAmount,
+  }) async {
     final repository = ref.read(circleRepositoryProvider);
     try {
-      final circle = await repository.createCircle(ledgerId, startDate);
+      final circle = await repository.createCircle(
+        ledgerId,
+        startDate,
+        contributionAmount: contributionAmount,
+      );
       state = circle;
       return circle;
     } on ApiException catch (e) {
       _lastError = e.message;
       return null;
+    }
+  }
+
+  /// ADMIN action, PENDING-only. Revises the circle's OWN agreed amount
+  /// — see CircleResponse.contributionAmount's doc. Invalidates history
+  /// (an AMOUNT_UPDATED entry is logged) alongside updating `state` so
+  /// the PENDING setup screen reflects the new figure immediately.
+  Future<bool> updateAmount(
+    String ledgerId,
+    String circleId,
+    double contributionAmount,
+  ) async {
+    final repository = ref.read(circleRepositoryProvider);
+    try {
+      final circle = await repository.updateCircleAmount(
+        ledgerId,
+        circleId,
+        contributionAmount,
+      );
+      state = circle;
+      ref.invalidate(
+          circleHistoryProvider((ledgerId: ledgerId, circleId: circleId)));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
     }
   }
 
@@ -201,8 +235,8 @@ class CircleController extends _$CircleController {
         slotId,
         targetUserId: targetUserId,
       );
-      ref.invalidate(
-          circleSlotTransfersProvider((ledgerId: ledgerId, circleId: circleId)));
+      ref.invalidate(circleSlotTransfersProvider(
+          (ledgerId: ledgerId, circleId: circleId)));
       return transfer;
     } on ApiException catch (e) {
       _lastError = e.message;
@@ -245,8 +279,8 @@ class CircleController extends _$CircleController {
     final repository = ref.read(circleRepositoryProvider);
     try {
       await repository.declineSlotTransfer(ledgerId, circleId, transferId);
-      ref.invalidate(
-          circleSlotTransfersProvider((ledgerId: ledgerId, circleId: circleId)));
+      ref.invalidate(circleSlotTransfersProvider(
+          (ledgerId: ledgerId, circleId: circleId)));
       return true;
     } on ApiException catch (e) {
       _lastError = e.message;
@@ -263,8 +297,8 @@ class CircleController extends _$CircleController {
     final repository = ref.read(circleRepositoryProvider);
     try {
       await repository.cancelSlotTransfer(ledgerId, circleId, transferId);
-      ref.invalidate(
-          circleSlotTransfersProvider((ledgerId: ledgerId, circleId: circleId)));
+      ref.invalidate(circleSlotTransfersProvider(
+          (ledgerId: ledgerId, circleId: circleId)));
       return true;
     } on ApiException catch (e) {
       _lastError = e.message;

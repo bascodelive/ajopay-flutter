@@ -131,12 +131,24 @@ class _CircleRow extends StatelessWidget {
               .titleSmall
               ?.copyWith(fontWeight: FontWeight.w700),
         ),
-        subtitle: Text(
-          circle.status,
-          style: Theme.of(context)
-              .textTheme
-              .labelSmall
-              ?.copyWith(color: _statusColor, fontWeight: FontWeight.w700),
+        // Circles can each have their own agreed amount now (independent
+        // of the ledger's own default) — worth surfacing right here
+        // rather than making someone open each one to find out.
+        subtitle: Row(
+          children: [
+            Text(
+              circle.status,
+              style: Theme.of(context)
+                  .textTheme
+                  .labelSmall
+                  ?.copyWith(color: _statusColor, fontWeight: FontWeight.w700),
+            ),
+            const Text(' · '),
+            Text(
+              '₦${circle.contributionAmount.toStringAsFixed(0)}/hand',
+              style: Theme.of(context).textTheme.labelSmall,
+            ),
+          ],
         ),
         trailing: const Icon(Icons.chevron_right),
         // circle.status passed directly via `extra` — the whole point

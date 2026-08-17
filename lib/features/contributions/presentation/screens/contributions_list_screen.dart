@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_backdrop.dart';
@@ -159,6 +160,21 @@ class _ContributionsListViewState
         : null;
     final isCircleActive = circleAsync?.valueOrNull?.status == 'ACTIVE';
 
+    // Same proactive-disable signal circle_home_screen's own Generate
+    // button uses — only fetched once we already know there's an ACTIVE
+    // circle to check against. Without this the banner stayed tappable
+    // forever and just surfaced the backend's 400 after the fact.
+    final payoutAsync = isCircleActive
+        ? ref.watch(currentPayoutProvider(
+            (ledgerId: widget.ledgerId, circleId: circleAsync!.value!.id)))
+        : null;
+    final alreadyGenerated =
+        payoutAsync?.valueOrNull?.alreadyGeneratedThisCycle ?? false;
+    final noPendingSlot = payoutAsync != null &&
+        payoutAsync.hasError &&
+        payoutAsync.error is ApiException &&
+        (payoutAsync.error as ApiException).isNotFound;
+
     return pageAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
@@ -191,20 +207,42 @@ class _ContributionsListViewState
           });
         }
 
-        final banner = (showGenerateBanner && isCircleActive)
+        final circleBanner = (showGenerateBanner && isCircleActive)
             ? _GenerateCycleBanner(
                 ledgerId: widget.ledgerId,
                 circleId: circleAsync!.value!.id,
+                alreadyGenerated: alreadyGenerated,
+                noPendingSlot: noPendingSlot,
               )
             : null;
+        // Independent of circle state entirely — deliberately always
+        // available to an Admin, circle or no circle, PENDING/ACTIVE/
+        // COMPLETED alike. ContributionService.scheduleContribution has
+        // no circle-awareness at all (see backend design decision), so
+        // this action never needs to check circle status to decide
+        // whether to show itself.
+        final scheduleBanner = showGenerateBanner
+            ? _ScheduleContributionBanner(ledgerId: widget.ledgerId)
+            : null;
+        final banners = [
+          if (circleBanner != null) circleBanner,
+          if (scheduleBanner != null) scheduleBanner,
+        ];
 
         if (pageState.items.isEmpty) {
           return Column(
             children: [
-              if (banner != null)
+              if (banners.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: banner,
+                  child: Column(
+                    children: [
+                      for (final b in banners) ...[
+                        b,
+                        const SizedBox(height: 8),
+                      ],
+                    ],
+                  ),
                 ),
               Expanded(
                 child: Center(
@@ -242,16 +280,14 @@ class _ContributionsListViewState
             controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
-            itemCount: (banner != null ? 1 : 0) +
+            itemCount: banners.length +
                 pageState.items.length +
                 (pageState.hasMore ? 1 : 0),
             separatorBuilder: (context, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               var i = index;
-              if (banner != null) {
-                if (i == 0) return banner;
-                i -= 1;
-              }
+              if (i < banners.length) return banners[i];
+              i -= banners.length;
               if (i >= pageState.items.length) {
                 return const Padding(
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -278,10 +314,17 @@ class _ContributionsListViewState
 /// safely visible even after generating — a repeat tap just surfaces
 /// that friendly error rather than doing anything harmful.
 class _GenerateCycleBanner extends ConsumerStatefulWidget {
-  const _GenerateCycleBanner({required this.ledgerId, required this.circleId});
+  const _GenerateCycleBanner({
+    required this.ledgerId,
+    required this.circleId,
+    required this.alreadyGenerated,
+    required this.noPendingSlot,
+  });
 
   final String ledgerId;
   final String circleId;
+  final bool alreadyGenerated;
+  final bool noPendingSlot;
 
   @override
   ConsumerState<_GenerateCycleBanner> createState() =>
@@ -344,6 +387,19 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
 
   @override
   Widget build(BuildContext context) {
+    final canGenerate =
+        !_isGenerating && !widget.alreadyGenerated && !widget.noPendingSlot;
+    final subtitle = widget.alreadyGenerated
+        ? 'Already generated for this cycle.'
+        : widget.noPendingSlot
+            ? 'Every hand in this circle has been paid — nothing left to generate.'
+            : 'Open this cycle\'s contributions for its participants.';
+    final buttonLabel = widget.alreadyGenerated
+        ? 'Done'
+        : widget.noPendingSlot
+            ? 'Done'
+            : 'Generate';
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color: AjopayColors.primaryTint,
@@ -359,8 +415,13 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.receipt_long_outlined,
-                  color: AjopayColors.primaryDark, size: 19),
+              child: Icon(
+                widget.alreadyGenerated || widget.noPendingSlot
+                    ? Icons.check_circle_outline
+                    : Icons.receipt_long_outlined,
+                color: AjopayColors.primaryDark,
+                size: 19,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -374,7 +435,7 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
                         ),
                   ),
                   Text(
-                    'Open this cycle\'s contributions for its participants.',
+                    subtitle,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AjopayColors.primaryDark,
                         ),
@@ -392,11 +453,81 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
                 : SizedBox(
                     width: 96,
                     child: AppPrimaryButton(
-                      label: 'Generate',
+                      label: buttonLabel,
                       height: 36,
-                      onPressed: _generate,
+                      onPressed: canGenerate ? _generate : null,
                     ),
                   ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Independent of any circle — the plain, per-member scheduling path
+/// (ContributionService.scheduleContribution has no circle-awareness at
+/// all by design; see the earlier decoupling work). Always visible to
+/// an Admin regardless of whether this ledger has a circle at all, or
+/// what state it's in. Previously the only way to reach this was a bare
+/// `+` icon in the AppBar — easy to miss, and gave no indication this
+/// path exists independently of the circle banner above it.
+class _ScheduleContributionBanner extends StatelessWidget {
+  const _ScheduleContributionBanner({required this.ledgerId});
+
+  final String ledgerId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: AjopayColors.primaryTint,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.event_available_outlined,
+                  color: AjopayColors.primaryDark, size: 19),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Schedule a contribution',
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(
+                    'Open a one-off contribution for a member\'s cycle — '
+                    'works with or without a circle.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AjopayColors.textSecondary,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 96,
+              child: OutlinedButton(
+                onPressed: () =>
+                    context.push('/ledgers/$ledgerId/contributions/schedule'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: EdgeInsets.zero,
+                ),
+                child: const Text('Schedule'),
+              ),
+            ),
           ],
         ),
       ),

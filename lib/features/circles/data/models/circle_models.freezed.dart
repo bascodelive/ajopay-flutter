@@ -26,6 +26,12 @@ mixin _$CircleResponse {
       throw _privateConstructorUsedError; // ISO-8601 date (YYYY-MM-DD)
   String? get endDate =>
       throw _privateConstructorUsedError; // null until the circle is started
+  /// This circle's OWN agreed per-hand contribution amount —
+  /// independent of the ledger's own contributionAmount from the
+  /// moment this circle is scheduled (see backend Circle's Javadoc).
+  /// Editable while PENDING (see UpdateCircleAmountRequest below),
+  /// locked the moment the circle starts.
+  double get contributionAmount => throw _privateConstructorUsedError;
   String get status =>
       throw _privateConstructorUsedError; // PENDING | ACTIVE | COMPLETED
   String get createdAt => throw _privateConstructorUsedError;
@@ -47,6 +53,7 @@ abstract class $CircleResponseCopyWith<$Res> {
       String ledgerId,
       String startDate,
       String? endDate,
+      double contributionAmount,
       String status,
       String createdAt});
 }
@@ -68,6 +75,7 @@ class _$CircleResponseCopyWithImpl<$Res, $Val extends CircleResponse>
     Object? ledgerId = null,
     Object? startDate = null,
     Object? endDate = freezed,
+    Object? contributionAmount = null,
     Object? status = null,
     Object? createdAt = null,
   }) {
@@ -88,6 +96,10 @@ class _$CircleResponseCopyWithImpl<$Res, $Val extends CircleResponse>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as String?,
+      contributionAmount: null == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -113,6 +125,7 @@ abstract class _$$CircleResponseImplCopyWith<$Res>
       String ledgerId,
       String startDate,
       String? endDate,
+      double contributionAmount,
       String status,
       String createdAt});
 }
@@ -132,6 +145,7 @@ class __$$CircleResponseImplCopyWithImpl<$Res>
     Object? ledgerId = null,
     Object? startDate = null,
     Object? endDate = freezed,
+    Object? contributionAmount = null,
     Object? status = null,
     Object? createdAt = null,
   }) {
@@ -152,6 +166,10 @@ class __$$CircleResponseImplCopyWithImpl<$Res>
           ? _value.endDate
           : endDate // ignore: cast_nullable_to_non_nullable
               as String?,
+      contributionAmount: null == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double,
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
@@ -172,6 +190,7 @@ class _$CircleResponseImpl implements _CircleResponse {
       required this.ledgerId,
       required this.startDate,
       this.endDate,
+      required this.contributionAmount,
       required this.status,
       required this.createdAt});
 
@@ -188,6 +207,13 @@ class _$CircleResponseImpl implements _CircleResponse {
   @override
   final String? endDate;
 // null until the circle is started
+  /// This circle's OWN agreed per-hand contribution amount —
+  /// independent of the ledger's own contributionAmount from the
+  /// moment this circle is scheduled (see backend Circle's Javadoc).
+  /// Editable while PENDING (see UpdateCircleAmountRequest below),
+  /// locked the moment the circle starts.
+  @override
+  final double contributionAmount;
   @override
   final String status;
 // PENDING | ACTIVE | COMPLETED
@@ -196,7 +222,7 @@ class _$CircleResponseImpl implements _CircleResponse {
 
   @override
   String toString() {
-    return 'CircleResponse(id: $id, ledgerId: $ledgerId, startDate: $startDate, endDate: $endDate, status: $status, createdAt: $createdAt)';
+    return 'CircleResponse(id: $id, ledgerId: $ledgerId, startDate: $startDate, endDate: $endDate, contributionAmount: $contributionAmount, status: $status, createdAt: $createdAt)';
   }
 
   @override
@@ -210,6 +236,8 @@ class _$CircleResponseImpl implements _CircleResponse {
             (identical(other.startDate, startDate) ||
                 other.startDate == startDate) &&
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
+            (identical(other.contributionAmount, contributionAmount) ||
+                other.contributionAmount == contributionAmount) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
@@ -217,8 +245,8 @@ class _$CircleResponseImpl implements _CircleResponse {
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, ledgerId, startDate, endDate, status, createdAt);
+  int get hashCode => Object.hash(runtimeType, id, ledgerId, startDate, endDate,
+      contributionAmount, status, createdAt);
 
   @JsonKey(ignore: true)
   @override
@@ -241,6 +269,7 @@ abstract class _CircleResponse implements CircleResponse {
       required final String ledgerId,
       required final String startDate,
       final String? endDate,
+      required final double contributionAmount,
       required final String status,
       required final String createdAt}) = _$CircleResponseImpl;
 
@@ -256,6 +285,13 @@ abstract class _CircleResponse implements CircleResponse {
   @override // ISO-8601 date (YYYY-MM-DD)
   String? get endDate;
   @override // null until the circle is started
+  /// This circle's OWN agreed per-hand contribution amount —
+  /// independent of the ledger's own contributionAmount from the
+  /// moment this circle is scheduled (see backend Circle's Javadoc).
+  /// Editable while PENDING (see UpdateCircleAmountRequest below),
+  /// locked the moment the circle starts.
+  double get contributionAmount;
+  @override
   String get status;
   @override // PENDING | ACTIVE | COMPLETED
   String get createdAt;
@@ -273,6 +309,10 @@ CreateCircleRequest _$CreateCircleRequestFromJson(Map<String, dynamic> json) {
 mixin _$CreateCircleRequest {
   String get startDate => throw _privateConstructorUsedError;
 
+  /// Optional — if omitted, the backend defaults this circle's amount
+  /// to the ledger's current contributionAmount at schedule time.
+  double? get contributionAmount => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $CreateCircleRequestCopyWith<CreateCircleRequest> get copyWith =>
@@ -285,7 +325,7 @@ abstract class $CreateCircleRequestCopyWith<$Res> {
           CreateCircleRequest value, $Res Function(CreateCircleRequest) then) =
       _$CreateCircleRequestCopyWithImpl<$Res, CreateCircleRequest>;
   @useResult
-  $Res call({String startDate});
+  $Res call({String startDate, double? contributionAmount});
 }
 
 /// @nodoc
@@ -302,12 +342,17 @@ class _$CreateCircleRequestCopyWithImpl<$Res, $Val extends CreateCircleRequest>
   @override
   $Res call({
     Object? startDate = null,
+    Object? contributionAmount = freezed,
   }) {
     return _then(_value.copyWith(
       startDate: null == startDate
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as String,
+      contributionAmount: freezed == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double?,
     ) as $Val);
   }
 }
@@ -320,7 +365,7 @@ abstract class _$$CreateCircleRequestImplCopyWith<$Res>
       __$$CreateCircleRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String startDate});
+  $Res call({String startDate, double? contributionAmount});
 }
 
 /// @nodoc
@@ -335,12 +380,17 @@ class __$$CreateCircleRequestImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? startDate = null,
+    Object? contributionAmount = freezed,
   }) {
     return _then(_$CreateCircleRequestImpl(
       startDate: null == startDate
           ? _value.startDate
           : startDate // ignore: cast_nullable_to_non_nullable
               as String,
+      contributionAmount: freezed == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double?,
     ));
   }
 }
@@ -348,7 +398,8 @@ class __$$CreateCircleRequestImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$CreateCircleRequestImpl implements _CreateCircleRequest {
-  const _$CreateCircleRequestImpl({required this.startDate});
+  const _$CreateCircleRequestImpl(
+      {required this.startDate, this.contributionAmount});
 
   factory _$CreateCircleRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$CreateCircleRequestImplFromJson(json);
@@ -356,9 +407,14 @@ class _$CreateCircleRequestImpl implements _CreateCircleRequest {
   @override
   final String startDate;
 
+  /// Optional — if omitted, the backend defaults this circle's amount
+  /// to the ledger's current contributionAmount at schedule time.
+  @override
+  final double? contributionAmount;
+
   @override
   String toString() {
-    return 'CreateCircleRequest(startDate: $startDate)';
+    return 'CreateCircleRequest(startDate: $startDate, contributionAmount: $contributionAmount)';
   }
 
   @override
@@ -367,12 +423,14 @@ class _$CreateCircleRequestImpl implements _CreateCircleRequest {
         (other.runtimeType == runtimeType &&
             other is _$CreateCircleRequestImpl &&
             (identical(other.startDate, startDate) ||
-                other.startDate == startDate));
+                other.startDate == startDate) &&
+            (identical(other.contributionAmount, contributionAmount) ||
+                other.contributionAmount == contributionAmount));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, startDate);
+  int get hashCode => Object.hash(runtimeType, startDate, contributionAmount);
 
   @JsonKey(ignore: true)
   @override
@@ -390,8 +448,9 @@ class _$CreateCircleRequestImpl implements _CreateCircleRequest {
 }
 
 abstract class _CreateCircleRequest implements CreateCircleRequest {
-  const factory _CreateCircleRequest({required final String startDate}) =
-      _$CreateCircleRequestImpl;
+  const factory _CreateCircleRequest(
+      {required final String startDate,
+      final double? contributionAmount}) = _$CreateCircleRequestImpl;
 
   factory _CreateCircleRequest.fromJson(Map<String, dynamic> json) =
       _$CreateCircleRequestImpl.fromJson;
@@ -399,9 +458,159 @@ abstract class _CreateCircleRequest implements CreateCircleRequest {
   @override
   String get startDate;
   @override
+
+  /// Optional — if omitted, the backend defaults this circle's amount
+  /// to the ledger's current contributionAmount at schedule time.
+  double? get contributionAmount;
+  @override
   @JsonKey(ignore: true)
   _$$CreateCircleRequestImplCopyWith<_$CreateCircleRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+UpdateCircleAmountRequest _$UpdateCircleAmountRequestFromJson(
+    Map<String, dynamic> json) {
+  return _UpdateCircleAmountRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$UpdateCircleAmountRequest {
+  double get contributionAmount => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $UpdateCircleAmountRequestCopyWith<UpdateCircleAmountRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $UpdateCircleAmountRequestCopyWith<$Res> {
+  factory $UpdateCircleAmountRequestCopyWith(UpdateCircleAmountRequest value,
+          $Res Function(UpdateCircleAmountRequest) then) =
+      _$UpdateCircleAmountRequestCopyWithImpl<$Res, UpdateCircleAmountRequest>;
+  @useResult
+  $Res call({double contributionAmount});
+}
+
+/// @nodoc
+class _$UpdateCircleAmountRequestCopyWithImpl<$Res,
+        $Val extends UpdateCircleAmountRequest>
+    implements $UpdateCircleAmountRequestCopyWith<$Res> {
+  _$UpdateCircleAmountRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? contributionAmount = null,
+  }) {
+    return _then(_value.copyWith(
+      contributionAmount: null == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$UpdateCircleAmountRequestImplCopyWith<$Res>
+    implements $UpdateCircleAmountRequestCopyWith<$Res> {
+  factory _$$UpdateCircleAmountRequestImplCopyWith(
+          _$UpdateCircleAmountRequestImpl value,
+          $Res Function(_$UpdateCircleAmountRequestImpl) then) =
+      __$$UpdateCircleAmountRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({double contributionAmount});
+}
+
+/// @nodoc
+class __$$UpdateCircleAmountRequestImplCopyWithImpl<$Res>
+    extends _$UpdateCircleAmountRequestCopyWithImpl<$Res,
+        _$UpdateCircleAmountRequestImpl>
+    implements _$$UpdateCircleAmountRequestImplCopyWith<$Res> {
+  __$$UpdateCircleAmountRequestImplCopyWithImpl(
+      _$UpdateCircleAmountRequestImpl _value,
+      $Res Function(_$UpdateCircleAmountRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? contributionAmount = null,
+  }) {
+    return _then(_$UpdateCircleAmountRequestImpl(
+      contributionAmount: null == contributionAmount
+          ? _value.contributionAmount
+          : contributionAmount // ignore: cast_nullable_to_non_nullable
+              as double,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$UpdateCircleAmountRequestImpl implements _UpdateCircleAmountRequest {
+  const _$UpdateCircleAmountRequestImpl({required this.contributionAmount});
+
+  factory _$UpdateCircleAmountRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UpdateCircleAmountRequestImplFromJson(json);
+
+  @override
+  final double contributionAmount;
+
+  @override
+  String toString() {
+    return 'UpdateCircleAmountRequest(contributionAmount: $contributionAmount)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$UpdateCircleAmountRequestImpl &&
+            (identical(other.contributionAmount, contributionAmount) ||
+                other.contributionAmount == contributionAmount));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, contributionAmount);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$UpdateCircleAmountRequestImplCopyWith<_$UpdateCircleAmountRequestImpl>
+      get copyWith => __$$UpdateCircleAmountRequestImplCopyWithImpl<
+          _$UpdateCircleAmountRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$UpdateCircleAmountRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _UpdateCircleAmountRequest implements UpdateCircleAmountRequest {
+  const factory _UpdateCircleAmountRequest(
+          {required final double contributionAmount}) =
+      _$UpdateCircleAmountRequestImpl;
+
+  factory _UpdateCircleAmountRequest.fromJson(Map<String, dynamic> json) =
+      _$UpdateCircleAmountRequestImpl.fromJson;
+
+  @override
+  double get contributionAmount;
+  @override
+  @JsonKey(ignore: true)
+  _$$UpdateCircleAmountRequestImplCopyWith<_$UpdateCircleAmountRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }
 
 CircleParticipantResponse _$CircleParticipantResponseFromJson(
@@ -1279,6 +1488,12 @@ mixin _$CurrentPayoutResponse {
   double get confirmedSoFar => throw _privateConstructorUsedError;
   double get targetAmount => throw _privateConstructorUsedError;
 
+  /// True once this cycle's Contribution rows already exist —
+  /// lets the "Generate this cycle's contributions" button grey
+  /// itself out proactively instead of only failing with a 400
+  /// after the fact.
+  bool get alreadyGeneratedThisCycle => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $CurrentPayoutResponseCopyWith<CurrentPayoutResponse> get copyWith =>
@@ -1298,7 +1513,8 @@ abstract class $CurrentPayoutResponseCopyWith<$Res> {
       int handNumber,
       String scheduledDate,
       double confirmedSoFar,
-      double targetAmount});
+      double targetAmount,
+      bool alreadyGeneratedThisCycle});
 }
 
 /// @nodoc
@@ -1322,6 +1538,7 @@ class _$CurrentPayoutResponseCopyWithImpl<$Res,
     Object? scheduledDate = null,
     Object? confirmedSoFar = null,
     Object? targetAmount = null,
+    Object? alreadyGeneratedThisCycle = null,
   }) {
     return _then(_value.copyWith(
       slotId: null == slotId
@@ -1352,6 +1569,10 @@ class _$CurrentPayoutResponseCopyWithImpl<$Res,
           ? _value.targetAmount
           : targetAmount // ignore: cast_nullable_to_non_nullable
               as double,
+      alreadyGeneratedThisCycle: null == alreadyGeneratedThisCycle
+          ? _value.alreadyGeneratedThisCycle
+          : alreadyGeneratedThisCycle // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -1372,7 +1593,8 @@ abstract class _$$CurrentPayoutResponseImplCopyWith<$Res>
       int handNumber,
       String scheduledDate,
       double confirmedSoFar,
-      double targetAmount});
+      double targetAmount,
+      bool alreadyGeneratedThisCycle});
 }
 
 /// @nodoc
@@ -1394,6 +1616,7 @@ class __$$CurrentPayoutResponseImplCopyWithImpl<$Res>
     Object? scheduledDate = null,
     Object? confirmedSoFar = null,
     Object? targetAmount = null,
+    Object? alreadyGeneratedThisCycle = null,
   }) {
     return _then(_$CurrentPayoutResponseImpl(
       slotId: null == slotId
@@ -1424,6 +1647,10 @@ class __$$CurrentPayoutResponseImplCopyWithImpl<$Res>
           ? _value.targetAmount
           : targetAmount // ignore: cast_nullable_to_non_nullable
               as double,
+      alreadyGeneratedThisCycle: null == alreadyGeneratedThisCycle
+          ? _value.alreadyGeneratedThisCycle
+          : alreadyGeneratedThisCycle // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -1438,7 +1665,8 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
       required this.handNumber,
       required this.scheduledDate,
       required this.confirmedSoFar,
-      required this.targetAmount});
+      required this.targetAmount,
+      required this.alreadyGeneratedThisCycle});
 
   factory _$CurrentPayoutResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$CurrentPayoutResponseImplFromJson(json);
@@ -1458,9 +1686,16 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
   @override
   final double targetAmount;
 
+  /// True once this cycle's Contribution rows already exist —
+  /// lets the "Generate this cycle's contributions" button grey
+  /// itself out proactively instead of only failing with a 400
+  /// after the fact.
+  @override
+  final bool alreadyGeneratedThisCycle;
+
   @override
   String toString() {
-    return 'CurrentPayoutResponse(slotId: $slotId, userId: $userId, userFullName: $userFullName, handNumber: $handNumber, scheduledDate: $scheduledDate, confirmedSoFar: $confirmedSoFar, targetAmount: $targetAmount)';
+    return 'CurrentPayoutResponse(slotId: $slotId, userId: $userId, userFullName: $userFullName, handNumber: $handNumber, scheduledDate: $scheduledDate, confirmedSoFar: $confirmedSoFar, targetAmount: $targetAmount, alreadyGeneratedThisCycle: $alreadyGeneratedThisCycle)';
   }
 
   @override
@@ -1479,13 +1714,24 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
             (identical(other.confirmedSoFar, confirmedSoFar) ||
                 other.confirmedSoFar == confirmedSoFar) &&
             (identical(other.targetAmount, targetAmount) ||
-                other.targetAmount == targetAmount));
+                other.targetAmount == targetAmount) &&
+            (identical(other.alreadyGeneratedThisCycle,
+                    alreadyGeneratedThisCycle) ||
+                other.alreadyGeneratedThisCycle == alreadyGeneratedThisCycle));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, slotId, userId, userFullName,
-      handNumber, scheduledDate, confirmedSoFar, targetAmount);
+  int get hashCode => Object.hash(
+      runtimeType,
+      slotId,
+      userId,
+      userFullName,
+      handNumber,
+      scheduledDate,
+      confirmedSoFar,
+      targetAmount,
+      alreadyGeneratedThisCycle);
 
   @JsonKey(ignore: true)
   @override
@@ -1504,13 +1750,15 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
 
 abstract class _CurrentPayoutResponse implements CurrentPayoutResponse {
   const factory _CurrentPayoutResponse(
-      {required final String slotId,
-      required final String userId,
-      required final String userFullName,
-      required final int handNumber,
-      required final String scheduledDate,
-      required final double confirmedSoFar,
-      required final double targetAmount}) = _$CurrentPayoutResponseImpl;
+          {required final String slotId,
+          required final String userId,
+          required final String userFullName,
+          required final int handNumber,
+          required final String scheduledDate,
+          required final double confirmedSoFar,
+          required final double targetAmount,
+          required final bool alreadyGeneratedThisCycle}) =
+      _$CurrentPayoutResponseImpl;
 
   factory _CurrentPayoutResponse.fromJson(Map<String, dynamic> json) =
       _$CurrentPayoutResponseImpl.fromJson;
@@ -1529,6 +1777,13 @@ abstract class _CurrentPayoutResponse implements CurrentPayoutResponse {
   double get confirmedSoFar;
   @override
   double get targetAmount;
+  @override
+
+  /// True once this cycle's Contribution rows already exist —
+  /// lets the "Generate this cycle's contributions" button grey
+  /// itself out proactively instead of only failing with a 400
+  /// after the fact.
+  bool get alreadyGeneratedThisCycle;
   @override
   @JsonKey(ignore: true)
   _$$CurrentPayoutResponseImplCopyWith<_$CurrentPayoutResponseImpl>

@@ -10,6 +10,13 @@ class CircleResponse with _$CircleResponse {
     required String ledgerId,
     required String startDate, // ISO-8601 date (YYYY-MM-DD)
     String? endDate, // null until the circle is started
+
+    /// This circle's OWN agreed per-hand contribution amount —
+    /// independent of the ledger's own contributionAmount from the
+    /// moment this circle is scheduled (see backend Circle's Javadoc).
+    /// Editable while PENDING (see UpdateCircleAmountRequest below),
+    /// locked the moment the circle starts.
+    required double contributionAmount,
     required String status, // PENDING | ACTIVE | COMPLETED
     required String createdAt,
   }) = _CircleResponse;
@@ -20,11 +27,29 @@ class CircleResponse with _$CircleResponse {
 
 @freezed
 class CreateCircleRequest with _$CreateCircleRequest {
-  const factory CreateCircleRequest({required String startDate}) =
-      _CreateCircleRequest;
+  const factory CreateCircleRequest({
+    required String startDate,
+
+    /// Optional — if omitted, the backend defaults this circle's amount
+    /// to the ledger's current contributionAmount at schedule time.
+    double? contributionAmount,
+  }) = _CreateCircleRequest;
 
   factory CreateCircleRequest.fromJson(Map<String, dynamic> json) =>
       _$CreateCircleRequestFromJson(json);
+}
+
+/// ADMIN action, PENDING-only — revises the circle's own agreed amount.
+/// Has no effect on the ledger's own default; rejected with 400 once
+/// the circle is ACTIVE or COMPLETED.
+@freezed
+class UpdateCircleAmountRequest with _$UpdateCircleAmountRequest {
+  const factory UpdateCircleAmountRequest({
+    required double contributionAmount,
+  }) = _UpdateCircleAmountRequest;
+
+  factory UpdateCircleAmountRequest.fromJson(Map<String, dynamic> json) =>
+      _$UpdateCircleAmountRequestFromJson(json);
 }
 
 @freezed
@@ -95,6 +120,12 @@ class CurrentPayoutResponse with _$CurrentPayoutResponse {
     required String scheduledDate,
     required double confirmedSoFar,
     required double targetAmount,
+
+    /// True once this cycle's Contribution rows already exist —
+    /// lets the "Generate this cycle's contributions" button grey
+    /// itself out proactively instead of only failing with a 400
+    /// after the fact.
+    required bool alreadyGeneratedThisCycle,
   }) = _CurrentPayoutResponse;
 
   factory CurrentPayoutResponse.fromJson(Map<String, dynamic> json) =>
