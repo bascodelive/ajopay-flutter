@@ -7,7 +7,7 @@ part of 'message_stream_controller.dart';
 // **************************************************************************
 
 String _$messageStreamControllerHash() =>
-    r'5b26e368b9e7e4d7dd098b1a6fcb7a2df50d2957';
+    r'3331ff384321f813a5b84822313af496f4abaa18';
 
 /// One live connection per LEDGER, not per thread — matches the backend
 /// exactly (MessageStreamRegistry: "One connection per ledger per user
@@ -22,21 +22,28 @@ String _$messageStreamControllerHash() =>
 /// and-retry never applies to it automatically. Rather than writing a
 /// SECOND, independent refresh call here — which would race against
 /// `AuthInterceptor`'s own single-in-flight refresh and risk using an
-/// already-rotated, dead refresh token (yours are single-use) — this
-/// periodically fires one ordinary, cheap request through the SAME
-/// shared, already-intercepted `dioProvider` Dio instance
-/// (`GET /api/account/profile`). If the access token is stale,
-/// `AuthInterceptor` transparently refreshes it exactly as it would for
-/// any other screen's request; this then reconnects the SSE stream,
-/// which reads whatever fresh token secure storage now holds. That's
-/// deliberately simpler than trying to introspect a JWT's expiry
-/// client-side.
+/// already-rotated, dead refresh token (yours are single-use) — every
+/// path that opens a real connection first fires one ordinary, cheap
+/// request through the SAME shared, already-intercepted `dioProvider`
+/// Dio instance (`GET /api/account/profile`). If the access token is
+/// stale, `AuthInterceptor` transparently refreshes it exactly as it
+/// would for any other screen's request; only then does this open the
+/// SSE connection, reading whatever fresh token secure storage now
+/// holds.
 ///
-/// **Separately, reconnect-on-drop:** an ordinary network blip, the app
-/// backgrounding, or the server closing the connection all surface as
-/// `onError`/`onDone` on the stream — handled with a capped exponential
-/// backoff (2s, 4s, 8s, 16s, capped at 30s), distinct from the proactive
-/// keep-alive above.
+/// **This "probe before every open" step is deliberately NOT limited to
+/// the periodic keep-alive timer.** The connection dropping on its own
+/// (`onError`/`onDone`) is usually not a random blip — it's the backend
+/// closing the stream because the access token used at handshake time
+/// just expired (SSE has no per-message reauth, so an expired token
+/// only surfaces once the connection actually drops). Reconnecting with
+/// whatever's still in storage at that moment reuses the SAME dead
+/// token that just caused the drop, fails again, and loops on backoff
+/// until the next scheduled keep-alive happens to catch up — visible as
+/// repeated "access denied" in the console right around a token
+/// refresh. Routing the error/done-triggered reconnect through the same
+/// guarded probe as the keep-alive timer closes that gap: every attempt
+/// to open a connection, for any reason, checks freshness first.
 ///
 /// Copied from [MessageStreamController].
 @ProviderFor(MessageStreamController)

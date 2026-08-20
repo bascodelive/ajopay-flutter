@@ -140,6 +140,11 @@ _$CurrentPayoutResponseImpl _$$CurrentPayoutResponseImplFromJson(
       confirmedSoFar: (json['confirmedSoFar'] as num).toDouble(),
       targetAmount: (json['targetAmount'] as num).toDouble(),
       alreadyGeneratedThisCycle: json['alreadyGeneratedThisCycle'] as bool,
+      paidCount: (json['paidCount'] as num).toInt(),
+      pendingCount: (json['pendingCount'] as num).toInt(),
+      missedCount: (json['missedCount'] as num).toInt(),
+      totalContributors: (json['totalContributors'] as num).toInt(),
+      canConfirmPayout: json['canConfirmPayout'] as bool,
     );
 
 Map<String, dynamic> _$$CurrentPayoutResponseImplToJson(
@@ -153,6 +158,11 @@ Map<String, dynamic> _$$CurrentPayoutResponseImplToJson(
       'confirmedSoFar': instance.confirmedSoFar,
       'targetAmount': instance.targetAmount,
       'alreadyGeneratedThisCycle': instance.alreadyGeneratedThisCycle,
+      'paidCount': instance.paidCount,
+      'pendingCount': instance.pendingCount,
+      'missedCount': instance.missedCount,
+      'totalContributors': instance.totalContributors,
+      'canConfirmPayout': instance.canConfirmPayout,
     };
 
 _$ConfirmPayoutRequestImpl _$$ConfirmPayoutRequestImplFromJson(

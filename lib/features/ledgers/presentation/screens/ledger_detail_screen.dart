@@ -253,9 +253,122 @@ class _HeaderCard extends StatelessWidget {
               value: ledger.status,
               valueColor: isActive ? AjopayColors.primary : AjopayColors.error,
             ),
+            if (ledger.callerRole == 'ADMIN') ...[
+              const Divider(height: 24),
+              _AutoGenerateToggleRow(ledger: ledger),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Admin-only. Moved here from EditLedgerScreen — that location was too
+/// easy to miss (an admin has to already know to open Edit, then scroll
+/// past the name/frequency/amount form, to ever find it). Right on the
+/// ledger's own summary card is where an admin actually looks first.
+/// Fires immediately on flip, same as before — this is still its own
+/// backend action, not part of the name/frequency/amount PATCH.
+class _AutoGenerateToggleRow extends ConsumerStatefulWidget {
+  const _AutoGenerateToggleRow({required this.ledger});
+
+  final LedgerResponse ledger;
+
+  @override
+  ConsumerState<_AutoGenerateToggleRow> createState() =>
+      _AutoGenerateToggleRowState();
+}
+
+class _AutoGenerateToggleRowState
+    extends ConsumerState<_AutoGenerateToggleRow> {
+  late bool _autoGenerate = widget.ledger.autoGenerateContributions;
+  bool _isToggling = false;
+
+  @override
+  void didUpdateWidget(covariant _AutoGenerateToggleRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Keep in sync if the ledger refetches with a different value from
+    // elsewhere (e.g. pull-to-refresh) while this row isn't mid-toggle.
+    if (!_isToggling &&
+        oldWidget.ledger.autoGenerateContributions !=
+            widget.ledger.autoGenerateContributions) {
+      _autoGenerate = widget.ledger.autoGenerateContributions;
+    }
+  }
+
+  Future<void> _toggle(bool value) async {
+    final previous = _autoGenerate;
+    setState(() {
+      _autoGenerate = value; // optimistic — reverted below on failure
+      _isToggling = true;
+    });
+
+    final ok = await ref
+        .read(ledgerControllerProvider.notifier)
+        .setAutoGenerateContributions(widget.ledger.id, value);
+
+    if (!mounted) return;
+    setState(() => _isToggling = false);
+
+    if (ok) {
+      ref.invalidate(ledgerDetailProvider(widget.ledger.id));
+      AppFeedback.showSuccess(
+        context,
+        value
+            ? 'Auto-generate turned on for this ledger'
+            : 'Auto-generate turned off for this ledger',
+      );
+    } else {
+      setState(() => _autoGenerate = previous); // revert the optimistic flip
+      final message = ref.read(ledgerControllerProvider.notifier).lastError;
+      AppFeedback.showError(
+          context, message ?? 'Could not update this setting.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.auto_mode_outlined,
+                size: 18, color: AjopayColors.textMuted),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Auto-generate contributions',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            _isToggling
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Switch(
+                    value: _autoGenerate,
+                    onChanged: _toggle,
+                  ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 26),
+          child: Text(
+            _autoGenerate
+                ? 'On — a new cycle opens automatically for every active '
+                    'member.'
+                : 'Off — contributions stay manual until this is on. Has no '
+                    'effect on a Circle, which always auto-generates once due.',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AjopayColors.textMuted,
+                ),
+          ),
+        ),
+      ],
     );
   }
 }

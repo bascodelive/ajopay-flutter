@@ -34,6 +34,14 @@ class LedgerResponse with _$LedgerResponse {
     /// mapped through a different DTO), not because the backend ever
     /// omits it on `getMyLedgers`/`getLedger`.
     @Default(false) bool locked,
+
+    /// Opt-in, defaults false. When true,
+    /// ContributionAutoGenerationScheduler automatically opens each new
+    /// standalone cycle's contributions for every currently active
+    /// member — see SetAutoGenerateContributionsRequest below for the
+    /// toggle. `@Default(false)` for the same forward-compatibility
+    /// reason as `locked` above.
+    @Default(false) bool autoGenerateContributions,
   }) = _LedgerResponse;
 
   factory LedgerResponse.fromJson(Map<String, dynamic> json) =>
@@ -67,6 +75,22 @@ class UpdateLedgerRequest with _$UpdateLedgerRequest {
 
   factory UpdateLedgerRequest.fromJson(Map<String, dynamic> json) =>
       _$UpdateLedgerRequestFromJson(json);
+}
+
+/// Deliberately its OWN request type, not folded into UpdateLedgerRequest
+/// above — that one is a documented full-replacement DTO (all fields
+/// required); an optional toggle there would either break that contract
+/// or force every unrelated name/frequency/amount edit to also specify
+/// it. Mirrors the backend's SetAutoGenerateContributionsRequest exactly.
+@freezed
+class SetAutoGenerateContributionsRequest
+    with _$SetAutoGenerateContributionsRequest {
+  const factory SetAutoGenerateContributionsRequest({required bool enabled}) =
+      _SetAutoGenerateContributionsRequest;
+
+  factory SetAutoGenerateContributionsRequest.fromJson(
+          Map<String, dynamic> json) =>
+      _$SetAutoGenerateContributionsRequestFromJson(json);
 }
 
 @freezed

@@ -53,6 +53,29 @@ class ContributionActionController extends _$ContributionActionController {
     }
   }
 
+  /// Batch counterpart to `schedule` above — one or more members, one
+  /// cycleDate, one call. Never throws for a partial outcome (a member
+  /// already scheduled, or no longer active) — that's reported inside
+  /// the returned response's `skipped` list instead; only a genuine
+  /// request failure (non-Admin, empty member list, network error)
+  /// surfaces via `null` + `lastError`, same as every other method here.
+  Future<BatchScheduleContributionResponse?> scheduleBatch(
+    String ledgerId,
+    List<String> memberUserIds,
+    String cycleDate,
+  ) async {
+    final repository = ref.read(contributionRepositoryProvider);
+    try {
+      final result =
+          await repository.scheduleBatch(ledgerId, memberUserIds, cycleDate);
+      ref.invalidate(contributionsPagerProvider);
+      return result;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return null;
+    }
+  }
+
   Future<ContributionResponse?> reportPayment(
     String ledgerId,
     String contributionId, {

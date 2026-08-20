@@ -50,6 +50,55 @@ Map<String, dynamic> _$$ScheduleContributionRequestImplToJson(
       'cycleDate': instance.cycleDate,
     };
 
+_$BatchScheduleContributionRequestImpl
+    _$$BatchScheduleContributionRequestImplFromJson(
+            Map<String, dynamic> json) =>
+        _$BatchScheduleContributionRequestImpl(
+          memberUserIds: (json['memberUserIds'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
+          cycleDate: json['cycleDate'] as String,
+        );
+
+Map<String, dynamic> _$$BatchScheduleContributionRequestImplToJson(
+        _$BatchScheduleContributionRequestImpl instance) =>
+    <String, dynamic>{
+      'memberUserIds': instance.memberUserIds,
+      'cycleDate': instance.cycleDate,
+    };
+
+_$BatchScheduleContributionResponseImpl
+    _$$BatchScheduleContributionResponseImplFromJson(
+            Map<String, dynamic> json) =>
+        _$BatchScheduleContributionResponseImpl(
+          created: (json['created'] as List<dynamic>)
+              .map((e) =>
+                  ContributionResponse.fromJson(e as Map<String, dynamic>))
+              .toList(),
+          skipped: (json['skipped'] as List<dynamic>)
+              .map((e) => SkippedMember.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        );
+
+Map<String, dynamic> _$$BatchScheduleContributionResponseImplToJson(
+        _$BatchScheduleContributionResponseImpl instance) =>
+    <String, dynamic>{
+      'created': instance.created,
+      'skipped': instance.skipped,
+    };
+
+_$SkippedMemberImpl _$$SkippedMemberImplFromJson(Map<String, dynamic> json) =>
+    _$SkippedMemberImpl(
+      memberUserId: json['memberUserId'] as String,
+      reason: json['reason'] as String,
+    );
+
+Map<String, dynamic> _$$SkippedMemberImplToJson(_$SkippedMemberImpl instance) =>
+    <String, dynamic>{
+      'memberUserId': instance.memberUserId,
+      'reason': instance.reason,
+    };
+
 _$ContributionActionRequestImpl _$$ContributionActionRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$ContributionActionRequestImpl(

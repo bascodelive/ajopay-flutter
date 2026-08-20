@@ -34,11 +34,12 @@ mixin _$ContributionResponse {
   String? get memberNote => throw _privateConstructorUsedError;
 
   /// 1-indexed. Always 1 for the original manual per-member scheduling
-  /// path (`POST .../contributions`). A contribution generated via a
-  /// Circle's rotation (`POST .../circles/{id}/generate-cycle-contributions`)
-  /// reflects which of a multi-hand participant's turns this row is
-  /// for — a 2-hand member has TWO rows for the same cycleDate, one
-  /// with handNumber 1 and one with handNumber 2. Note there is no
+  /// path (`POST .../contributions`, and its batch counterpart below).
+  /// A contribution generated via a Circle's rotation
+  /// (`POST .../circles/{id}/generate-cycle-contributions`) reflects
+  /// which of a multi-hand participant's turns this row is for — a
+  /// 2-hand member has TWO rows for the same cycleDate, one with
+  /// handNumber 1 and one with handNumber 2. Note there is no
   /// `circleId` on this response even for circle-generated rows — the
   /// backend's ContributionResponse DTO doesn't carry one; a client
   /// that needs to know which circle a row belongs to has to correlate
@@ -269,11 +270,12 @@ class _$ContributionResponseImpl implements _ContributionResponse {
   final String? memberNote;
 
   /// 1-indexed. Always 1 for the original manual per-member scheduling
-  /// path (`POST .../contributions`). A contribution generated via a
-  /// Circle's rotation (`POST .../circles/{id}/generate-cycle-contributions`)
-  /// reflects which of a multi-hand participant's turns this row is
-  /// for — a 2-hand member has TWO rows for the same cycleDate, one
-  /// with handNumber 1 and one with handNumber 2. Note there is no
+  /// path (`POST .../contributions`, and its batch counterpart below).
+  /// A contribution generated via a Circle's rotation
+  /// (`POST .../circles/{id}/generate-cycle-contributions`) reflects
+  /// which of a multi-hand participant's turns this row is for — a
+  /// 2-hand member has TWO rows for the same cycleDate, one with
+  /// handNumber 1 and one with handNumber 2. Note there is no
   /// `circleId` on this response even for circle-generated rows — the
   /// backend's ContributionResponse DTO doesn't carry one; a client
   /// that needs to know which circle a row belongs to has to correlate
@@ -378,11 +380,12 @@ abstract class _ContributionResponse implements ContributionResponse {
   @override
 
   /// 1-indexed. Always 1 for the original manual per-member scheduling
-  /// path (`POST .../contributions`). A contribution generated via a
-  /// Circle's rotation (`POST .../circles/{id}/generate-cycle-contributions`)
-  /// reflects which of a multi-hand participant's turns this row is
-  /// for — a 2-hand member has TWO rows for the same cycleDate, one
-  /// with handNumber 1 and one with handNumber 2. Note there is no
+  /// path (`POST .../contributions`, and its batch counterpart below).
+  /// A contribution generated via a Circle's rotation
+  /// (`POST .../circles/{id}/generate-cycle-contributions`) reflects
+  /// which of a multi-hand participant's turns this row is for — a
+  /// 2-hand member has TWO rows for the same cycleDate, one with
+  /// handNumber 1 and one with handNumber 2. Note there is no
   /// `circleId` on this response even for circle-generated rows — the
   /// backend's ContributionResponse DTO doesn't carry one; a client
   /// that needs to know which circle a row belongs to has to correlate
@@ -560,6 +563,528 @@ abstract class _ScheduleContributionRequest
   @JsonKey(ignore: true)
   _$$ScheduleContributionRequestImplCopyWith<_$ScheduleContributionRequestImpl>
       get copyWith => throw _privateConstructorUsedError;
+}
+
+BatchScheduleContributionRequest _$BatchScheduleContributionRequestFromJson(
+    Map<String, dynamic> json) {
+  return _BatchScheduleContributionRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$BatchScheduleContributionRequest {
+  List<String> get memberUserIds => throw _privateConstructorUsedError;
+  String get cycleDate => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $BatchScheduleContributionRequestCopyWith<BatchScheduleContributionRequest>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BatchScheduleContributionRequestCopyWith<$Res> {
+  factory $BatchScheduleContributionRequestCopyWith(
+          BatchScheduleContributionRequest value,
+          $Res Function(BatchScheduleContributionRequest) then) =
+      _$BatchScheduleContributionRequestCopyWithImpl<$Res,
+          BatchScheduleContributionRequest>;
+  @useResult
+  $Res call({List<String> memberUserIds, String cycleDate});
+}
+
+/// @nodoc
+class _$BatchScheduleContributionRequestCopyWithImpl<$Res,
+        $Val extends BatchScheduleContributionRequest>
+    implements $BatchScheduleContributionRequestCopyWith<$Res> {
+  _$BatchScheduleContributionRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? memberUserIds = null,
+    Object? cycleDate = null,
+  }) {
+    return _then(_value.copyWith(
+      memberUserIds: null == memberUserIds
+          ? _value.memberUserIds
+          : memberUserIds // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      cycleDate: null == cycleDate
+          ? _value.cycleDate
+          : cycleDate // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$BatchScheduleContributionRequestImplCopyWith<$Res>
+    implements $BatchScheduleContributionRequestCopyWith<$Res> {
+  factory _$$BatchScheduleContributionRequestImplCopyWith(
+          _$BatchScheduleContributionRequestImpl value,
+          $Res Function(_$BatchScheduleContributionRequestImpl) then) =
+      __$$BatchScheduleContributionRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({List<String> memberUserIds, String cycleDate});
+}
+
+/// @nodoc
+class __$$BatchScheduleContributionRequestImplCopyWithImpl<$Res>
+    extends _$BatchScheduleContributionRequestCopyWithImpl<$Res,
+        _$BatchScheduleContributionRequestImpl>
+    implements _$$BatchScheduleContributionRequestImplCopyWith<$Res> {
+  __$$BatchScheduleContributionRequestImplCopyWithImpl(
+      _$BatchScheduleContributionRequestImpl _value,
+      $Res Function(_$BatchScheduleContributionRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? memberUserIds = null,
+    Object? cycleDate = null,
+  }) {
+    return _then(_$BatchScheduleContributionRequestImpl(
+      memberUserIds: null == memberUserIds
+          ? _value._memberUserIds
+          : memberUserIds // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      cycleDate: null == cycleDate
+          ? _value.cycleDate
+          : cycleDate // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$BatchScheduleContributionRequestImpl
+    implements _BatchScheduleContributionRequest {
+  const _$BatchScheduleContributionRequestImpl(
+      {required final List<String> memberUserIds, required this.cycleDate})
+      : _memberUserIds = memberUserIds;
+
+  factory _$BatchScheduleContributionRequestImpl.fromJson(
+          Map<String, dynamic> json) =>
+      _$$BatchScheduleContributionRequestImplFromJson(json);
+
+  final List<String> _memberUserIds;
+  @override
+  List<String> get memberUserIds {
+    if (_memberUserIds is EqualUnmodifiableListView) return _memberUserIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_memberUserIds);
+  }
+
+  @override
+  final String cycleDate;
+
+  @override
+  String toString() {
+    return 'BatchScheduleContributionRequest(memberUserIds: $memberUserIds, cycleDate: $cycleDate)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$BatchScheduleContributionRequestImpl &&
+            const DeepCollectionEquality()
+                .equals(other._memberUserIds, _memberUserIds) &&
+            (identical(other.cycleDate, cycleDate) ||
+                other.cycleDate == cycleDate));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType,
+      const DeepCollectionEquality().hash(_memberUserIds), cycleDate);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$BatchScheduleContributionRequestImplCopyWith<
+          _$BatchScheduleContributionRequestImpl>
+      get copyWith => __$$BatchScheduleContributionRequestImplCopyWithImpl<
+          _$BatchScheduleContributionRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$BatchScheduleContributionRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _BatchScheduleContributionRequest
+    implements BatchScheduleContributionRequest {
+  const factory _BatchScheduleContributionRequest(
+          {required final List<String> memberUserIds,
+          required final String cycleDate}) =
+      _$BatchScheduleContributionRequestImpl;
+
+  factory _BatchScheduleContributionRequest.fromJson(
+          Map<String, dynamic> json) =
+      _$BatchScheduleContributionRequestImpl.fromJson;
+
+  @override
+  List<String> get memberUserIds;
+  @override
+  String get cycleDate;
+  @override
+  @JsonKey(ignore: true)
+  _$$BatchScheduleContributionRequestImplCopyWith<
+          _$BatchScheduleContributionRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+BatchScheduleContributionResponse _$BatchScheduleContributionResponseFromJson(
+    Map<String, dynamic> json) {
+  return _BatchScheduleContributionResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$BatchScheduleContributionResponse {
+  List<ContributionResponse> get created => throw _privateConstructorUsedError;
+  List<SkippedMember> get skipped => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $BatchScheduleContributionResponseCopyWith<BatchScheduleContributionResponse>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $BatchScheduleContributionResponseCopyWith<$Res> {
+  factory $BatchScheduleContributionResponseCopyWith(
+          BatchScheduleContributionResponse value,
+          $Res Function(BatchScheduleContributionResponse) then) =
+      _$BatchScheduleContributionResponseCopyWithImpl<$Res,
+          BatchScheduleContributionResponse>;
+  @useResult
+  $Res call({List<ContributionResponse> created, List<SkippedMember> skipped});
+}
+
+/// @nodoc
+class _$BatchScheduleContributionResponseCopyWithImpl<$Res,
+        $Val extends BatchScheduleContributionResponse>
+    implements $BatchScheduleContributionResponseCopyWith<$Res> {
+  _$BatchScheduleContributionResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? created = null,
+    Object? skipped = null,
+  }) {
+    return _then(_value.copyWith(
+      created: null == created
+          ? _value.created
+          : created // ignore: cast_nullable_to_non_nullable
+              as List<ContributionResponse>,
+      skipped: null == skipped
+          ? _value.skipped
+          : skipped // ignore: cast_nullable_to_non_nullable
+              as List<SkippedMember>,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$BatchScheduleContributionResponseImplCopyWith<$Res>
+    implements $BatchScheduleContributionResponseCopyWith<$Res> {
+  factory _$$BatchScheduleContributionResponseImplCopyWith(
+          _$BatchScheduleContributionResponseImpl value,
+          $Res Function(_$BatchScheduleContributionResponseImpl) then) =
+      __$$BatchScheduleContributionResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({List<ContributionResponse> created, List<SkippedMember> skipped});
+}
+
+/// @nodoc
+class __$$BatchScheduleContributionResponseImplCopyWithImpl<$Res>
+    extends _$BatchScheduleContributionResponseCopyWithImpl<$Res,
+        _$BatchScheduleContributionResponseImpl>
+    implements _$$BatchScheduleContributionResponseImplCopyWith<$Res> {
+  __$$BatchScheduleContributionResponseImplCopyWithImpl(
+      _$BatchScheduleContributionResponseImpl _value,
+      $Res Function(_$BatchScheduleContributionResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? created = null,
+    Object? skipped = null,
+  }) {
+    return _then(_$BatchScheduleContributionResponseImpl(
+      created: null == created
+          ? _value._created
+          : created // ignore: cast_nullable_to_non_nullable
+              as List<ContributionResponse>,
+      skipped: null == skipped
+          ? _value._skipped
+          : skipped // ignore: cast_nullable_to_non_nullable
+              as List<SkippedMember>,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$BatchScheduleContributionResponseImpl
+    implements _BatchScheduleContributionResponse {
+  const _$BatchScheduleContributionResponseImpl(
+      {required final List<ContributionResponse> created,
+      required final List<SkippedMember> skipped})
+      : _created = created,
+        _skipped = skipped;
+
+  factory _$BatchScheduleContributionResponseImpl.fromJson(
+          Map<String, dynamic> json) =>
+      _$$BatchScheduleContributionResponseImplFromJson(json);
+
+  final List<ContributionResponse> _created;
+  @override
+  List<ContributionResponse> get created {
+    if (_created is EqualUnmodifiableListView) return _created;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_created);
+  }
+
+  final List<SkippedMember> _skipped;
+  @override
+  List<SkippedMember> get skipped {
+    if (_skipped is EqualUnmodifiableListView) return _skipped;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_skipped);
+  }
+
+  @override
+  String toString() {
+    return 'BatchScheduleContributionResponse(created: $created, skipped: $skipped)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$BatchScheduleContributionResponseImpl &&
+            const DeepCollectionEquality().equals(other._created, _created) &&
+            const DeepCollectionEquality().equals(other._skipped, _skipped));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_created),
+      const DeepCollectionEquality().hash(_skipped));
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$BatchScheduleContributionResponseImplCopyWith<
+          _$BatchScheduleContributionResponseImpl>
+      get copyWith => __$$BatchScheduleContributionResponseImplCopyWithImpl<
+          _$BatchScheduleContributionResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$BatchScheduleContributionResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _BatchScheduleContributionResponse
+    implements BatchScheduleContributionResponse {
+  const factory _BatchScheduleContributionResponse(
+          {required final List<ContributionResponse> created,
+          required final List<SkippedMember> skipped}) =
+      _$BatchScheduleContributionResponseImpl;
+
+  factory _BatchScheduleContributionResponse.fromJson(
+          Map<String, dynamic> json) =
+      _$BatchScheduleContributionResponseImpl.fromJson;
+
+  @override
+  List<ContributionResponse> get created;
+  @override
+  List<SkippedMember> get skipped;
+  @override
+  @JsonKey(ignore: true)
+  _$$BatchScheduleContributionResponseImplCopyWith<
+          _$BatchScheduleContributionResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+SkippedMember _$SkippedMemberFromJson(Map<String, dynamic> json) {
+  return _SkippedMember.fromJson(json);
+}
+
+/// @nodoc
+mixin _$SkippedMember {
+  String get memberUserId => throw _privateConstructorUsedError;
+  String get reason => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $SkippedMemberCopyWith<SkippedMember> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SkippedMemberCopyWith<$Res> {
+  factory $SkippedMemberCopyWith(
+          SkippedMember value, $Res Function(SkippedMember) then) =
+      _$SkippedMemberCopyWithImpl<$Res, SkippedMember>;
+  @useResult
+  $Res call({String memberUserId, String reason});
+}
+
+/// @nodoc
+class _$SkippedMemberCopyWithImpl<$Res, $Val extends SkippedMember>
+    implements $SkippedMemberCopyWith<$Res> {
+  _$SkippedMemberCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? memberUserId = null,
+    Object? reason = null,
+  }) {
+    return _then(_value.copyWith(
+      memberUserId: null == memberUserId
+          ? _value.memberUserId
+          : memberUserId // ignore: cast_nullable_to_non_nullable
+              as String,
+      reason: null == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$SkippedMemberImplCopyWith<$Res>
+    implements $SkippedMemberCopyWith<$Res> {
+  factory _$$SkippedMemberImplCopyWith(
+          _$SkippedMemberImpl value, $Res Function(_$SkippedMemberImpl) then) =
+      __$$SkippedMemberImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String memberUserId, String reason});
+}
+
+/// @nodoc
+class __$$SkippedMemberImplCopyWithImpl<$Res>
+    extends _$SkippedMemberCopyWithImpl<$Res, _$SkippedMemberImpl>
+    implements _$$SkippedMemberImplCopyWith<$Res> {
+  __$$SkippedMemberImplCopyWithImpl(
+      _$SkippedMemberImpl _value, $Res Function(_$SkippedMemberImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? memberUserId = null,
+    Object? reason = null,
+  }) {
+    return _then(_$SkippedMemberImpl(
+      memberUserId: null == memberUserId
+          ? _value.memberUserId
+          : memberUserId // ignore: cast_nullable_to_non_nullable
+              as String,
+      reason: null == reason
+          ? _value.reason
+          : reason // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SkippedMemberImpl implements _SkippedMember {
+  const _$SkippedMemberImpl({required this.memberUserId, required this.reason});
+
+  factory _$SkippedMemberImpl.fromJson(Map<String, dynamic> json) =>
+      _$$SkippedMemberImplFromJson(json);
+
+  @override
+  final String memberUserId;
+  @override
+  final String reason;
+
+  @override
+  String toString() {
+    return 'SkippedMember(memberUserId: $memberUserId, reason: $reason)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SkippedMemberImpl &&
+            (identical(other.memberUserId, memberUserId) ||
+                other.memberUserId == memberUserId) &&
+            (identical(other.reason, reason) || other.reason == reason));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, memberUserId, reason);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SkippedMemberImplCopyWith<_$SkippedMemberImpl> get copyWith =>
+      __$$SkippedMemberImplCopyWithImpl<_$SkippedMemberImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SkippedMemberImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _SkippedMember implements SkippedMember {
+  const factory _SkippedMember(
+      {required final String memberUserId,
+      required final String reason}) = _$SkippedMemberImpl;
+
+  factory _SkippedMember.fromJson(Map<String, dynamic> json) =
+      _$SkippedMemberImpl.fromJson;
+
+  @override
+  String get memberUserId;
+  @override
+  String get reason;
+  @override
+  @JsonKey(ignore: true)
+  _$$SkippedMemberImplCopyWith<_$SkippedMemberImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 ContributionActionRequest _$ContributionActionRequestFromJson(

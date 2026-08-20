@@ -99,6 +99,27 @@ class LedgerController extends _$LedgerController {
     }
   }
 
+  /// ADMIN action, deliberately separate from `update()` above — see
+  /// SetAutoGenerateContributionsRequest's doc for why this isn't folded
+  /// into the same call. Updates `state` with the fresh LedgerResponse
+  /// on success, same as `update()` does, so a caller watching
+  /// `ledgerControllerProvider` sees the new toggle value immediately.
+  Future<bool> setAutoGenerateContributions(
+    String ledgerId,
+    bool enabled,
+  ) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      final updated =
+          await repository.setAutoGenerateContributions(ledgerId, enabled);
+      state = updated;
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
   /// Self-service — picks which of the caller's OWN ledgers stays
   /// unlocked while FREE and over the tier cap (see
   /// `LedgerResponse.locked`). A harmless no-op with no observable

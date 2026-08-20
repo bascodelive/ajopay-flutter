@@ -51,6 +51,14 @@ mixin _$LedgerResponse {
   /// omits it on `getMyLedgers`/`getLedger`.
   bool get locked => throw _privateConstructorUsedError;
 
+  /// Opt-in, defaults false. When true,
+  /// ContributionAutoGenerationScheduler automatically opens each new
+  /// standalone cycle's contributions for every currently active
+  /// member — see SetAutoGenerateContributionsRequest below for the
+  /// toggle. `@Default(false)` for the same forward-compatibility
+  /// reason as `locked` above.
+  bool get autoGenerateContributions => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $LedgerResponseCopyWith<LedgerResponse> get copyWith =>
@@ -72,7 +80,8 @@ abstract class $LedgerResponseCopyWith<$Res> {
       String status,
       String callerRole,
       String membershipStatus,
-      bool locked});
+      bool locked,
+      bool autoGenerateContributions});
 }
 
 /// @nodoc
@@ -97,6 +106,7 @@ class _$LedgerResponseCopyWithImpl<$Res, $Val extends LedgerResponse>
     Object? callerRole = null,
     Object? membershipStatus = null,
     Object? locked = null,
+    Object? autoGenerateContributions = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -135,6 +145,10 @@ class _$LedgerResponseCopyWithImpl<$Res, $Val extends LedgerResponse>
           ? _value.locked
           : locked // ignore: cast_nullable_to_non_nullable
               as bool,
+      autoGenerateContributions: null == autoGenerateContributions
+          ? _value.autoGenerateContributions
+          : autoGenerateContributions // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -156,7 +170,8 @@ abstract class _$$LedgerResponseImplCopyWith<$Res>
       String status,
       String callerRole,
       String membershipStatus,
-      bool locked});
+      bool locked,
+      bool autoGenerateContributions});
 }
 
 /// @nodoc
@@ -179,6 +194,7 @@ class __$$LedgerResponseImplCopyWithImpl<$Res>
     Object? callerRole = null,
     Object? membershipStatus = null,
     Object? locked = null,
+    Object? autoGenerateContributions = null,
   }) {
     return _then(_$LedgerResponseImpl(
       id: null == id
@@ -217,6 +233,10 @@ class __$$LedgerResponseImplCopyWithImpl<$Res>
           ? _value.locked
           : locked // ignore: cast_nullable_to_non_nullable
               as bool,
+      autoGenerateContributions: null == autoGenerateContributions
+          ? _value.autoGenerateContributions
+          : autoGenerateContributions // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -233,7 +253,8 @@ class _$LedgerResponseImpl implements _LedgerResponse {
       required this.status,
       required this.callerRole,
       required this.membershipStatus,
-      this.locked = false});
+      this.locked = false,
+      this.autoGenerateContributions = false});
 
   factory _$LedgerResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$LedgerResponseImplFromJson(json);
@@ -280,9 +301,19 @@ class _$LedgerResponseImpl implements _LedgerResponse {
   @JsonKey()
   final bool locked;
 
+  /// Opt-in, defaults false. When true,
+  /// ContributionAutoGenerationScheduler automatically opens each new
+  /// standalone cycle's contributions for every currently active
+  /// member — see SetAutoGenerateContributionsRequest below for the
+  /// toggle. `@Default(false)` for the same forward-compatibility
+  /// reason as `locked` above.
+  @override
+  @JsonKey()
+  final bool autoGenerateContributions;
+
   @override
   String toString() {
-    return 'LedgerResponse(id: $id, name: $name, inviteCode: $inviteCode, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, status: $status, callerRole: $callerRole, membershipStatus: $membershipStatus, locked: $locked)';
+    return 'LedgerResponse(id: $id, name: $name, inviteCode: $inviteCode, contributionFrequency: $contributionFrequency, contributionAmount: $contributionAmount, status: $status, callerRole: $callerRole, membershipStatus: $membershipStatus, locked: $locked, autoGenerateContributions: $autoGenerateContributions)';
   }
 
   @override
@@ -303,7 +334,10 @@ class _$LedgerResponseImpl implements _LedgerResponse {
                 other.callerRole == callerRole) &&
             (identical(other.membershipStatus, membershipStatus) ||
                 other.membershipStatus == membershipStatus) &&
-            (identical(other.locked, locked) || other.locked == locked));
+            (identical(other.locked, locked) || other.locked == locked) &&
+            (identical(other.autoGenerateContributions,
+                    autoGenerateContributions) ||
+                other.autoGenerateContributions == autoGenerateContributions));
   }
 
   @JsonKey(ignore: true)
@@ -318,7 +352,8 @@ class _$LedgerResponseImpl implements _LedgerResponse {
       status,
       callerRole,
       membershipStatus,
-      locked);
+      locked,
+      autoGenerateContributions);
 
   @JsonKey(ignore: true)
   @override
@@ -345,7 +380,8 @@ abstract class _LedgerResponse implements LedgerResponse {
       required final String status,
       required final String callerRole,
       required final String membershipStatus,
-      final bool locked}) = _$LedgerResponseImpl;
+      final bool locked,
+      final bool autoGenerateContributions}) = _$LedgerResponseImpl;
 
   factory _LedgerResponse.fromJson(Map<String, dynamic> json) =
       _$LedgerResponseImpl.fromJson;
@@ -386,6 +422,15 @@ abstract class _LedgerResponse implements LedgerResponse {
   /// mapped through a different DTO), not because the backend ever
   /// omits it on `getMyLedgers`/`getLedger`.
   bool get locked;
+  @override
+
+  /// Opt-in, defaults false. When true,
+  /// ContributionAutoGenerationScheduler automatically opens each new
+  /// standalone cycle's contributions for every currently active
+  /// member — see SetAutoGenerateContributionsRequest below for the
+  /// toggle. `@Default(false)` for the same forward-compatibility
+  /// reason as `locked` above.
+  bool get autoGenerateContributions;
   @override
   @JsonKey(ignore: true)
   _$$LedgerResponseImplCopyWith<_$LedgerResponseImpl> get copyWith =>
@@ -750,6 +795,159 @@ abstract class _UpdateLedgerRequest implements UpdateLedgerRequest {
   @JsonKey(ignore: true)
   _$$UpdateLedgerRequestImplCopyWith<_$UpdateLedgerRequestImpl> get copyWith =>
       throw _privateConstructorUsedError;
+}
+
+SetAutoGenerateContributionsRequest
+    _$SetAutoGenerateContributionsRequestFromJson(Map<String, dynamic> json) {
+  return _SetAutoGenerateContributionsRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$SetAutoGenerateContributionsRequest {
+  bool get enabled => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $SetAutoGenerateContributionsRequestCopyWith<
+          SetAutoGenerateContributionsRequest>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $SetAutoGenerateContributionsRequestCopyWith<$Res> {
+  factory $SetAutoGenerateContributionsRequestCopyWith(
+          SetAutoGenerateContributionsRequest value,
+          $Res Function(SetAutoGenerateContributionsRequest) then) =
+      _$SetAutoGenerateContributionsRequestCopyWithImpl<$Res,
+          SetAutoGenerateContributionsRequest>;
+  @useResult
+  $Res call({bool enabled});
+}
+
+/// @nodoc
+class _$SetAutoGenerateContributionsRequestCopyWithImpl<$Res,
+        $Val extends SetAutoGenerateContributionsRequest>
+    implements $SetAutoGenerateContributionsRequestCopyWith<$Res> {
+  _$SetAutoGenerateContributionsRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enabled = null,
+  }) {
+    return _then(_value.copyWith(
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$SetAutoGenerateContributionsRequestImplCopyWith<$Res>
+    implements $SetAutoGenerateContributionsRequestCopyWith<$Res> {
+  factory _$$SetAutoGenerateContributionsRequestImplCopyWith(
+          _$SetAutoGenerateContributionsRequestImpl value,
+          $Res Function(_$SetAutoGenerateContributionsRequestImpl) then) =
+      __$$SetAutoGenerateContributionsRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({bool enabled});
+}
+
+/// @nodoc
+class __$$SetAutoGenerateContributionsRequestImplCopyWithImpl<$Res>
+    extends _$SetAutoGenerateContributionsRequestCopyWithImpl<$Res,
+        _$SetAutoGenerateContributionsRequestImpl>
+    implements _$$SetAutoGenerateContributionsRequestImplCopyWith<$Res> {
+  __$$SetAutoGenerateContributionsRequestImplCopyWithImpl(
+      _$SetAutoGenerateContributionsRequestImpl _value,
+      $Res Function(_$SetAutoGenerateContributionsRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enabled = null,
+  }) {
+    return _then(_$SetAutoGenerateContributionsRequestImpl(
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$SetAutoGenerateContributionsRequestImpl
+    implements _SetAutoGenerateContributionsRequest {
+  const _$SetAutoGenerateContributionsRequestImpl({required this.enabled});
+
+  factory _$SetAutoGenerateContributionsRequestImpl.fromJson(
+          Map<String, dynamic> json) =>
+      _$$SetAutoGenerateContributionsRequestImplFromJson(json);
+
+  @override
+  final bool enabled;
+
+  @override
+  String toString() {
+    return 'SetAutoGenerateContributionsRequest(enabled: $enabled)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$SetAutoGenerateContributionsRequestImpl &&
+            (identical(other.enabled, enabled) || other.enabled == enabled));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, enabled);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$SetAutoGenerateContributionsRequestImplCopyWith<
+          _$SetAutoGenerateContributionsRequestImpl>
+      get copyWith => __$$SetAutoGenerateContributionsRequestImplCopyWithImpl<
+          _$SetAutoGenerateContributionsRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$SetAutoGenerateContributionsRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _SetAutoGenerateContributionsRequest
+    implements SetAutoGenerateContributionsRequest {
+  const factory _SetAutoGenerateContributionsRequest(
+          {required final bool enabled}) =
+      _$SetAutoGenerateContributionsRequestImpl;
+
+  factory _SetAutoGenerateContributionsRequest.fromJson(
+          Map<String, dynamic> json) =
+      _$SetAutoGenerateContributionsRequestImpl.fromJson;
+
+  @override
+  bool get enabled;
+  @override
+  @JsonKey(ignore: true)
+  _$$SetAutoGenerateContributionsRequestImplCopyWith<
+          _$SetAutoGenerateContributionsRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
 }
 
 JoinLedgerRequest _$JoinLedgerRequestFromJson(Map<String, dynamic> json) {
