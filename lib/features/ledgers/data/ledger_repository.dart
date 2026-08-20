@@ -12,12 +12,6 @@ class LedgerRepository {
 
   final Dio _dio;
 
-  /// Every ledger the caller is currently an ACTIVE member of — not a
-  /// public directory (see getDirectory below for that). Joining a NEW
-  /// ledger still only ever happens via invite code (joinLedger below);
-  /// this just answers "what do I already belong to." A PENDING request
-  /// never appears here — only an approved membership does (server-side:
-  /// this is ACTIVE-only).
   Future<List<LedgerResponse>> getMyLedgers() async {
     try {
       final response = await _dio.get('/api/ledgers');
@@ -29,10 +23,6 @@ class LedgerRepository {
     }
   }
 
-  /// The caller's own current standing against their tier's active-ledger
-  /// limit — lets the client show/gate Create+Join proactively (accurate
-  /// numbers, before ever attempting a request that would just 400)
-  /// instead of only finding out via a failed POST.
   Future<LedgerLimitResponse> getLedgerLimit() async {
     try {
       final response = await _dio.get('/api/ledgers/limit');
@@ -52,10 +42,6 @@ class LedgerRepository {
     }
   }
 
-  /// Creates a PENDING membership request, NOT an active one — the
-  /// ledger's Admin must approve it before the caller can do anything
-  /// else on this ledger. Check `LedgerResponse.membershipStatus` on the
-  /// result rather than assuming success means "you're in now."
   Future<LedgerResponse> joinLedger(String inviteCode) async {
     try {
       final response = await _dio.post(
@@ -93,15 +79,25 @@ class LedgerRepository {
     }
   }
 
-  /// Self-service — picks which ONE of the caller's own ledgers stays
-  /// unlocked while FREE and over the tier cap (see
-  /// `LedgerResponse.locked`). A harmless no-op with no observable
-  /// effect while Premium or at/under the cap — safe to call regardless
-  /// of current tier, since the backend honors it again the next time
-  /// it's actually relevant. Void return: the caller should re-fetch
-  /// `getMyLedgers()` afterward (invalidate `myLedgersProvider`) to see
-  /// the new lock state reflected, same pattern as every other mutating
-  /// call in this app.
+  /// ADMIN-only, deliberately its OWN endpoint — see
+  /// SetAutoGenerateContributionsRequest's doc for why this isn't folded
+  /// into updateLedger above. Rejected (403) if this ledger is currently
+  /// locked, same guard as updateLedger.
+  Future<LedgerResponse> setAutoGenerateContributions(
+    String ledgerId,
+    bool enabled,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/auto-generate-contributions',
+        data: SetAutoGenerateContributionsRequest(enabled: enabled).toJson(),
+      );
+      return LedgerResponse.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<void> chooseKeptLedger(String ledgerId) async {
     try {
       await _dio.post('/api/ledgers/$ledgerId/keep-free');
@@ -110,11 +106,6 @@ class LedgerRepository {
     }
   }
 
-  /// Any active member can call this now (API.md updated — used to be
-  /// ADMIN-only). Every ACTIVE member of the ledger, not paginated
-  /// (API.md: bounded list, realistically dozens of rows). PENDING and
-  /// INVALIDATED members never appear here — see getPendingMembers below
-  /// for the Admin's separate "who's waiting" view.
   Future<List<LedgerMemberResponse>> getMembers(String ledgerId) async {
     try {
       final response = await _dio.get('/api/ledgers/$ledgerId/members');
@@ -126,9 +117,6 @@ class LedgerRepository {
     }
   }
 
-  /// The caller's own membership row on this ledger, whatever its status
-  /// — deliberately NOT ACTIVE-gated server-side, so a still-PENDING
-  /// caller can check "am I approved yet?" instead of just getting a 403.
   Future<LedgerMemberResponse> getMyMembership(String ledgerId) async {
     try {
       final response = await _dio.get('/api/ledgers/$ledgerId/members/me');
@@ -139,7 +127,6 @@ class LedgerRepository {
     }
   }
 
-  /// ADMIN-only — everyone currently waiting to be let into this ledger.
   Future<List<LedgerMemberResponse>> getPendingMembers(String ledgerId) async {
     try {
       final response = await _dio.get('/api/ledgers/$ledgerId/members/pending');
@@ -151,7 +138,6 @@ class LedgerRepository {
     }
   }
 
-  /// ADMIN-only — approves a PENDING join request, activating it.
   Future<LedgerMemberResponse> approveMember(
     String ledgerId,
     String userId,
@@ -166,7 +152,6 @@ class LedgerRepository {
     }
   }
 
-  /// ADMIN-only — declines a PENDING join request (INVALIDATED).
   Future<LedgerMemberResponse> rejectMember(
     String ledgerId,
     String userId,
@@ -181,11 +166,6 @@ class LedgerRepository {
     }
   }
 
-  /// The public directory — every ACTIVE ledger in the system, browsable
-  /// by any registered user with at least one active membership
-  /// somewhere (server-side gate; see API.md). Deliberately returns the
-  /// narrower LedgerDirectoryEntryResponse, never the real LedgerResponse
-  /// (no inviteCode leak to non-members).
   Future<PageResponse<LedgerDirectoryEntryResponse>> getDirectory({
     String? search,
     DirectorySort orderBy = DirectorySort.newest,
@@ -197,8 +177,6 @@ class LedgerRepository {
         '/api/ledgers/directory',
         queryParameters: {
           if (search != null && search.isNotEmpty) 'search': search,
-          // 'orderBy', not 'sort' — that name collides with Spring's
-          // own Pageable sort binding on the backend.
           'orderBy': orderBy.wireValue,
           'page': page,
           'size': size,
@@ -214,10 +192,6 @@ class LedgerRepository {
     }
   }
 
-  /// Upserts the caller's own 1-5 star rating on this ledger, with an
-  /// optional written review alongside it. Same membership gate as
-  /// getDirectory; additionally rejected (403) if the caller is this
-  /// ledger's own Admin.
   Future<LedgerRatingResponse> rateLedger(
     String ledgerId,
     int stars, {
@@ -235,9 +209,6 @@ class LedgerRepository {
     }
   }
 
-  /// The caller's own existing rating on this ledger — null if they
-  /// haven't rated it yet (a 404 here is a normal, expected outcome, not
-  /// an error state; see getMyRating's caller).
   Future<LedgerRatingResponse?> getMyRating(String ledgerId) async {
     try {
       final response = await _dio.get('/api/ledgers/$ledgerId/rating/me');
@@ -250,10 +221,6 @@ class LedgerRepository {
     }
   }
 
-  /// A ledger's written reviews — only ratings with actual review text,
-  /// newest first. Same membership gate as the rest of this feature.
-  /// Route is `/ratings` (plural) — distinct from `/rating` (singular,
-  /// PUT, above) and `/rating/me` (singular, GET, above).
   Future<PageResponse<LedgerReviewResponse>> getReviews(
     String ledgerId, {
     int page = 0,

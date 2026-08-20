@@ -10,17 +10,14 @@ import 'models/contribution_models.dart';
 /// cross-checked directly against ContributionController/ContributionService
 /// source, not just the doc (per the pattern that already caught two real
 /// gaps in Ledgers/Circles). All 8 original endpoints matched exactly;
-/// `exportHistoryCsv` added alongside the backend's own
-/// history/export addition.
+/// `exportHistoryCsv` added alongside the backend's own history/export
+/// addition; `scheduleBatch` added alongside the backend's own
+/// POST .../contributions/batch addition.
 class ContributionRepository {
   ContributionRepository(this._dio);
 
   final Dio _dio;
 
-  /// ADMIN-only server-side. Default sort: cycleDate descending, page
-  /// size 20 (API.md) — page/size passed through as query params, sort
-  /// deliberately left to the backend's own default rather than
-  /// reimplementing it client-side.
   Future<PageResponse<ContributionResponse>> listAllForLedger(
     String ledgerId, {
     int page = 0,
@@ -40,8 +37,6 @@ class ContributionRepository {
     }
   }
 
-  /// Any active member — their own contributions only, same pagination
-  /// defaults as listAllForLedger.
   Future<PageResponse<ContributionResponse>> listOwnForLedger(
     String ledgerId, {
     int page = 0,
@@ -62,8 +57,9 @@ class ContributionRepository {
   }
 
   /// ADMIN-only server-side. Opens a PENDING contribution for one
-  /// member's cycle — manual, per-cycle, per-member (no auto-scheduler
-  /// exists yet, per API.md's own "Not yet implemented" list).
+  /// member's cycle — manual. Independent of any Circle entirely; see
+  /// `scheduleBatch` below for the multi-member fan-out of this same
+  /// operation.
   Future<ContributionResponse> scheduleContribution(
     String ledgerId,
     String memberUserId,
@@ -84,8 +80,32 @@ class ContributionRepository {
     }
   }
 
-  /// MEMBER action — only the contribution's own owner, only from
-  /// PENDING. Backend rejects (403) if caller isn't the owner.
+  /// ADMIN-only server-side. Same operation as scheduleContribution
+  /// above, fanned out to several (or all) members for one cycleDate in
+  /// one call. Never partially fails — a member who already has a
+  /// contribution for that date, or is no longer an active member, ends
+  /// up in the response's `skipped` list with a reason instead of
+  /// failing the whole call.
+  Future<BatchScheduleContributionResponse> scheduleBatch(
+    String ledgerId,
+    List<String> memberUserIds,
+    String cycleDate,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '/api/ledgers/$ledgerId/contributions/batch',
+        data: BatchScheduleContributionRequest(
+          memberUserIds: memberUserIds,
+          cycleDate: cycleDate,
+        ).toJson(),
+      );
+      return BatchScheduleContributionResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<ContributionResponse> reportPayment(
     String ledgerId,
     String contributionId, {
@@ -103,7 +123,6 @@ class ContributionRepository {
     }
   }
 
-  /// ADMIN-only, only from PENDING.
   Future<ContributionResponse> markMissed(
     String ledgerId,
     String contributionId, {
@@ -121,10 +140,6 @@ class ContributionRepository {
     }
   }
 
-  /// ADMIN-only, valid from REPORTED (normal) or MISSED (late cash,
-  /// confirmed directly — the one shortcut for cash already collected
-  /// out-of-band). NOT valid directly from PENDING — an on-time payment
-  /// must be reported by the member first.
   Future<ContributionResponse> confirmPayment(
     String ledgerId,
     String contributionId, {
@@ -142,9 +157,6 @@ class ContributionRepository {
     }
   }
 
-  /// ADMIN-only, only from REPORTED — the member's report was wrong or
-  /// unconfirmed, back to PENDING to try again. Clears reportedAt/memberNote
-  /// server-side.
   Future<ContributionResponse> rejectReport(
     String ledgerId,
     String contributionId, {
@@ -162,8 +174,6 @@ class ContributionRepository {
     }
   }
 
-  /// ADMIN-only, only from MISSED — gives a late payment a chance before
-  /// the cycle closes. Member can then report-payment on it as normal.
   Future<ContributionResponse> reopenForLatePayment(
     String ledgerId,
     String contributionId, {
@@ -181,8 +191,6 @@ class ContributionRepository {
     }
   }
 
-  /// Any active member — not admin-only, transparency is the point.
-  /// Realistically a handful of entries, not paginated (API.md).
   Future<List<ContributionActivityLogEntry>> getHistory(
     String ledgerId,
     String contributionId,
@@ -199,10 +207,6 @@ class ContributionRepository {
     }
   }
 
-  /// Same visibility as getHistory — any active member — but only once
-  /// the contribution is PAID (API.md: 400 otherwise). Returns the raw
-  /// CSV text; `responseType: plain` is required since this endpoint's
-  /// Content-Type is text/csv, not application/json.
   Future<String> exportHistoryCsv(
     String ledgerId,
     String contributionId,

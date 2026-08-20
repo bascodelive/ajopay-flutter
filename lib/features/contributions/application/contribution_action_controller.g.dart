@@ -7,7 +7,7 @@ part of 'contribution_action_controller.dart';
 // **************************************************************************
 
 String _$contributionActionControllerHash() =>
-    r'fb926b735c28486cf6400fc852d91c4951c4fbf6';
+    r'001d9f4774a79d05934bb4de31a3c755708e6dcb';
 
 /// Every Contribution mutation — schedule/report/miss/confirm/reject/reopen.
 ///

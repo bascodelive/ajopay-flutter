@@ -1494,6 +1494,27 @@ mixin _$CurrentPayoutResponse {
   /// after the fact.
   bool get alreadyGeneratedThisCycle => throw _privateConstructorUsedError;
 
+  /// How many of this cycle's contributions are PAID.
+  int get paidCount => throw _privateConstructorUsedError;
+
+  /// Still undecided — PENDING or REPORTED combined. Nonzero here
+  /// is exactly why `canConfirmPayout` below is false.
+  int get pendingCount => throw _privateConstructorUsedError;
+
+  /// MISSED — settled, does NOT block payout confirmation (unlike
+  /// pendingCount). A chronic non-payer marked MISSED never freezes
+  /// the circle; the pot is honestly just short by that amount.
+  int get missedCount => throw _privateConstructorUsedError;
+
+  /// paidCount + pendingCount + missedCount.
+  int get totalContributors => throw _privateConstructorUsedError;
+
+  /// Mirrors exactly what the backend itself enforces on confirm —
+  /// true iff pendingCount is zero. Use this to grey out the
+  /// "Confirm payout" button proactively instead of only discovering
+  /// the block via a 400.
+  bool get canConfirmPayout => throw _privateConstructorUsedError;
+
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
   $CurrentPayoutResponseCopyWith<CurrentPayoutResponse> get copyWith =>
@@ -1514,7 +1535,12 @@ abstract class $CurrentPayoutResponseCopyWith<$Res> {
       String scheduledDate,
       double confirmedSoFar,
       double targetAmount,
-      bool alreadyGeneratedThisCycle});
+      bool alreadyGeneratedThisCycle,
+      int paidCount,
+      int pendingCount,
+      int missedCount,
+      int totalContributors,
+      bool canConfirmPayout});
 }
 
 /// @nodoc
@@ -1539,6 +1565,11 @@ class _$CurrentPayoutResponseCopyWithImpl<$Res,
     Object? confirmedSoFar = null,
     Object? targetAmount = null,
     Object? alreadyGeneratedThisCycle = null,
+    Object? paidCount = null,
+    Object? pendingCount = null,
+    Object? missedCount = null,
+    Object? totalContributors = null,
+    Object? canConfirmPayout = null,
   }) {
     return _then(_value.copyWith(
       slotId: null == slotId
@@ -1573,6 +1604,26 @@ class _$CurrentPayoutResponseCopyWithImpl<$Res,
           ? _value.alreadyGeneratedThisCycle
           : alreadyGeneratedThisCycle // ignore: cast_nullable_to_non_nullable
               as bool,
+      paidCount: null == paidCount
+          ? _value.paidCount
+          : paidCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      pendingCount: null == pendingCount
+          ? _value.pendingCount
+          : pendingCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      missedCount: null == missedCount
+          ? _value.missedCount
+          : missedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalContributors: null == totalContributors
+          ? _value.totalContributors
+          : totalContributors // ignore: cast_nullable_to_non_nullable
+              as int,
+      canConfirmPayout: null == canConfirmPayout
+          ? _value.canConfirmPayout
+          : canConfirmPayout // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -1594,7 +1645,12 @@ abstract class _$$CurrentPayoutResponseImplCopyWith<$Res>
       String scheduledDate,
       double confirmedSoFar,
       double targetAmount,
-      bool alreadyGeneratedThisCycle});
+      bool alreadyGeneratedThisCycle,
+      int paidCount,
+      int pendingCount,
+      int missedCount,
+      int totalContributors,
+      bool canConfirmPayout});
 }
 
 /// @nodoc
@@ -1617,6 +1673,11 @@ class __$$CurrentPayoutResponseImplCopyWithImpl<$Res>
     Object? confirmedSoFar = null,
     Object? targetAmount = null,
     Object? alreadyGeneratedThisCycle = null,
+    Object? paidCount = null,
+    Object? pendingCount = null,
+    Object? missedCount = null,
+    Object? totalContributors = null,
+    Object? canConfirmPayout = null,
   }) {
     return _then(_$CurrentPayoutResponseImpl(
       slotId: null == slotId
@@ -1651,6 +1712,26 @@ class __$$CurrentPayoutResponseImplCopyWithImpl<$Res>
           ? _value.alreadyGeneratedThisCycle
           : alreadyGeneratedThisCycle // ignore: cast_nullable_to_non_nullable
               as bool,
+      paidCount: null == paidCount
+          ? _value.paidCount
+          : paidCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      pendingCount: null == pendingCount
+          ? _value.pendingCount
+          : pendingCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      missedCount: null == missedCount
+          ? _value.missedCount
+          : missedCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalContributors: null == totalContributors
+          ? _value.totalContributors
+          : totalContributors // ignore: cast_nullable_to_non_nullable
+              as int,
+      canConfirmPayout: null == canConfirmPayout
+          ? _value.canConfirmPayout
+          : canConfirmPayout // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -1666,7 +1747,12 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
       required this.scheduledDate,
       required this.confirmedSoFar,
       required this.targetAmount,
-      required this.alreadyGeneratedThisCycle});
+      required this.alreadyGeneratedThisCycle,
+      required this.paidCount,
+      required this.pendingCount,
+      required this.missedCount,
+      required this.totalContributors,
+      required this.canConfirmPayout});
 
   factory _$CurrentPayoutResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$CurrentPayoutResponseImplFromJson(json);
@@ -1693,9 +1779,35 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
   @override
   final bool alreadyGeneratedThisCycle;
 
+  /// How many of this cycle's contributions are PAID.
+  @override
+  final int paidCount;
+
+  /// Still undecided — PENDING or REPORTED combined. Nonzero here
+  /// is exactly why `canConfirmPayout` below is false.
+  @override
+  final int pendingCount;
+
+  /// MISSED — settled, does NOT block payout confirmation (unlike
+  /// pendingCount). A chronic non-payer marked MISSED never freezes
+  /// the circle; the pot is honestly just short by that amount.
+  @override
+  final int missedCount;
+
+  /// paidCount + pendingCount + missedCount.
+  @override
+  final int totalContributors;
+
+  /// Mirrors exactly what the backend itself enforces on confirm —
+  /// true iff pendingCount is zero. Use this to grey out the
+  /// "Confirm payout" button proactively instead of only discovering
+  /// the block via a 400.
+  @override
+  final bool canConfirmPayout;
+
   @override
   String toString() {
-    return 'CurrentPayoutResponse(slotId: $slotId, userId: $userId, userFullName: $userFullName, handNumber: $handNumber, scheduledDate: $scheduledDate, confirmedSoFar: $confirmedSoFar, targetAmount: $targetAmount, alreadyGeneratedThisCycle: $alreadyGeneratedThisCycle)';
+    return 'CurrentPayoutResponse(slotId: $slotId, userId: $userId, userFullName: $userFullName, handNumber: $handNumber, scheduledDate: $scheduledDate, confirmedSoFar: $confirmedSoFar, targetAmount: $targetAmount, alreadyGeneratedThisCycle: $alreadyGeneratedThisCycle, paidCount: $paidCount, pendingCount: $pendingCount, missedCount: $missedCount, totalContributors: $totalContributors, canConfirmPayout: $canConfirmPayout)';
   }
 
   @override
@@ -1717,7 +1829,17 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
                 other.targetAmount == targetAmount) &&
             (identical(other.alreadyGeneratedThisCycle,
                     alreadyGeneratedThisCycle) ||
-                other.alreadyGeneratedThisCycle == alreadyGeneratedThisCycle));
+                other.alreadyGeneratedThisCycle == alreadyGeneratedThisCycle) &&
+            (identical(other.paidCount, paidCount) ||
+                other.paidCount == paidCount) &&
+            (identical(other.pendingCount, pendingCount) ||
+                other.pendingCount == pendingCount) &&
+            (identical(other.missedCount, missedCount) ||
+                other.missedCount == missedCount) &&
+            (identical(other.totalContributors, totalContributors) ||
+                other.totalContributors == totalContributors) &&
+            (identical(other.canConfirmPayout, canConfirmPayout) ||
+                other.canConfirmPayout == canConfirmPayout));
   }
 
   @JsonKey(ignore: true)
@@ -1731,7 +1853,12 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
       scheduledDate,
       confirmedSoFar,
       targetAmount,
-      alreadyGeneratedThisCycle);
+      alreadyGeneratedThisCycle,
+      paidCount,
+      pendingCount,
+      missedCount,
+      totalContributors,
+      canConfirmPayout);
 
   @JsonKey(ignore: true)
   @override
@@ -1750,15 +1877,19 @@ class _$CurrentPayoutResponseImpl implements _CurrentPayoutResponse {
 
 abstract class _CurrentPayoutResponse implements CurrentPayoutResponse {
   const factory _CurrentPayoutResponse(
-          {required final String slotId,
-          required final String userId,
-          required final String userFullName,
-          required final int handNumber,
-          required final String scheduledDate,
-          required final double confirmedSoFar,
-          required final double targetAmount,
-          required final bool alreadyGeneratedThisCycle}) =
-      _$CurrentPayoutResponseImpl;
+      {required final String slotId,
+      required final String userId,
+      required final String userFullName,
+      required final int handNumber,
+      required final String scheduledDate,
+      required final double confirmedSoFar,
+      required final double targetAmount,
+      required final bool alreadyGeneratedThisCycle,
+      required final int paidCount,
+      required final int pendingCount,
+      required final int missedCount,
+      required final int totalContributors,
+      required final bool canConfirmPayout}) = _$CurrentPayoutResponseImpl;
 
   factory _CurrentPayoutResponse.fromJson(Map<String, dynamic> json) =
       _$CurrentPayoutResponseImpl.fromJson;
@@ -1784,6 +1915,32 @@ abstract class _CurrentPayoutResponse implements CurrentPayoutResponse {
   /// itself out proactively instead of only failing with a 400
   /// after the fact.
   bool get alreadyGeneratedThisCycle;
+  @override
+
+  /// How many of this cycle's contributions are PAID.
+  int get paidCount;
+  @override
+
+  /// Still undecided — PENDING or REPORTED combined. Nonzero here
+  /// is exactly why `canConfirmPayout` below is false.
+  int get pendingCount;
+  @override
+
+  /// MISSED — settled, does NOT block payout confirmation (unlike
+  /// pendingCount). A chronic non-payer marked MISSED never freezes
+  /// the circle; the pot is honestly just short by that amount.
+  int get missedCount;
+  @override
+
+  /// paidCount + pendingCount + missedCount.
+  int get totalContributors;
+  @override
+
+  /// Mirrors exactly what the backend itself enforces on confirm —
+  /// true iff pendingCount is zero. Use this to grey out the
+  /// "Confirm payout" button proactively instead of only discovering
+  /// the block via a 400.
+  bool get canConfirmPayout;
   @override
   @JsonKey(ignore: true)
   _$$CurrentPayoutResponseImplCopyWith<_$CurrentPayoutResponseImpl>

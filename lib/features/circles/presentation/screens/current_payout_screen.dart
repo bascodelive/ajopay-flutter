@@ -132,6 +132,13 @@ class CurrentPayoutScreen extends ConsumerWidget {
                   .clamp(0.0, 1.0)
                   .toDouble()
               : 0.0;
+          // "Yet to pay" combines pending (still might pay) and missed
+          // (settled, won't pay) — the two-banner view is about the
+          // simple paid-vs-not split every participant can act on; the
+          // finer pending-vs-missed distinction only matters for WHY
+          // the Confirm button is or isn't available, shown separately
+          // below.
+          final yetToPay = payout.pendingCount + payout.missedCount;
 
           return RefreshIndicator(
             onRefresh: () => ref.refresh(currentPayoutProvider(key).future),
@@ -224,11 +231,64 @@ class CurrentPayoutScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  // The two-banner transparency view — makes it visible
+                  // to every participant (not just the Admin) exactly
+                  // who's responsible for a payout not being confirmed
+                  // yet: the participants who haven't paid, not the
+                  // Admin sitting on it.
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _CountBanner(
+                          icon: Icons.check_circle_outline,
+                          color: AjopayColors.success,
+                          count: payout.paidCount,
+                          label: 'Paid',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _CountBanner(
+                          icon: Icons.hourglass_top,
+                          color: AjopayColors.gold,
+                          count: yetToPay,
+                          label: 'Yet to pay',
+                        ),
+                      ),
+                    ],
+                  ),
                   if (isAdmin) ...[
                     const SizedBox(height: 24),
+                    if (!payout.canConfirmPayout)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.info_outline,
+                                size: 18, color: AjopayColors.textMuted),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${payout.pendingCount} participant${payout.pendingCount == 1 ? '' : 's'} '
+                                'still ${payout.pendingCount == 1 ? 'hasn\'t' : 'haven\'t'} paid or reported '
+                                'for this cycle — payout can\'t be confirmed until everyone has paid, '
+                                'reported, or been marked missed.',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: AjopayColors.textMuted),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ElevatedButton(
-                      onPressed: () => _confirm(
-                          context, ref, payout.slotId, payout.userFullName),
+                      onPressed: payout.canConfirmPayout
+                          ? () => _confirm(
+                              context, ref, payout.slotId, payout.userFullName)
+                          : null,
                       child: const Text('Confirm payout'),
                     ),
                   ],
@@ -237,6 +297,51 @@ class CurrentPayoutScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _CountBanner extends StatelessWidget {
+  const _CountBanner({
+    required this.icon,
+    required this.color,
+    required this.count,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color color;
+  final int count;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: color.withValues(alpha: 0.10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 26),
+            const SizedBox(height: 8),
+            Text(
+              '$count',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: color,
+                  ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }

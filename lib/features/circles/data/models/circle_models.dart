@@ -126,6 +126,27 @@ class CurrentPayoutResponse with _$CurrentPayoutResponse {
     /// itself out proactively instead of only failing with a 400
     /// after the fact.
     required bool alreadyGeneratedThisCycle,
+
+    /// How many of this cycle's contributions are PAID.
+    required int paidCount,
+
+    /// Still undecided — PENDING or REPORTED combined. Nonzero here
+    /// is exactly why `canConfirmPayout` below is false.
+    required int pendingCount,
+
+    /// MISSED — settled, does NOT block payout confirmation (unlike
+    /// pendingCount). A chronic non-payer marked MISSED never freezes
+    /// the circle; the pot is honestly just short by that amount.
+    required int missedCount,
+
+    /// paidCount + pendingCount + missedCount.
+    required int totalContributors,
+
+    /// Mirrors exactly what the backend itself enforces on confirm —
+    /// true iff pendingCount is zero. Use this to grey out the
+    /// "Confirm payout" button proactively instead of only discovering
+    /// the block via a 400.
+    required bool canConfirmPayout,
   }) = _CurrentPayoutResponse;
 
   factory CurrentPayoutResponse.fromJson(Map<String, dynamic> json) =>

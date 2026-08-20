@@ -27,21 +27,28 @@ part 'message_stream_controller.g.dart';
 /// and-retry never applies to it automatically. Rather than writing a
 /// SECOND, independent refresh call here — which would race against
 /// `AuthInterceptor`'s own single-in-flight refresh and risk using an
-/// already-rotated, dead refresh token (yours are single-use) — this
-/// periodically fires one ordinary, cheap request through the SAME
-/// shared, already-intercepted `dioProvider` Dio instance
-/// (`GET /api/account/profile`). If the access token is stale,
-/// `AuthInterceptor` transparently refreshes it exactly as it would for
-/// any other screen's request; this then reconnects the SSE stream,
-/// which reads whatever fresh token secure storage now holds. That's
-/// deliberately simpler than trying to introspect a JWT's expiry
-/// client-side.
+/// already-rotated, dead refresh token (yours are single-use) — every
+/// path that opens a real connection first fires one ordinary, cheap
+/// request through the SAME shared, already-intercepted `dioProvider`
+/// Dio instance (`GET /api/account/profile`). If the access token is
+/// stale, `AuthInterceptor` transparently refreshes it exactly as it
+/// would for any other screen's request; only then does this open the
+/// SSE connection, reading whatever fresh token secure storage now
+/// holds.
 ///
-/// **Separately, reconnect-on-drop:** an ordinary network blip, the app
-/// backgrounding, or the server closing the connection all surface as
-/// `onError`/`onDone` on the stream — handled with a capped exponential
-/// backoff (2s, 4s, 8s, 16s, capped at 30s), distinct from the proactive
-/// keep-alive above.
+/// **This "probe before every open" step is deliberately NOT limited to
+/// the periodic keep-alive timer.** The connection dropping on its own
+/// (`onError`/`onDone`) is usually not a random blip — it's the backend
+/// closing the stream because the access token used at handshake time
+/// just expired (SSE has no per-message reauth, so an expired token
+/// only surfaces once the connection actually drops). Reconnecting with
+/// whatever's still in storage at that moment reuses the SAME dead
+/// token that just caused the drop, fails again, and loops on backoff
+/// until the next scheduled keep-alive happens to catch up — visible as
+/// repeated "access denied" in the console right around a token
+/// refresh. Routing the error/done-triggered reconnect through the same
+/// guarded probe as the keep-alive timer closes that gap: every attempt
+/// to open a connection, for any reason, checks freshness first.
 @Riverpod(keepAlive: true)
 class MessageStreamController extends _$MessageStreamController {
   StreamSubscription<SSEModel>? _subscription;
@@ -71,6 +78,36 @@ class MessageStreamController extends _$MessageStreamController {
     _intentionallyDisconnected = false;
     if (_connectedLedgerId == ledgerId && _subscription != null) return;
     _teardown();
+    // Probe-first even on the very first connect — the app may have
+    // been backgrounded long enough for the stored access token to
+    // already be stale by the time this screen opens.
+    await _openWithFreshToken(ledgerId);
+  }
+
+  /// The single entry point every reconnect path now goes through —
+  /// the periodic keep-alive, the error/done-triggered backoff, and the
+  /// initial connect above. Forces AuthInterceptor's guarded refresh-if-
+  /// stale check via a real Dio call, THEN opens the SSE connection with
+  /// whatever token secure storage holds afterward.
+  Future<void> _openWithFreshToken(String ledgerId) async {
+    if (_connectedLedgerId != null && _connectedLedgerId != ledgerId) {
+      return; // screen moved on to a different ledger already
+    }
+
+    try {
+      // The point isn't the response — it's forcing AuthInterceptor's
+      // normal refresh-on-401 path to run if the token has gone stale.
+      // Goes through the SAME single-in-flight guard as every other
+      // request in the app, so this can never race an ordinary screen's
+      // own refresh into using an already-rotated refresh token.
+      await ref.read(dioProvider).get('/api/account/profile');
+    } catch (_) {
+      // A genuine failure beyond the expected transparent 401-refresh-
+      // retry doesn't need special handling here — opening anyway is
+      // harmless, and if the connection still can't authenticate, the
+      // normal onError/backoff path below takes over again.
+    }
+
     await _openConnection(ledgerId);
   }
 
@@ -99,28 +136,8 @@ class MessageStreamController extends _$MessageStreamController {
     _keepAliveTimer?.cancel();
     _keepAliveTimer = Timer.periodic(
       _keepAliveInterval,
-      (_) => _refreshTokenThenReconnect(ledgerId),
+      (_) => _openWithFreshToken(ledgerId),
     );
-  }
-
-  Future<void> _refreshTokenThenReconnect(String ledgerId) async {
-    if (_connectedLedgerId != ledgerId) return; // screen moved on already
-
-    try {
-      // The point isn't the response — it's forcing AuthInterceptor's
-      // normal refresh-on-401 path to run if the token has gone stale.
-      await ref.read(dioProvider).get('/api/account/profile');
-    } catch (_) {
-      // A genuine failure beyond the expected transparent 401-refresh-
-      // retry doesn't need special handling here — reconnecting anyway
-      // is harmless, and if the connection still can't authenticate,
-      // the normal onError/backoff path below takes over.
-    }
-
-    if (_connectedLedgerId == ledgerId) {
-      await _openConnection(
-          ledgerId); // picks up whatever token secure storage holds now
-    }
   }
 
   void _scheduleReconnect(String ledgerId) {
@@ -134,7 +151,10 @@ class MessageStreamController extends _$MessageStreamController {
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
       if (_intentionallyDisconnected || _connectedLedgerId != ledgerId) return;
-      _openConnection(ledgerId);
+      // Probe-first here too — this is the path that most often follows
+      // an expired-token-caused drop, so it needs the freshness check
+      // at least as much as the periodic timer does.
+      _openWithFreshToken(ledgerId);
     });
   }
 

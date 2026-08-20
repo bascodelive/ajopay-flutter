@@ -38,10 +38,13 @@ class _ContributionsListScreenState
     final ledgerAsync = ref.watch(ledgerDetailProvider(widget.ledgerId));
     final isAdmin = ledgerAsync.valueOrNull?.callerRole == 'ADMIN';
 
-    // Tab count depends on role — only build the controller once we
-    // actually know it, and rebuild it if role becomes known later
-    // (e.g. ledger data was still loading on first build).
-    final tabCount = isAdmin ? 2 : 1;
+    // Both tabs are now shown to every active member — previously only
+    // an Admin could see "All" (who's paid/pending/missed for the whole
+    // ledger); everyone can now, same transparency reasoning already
+    // applied to the circle/contribution history screens. Mutation
+    // actions (the + icon, the generate/batch banners below) stay
+    // Admin-gated independently — this only affects who can VIEW.
+    const tabCount = 2;
     if (_tabController == null || _tabController!.length != tabCount) {
       _tabController?.dispose();
       _tabController = TabController(length: tabCount, vsync: this);
@@ -50,16 +53,14 @@ class _ContributionsListScreenState
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contributions'),
-        bottom: tabCount > 1
-            ? TabBar(
+        bottom: TabBar(
                 controller: _tabController,
                 indicatorColor: Colors.white,
                 indicatorWeight: 3,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white70,
                 tabs: const [Tab(text: 'All'), Tab(text: 'Mine')],
-              )
-            : null,
+              ),
         actions: [
           if (isAdmin)
             IconButton(
@@ -71,8 +72,7 @@ class _ContributionsListScreenState
       ),
       body: AppBackdrop(
         stops: const [0.0, 0.15],
-        child: tabCount > 1
-            ? TabBarView(
+        child: TabBarView(
                 controller: _tabController,
                 children: [
                   _ContributionsListView(
@@ -86,11 +86,6 @@ class _ContributionsListScreenState
                     isAdmin: isAdmin,
                   ),
                 ],
-              )
-            : _ContributionsListView(
-                ledgerId: widget.ledgerId,
-                scope: ContributionScope.own,
-                isAdmin: isAdmin,
               ),
       ),
     );
@@ -221,9 +216,8 @@ class _ContributionsListViewState
         // no circle-awareness at all (see backend design decision), so
         // this action never needs to check circle status to decide
         // whether to show itself.
-        final scheduleBanner = showGenerateBanner
-            ? _ScheduleContributionBanner(ledgerId: widget.ledgerId)
-            : null;
+        final scheduleBanner =
+            showGenerateBanner ? _ScheduleContributionBatchBanner(ledgerId: widget.ledgerId) : null;
         final banners = [
           if (circleBanner != null) circleBanner,
           if (scheduleBanner != null) scheduleBanner,
@@ -472,8 +466,8 @@ class _GenerateCycleBannerState extends ConsumerState<_GenerateCycleBanner> {
 /// what state it's in. Previously the only way to reach this was a bare
 /// `+` icon in the AppBar — easy to miss, and gave no indication this
 /// path exists independently of the circle banner above it.
-class _ScheduleContributionBanner extends StatelessWidget {
-  const _ScheduleContributionBanner({required this.ledgerId});
+class _ScheduleContributionBatchBanner extends StatelessWidget {
+  const _ScheduleContributionBatchBanner({required this.ledgerId});
 
   final String ledgerId;
 
@@ -493,7 +487,7 @@ class _ScheduleContributionBanner extends StatelessWidget {
                 color: AjopayColors.primaryTint,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.event_available_outlined,
+              child: const Icon(Icons.groups_outlined,
                   color: AjopayColors.primaryDark, size: 19),
             ),
             const SizedBox(width: 12),
@@ -502,12 +496,13 @@ class _ScheduleContributionBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Schedule a contribution',
+                    'Start a contribution round',
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   Text(
-                    'Open a one-off contribution for a member\'s cycle — '
-                    'works with or without a circle.',
+                    'Pick one, several, or every member and one cycle date — '
+                    'works with or without a circle. For opening a single '
+                    'missed contribution instead, use the + above.',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AjopayColors.textSecondary,
                         ),
@@ -519,13 +514,13 @@ class _ScheduleContributionBanner extends StatelessWidget {
             SizedBox(
               width: 96,
               child: OutlinedButton(
-                onPressed: () =>
-                    context.push('/ledgers/$ledgerId/contributions/schedule'),
+                onPressed: () => context
+                    .push('/ledgers/$ledgerId/contributions/schedule-batch'),
                 style: OutlinedButton.styleFrom(
                   minimumSize: const Size(0, 36),
                   padding: EdgeInsets.zero,
                 ),
-                child: const Text('Schedule'),
+                child: const Text('Start'),
               ),
             ),
           ],

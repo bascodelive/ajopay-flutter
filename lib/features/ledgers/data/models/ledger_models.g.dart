@@ -17,6 +17,8 @@ _$LedgerResponseImpl _$$LedgerResponseImplFromJson(Map<String, dynamic> json) =>
       callerRole: json['callerRole'] as String,
       membershipStatus: json['membershipStatus'] as String,
       locked: json['locked'] as bool? ?? false,
+      autoGenerateContributions:
+          json['autoGenerateContributions'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$LedgerResponseImplToJson(
@@ -31,6 +33,7 @@ Map<String, dynamic> _$$LedgerResponseImplToJson(
       'callerRole': instance.callerRole,
       'membershipStatus': instance.membershipStatus,
       'locked': instance.locked,
+      'autoGenerateContributions': instance.autoGenerateContributions,
     };
 
 _$CreateLedgerRequestImpl _$$CreateLedgerRequestImplFromJson(
@@ -63,6 +66,19 @@ Map<String, dynamic> _$$UpdateLedgerRequestImplToJson(
       'name': instance.name,
       'contributionFrequency': instance.contributionFrequency,
       'contributionAmount': instance.contributionAmount,
+    };
+
+_$SetAutoGenerateContributionsRequestImpl
+    _$$SetAutoGenerateContributionsRequestImplFromJson(
+            Map<String, dynamic> json) =>
+        _$SetAutoGenerateContributionsRequestImpl(
+          enabled: json['enabled'] as bool,
+        );
+
+Map<String, dynamic> _$$SetAutoGenerateContributionsRequestImplToJson(
+        _$SetAutoGenerateContributionsRequestImpl instance) =>
+    <String, dynamic>{
+      'enabled': instance.enabled,
     };
 
 _$JoinLedgerRequestImpl _$$JoinLedgerRequestImplFromJson(

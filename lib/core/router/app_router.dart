@@ -23,6 +23,7 @@ import '../../features/contributions/data/models/contribution_models.dart';
 import '../../features/contributions/presentation/screens/contribution_detail_screen.dart';
 import '../../features/contributions/presentation/screens/contributions_list_screen.dart';
 import '../../features/contributions/presentation/screens/schedule_contribution_screen.dart';
+import '../../features/contributions/presentation/screens/schedule_contribution_batch_screen.dart';
 import '../../features/ledgers/presentation/screens/create_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/edit_ledger_screen.dart';
 import '../../features/ledgers/presentation/screens/join_ledger_screen.dart';
@@ -240,6 +241,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ledgers/:id/contributions/schedule',
         builder: (context, state) => ScheduleContributionScreen(
+          ledgerId: state.pathParameters['id']!,
+        ),
+      ),
+      // Batch scheduling — admin picks one/several/all members plus one
+      // cycle date, independent of any Circle. Registered as its own
+      // route, sibling to the single-member `schedule` route above.
+      GoRoute(
+        path: '/ledgers/:id/contributions/schedule-batch',
+        builder: (context, state) => ScheduleContributionBatchScreen(
           ledgerId: state.pathParameters['id']!,
         ),
       ),
