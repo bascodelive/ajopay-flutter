@@ -166,6 +166,27 @@ class LedgerRepository {
     }
   }
 
+  /// ADMIN-only — removes an active member. Cannot target the caller's
+  /// own membership (see leaveLedger below) or this ledger's own Admin
+  /// (backend-enforced; not re-checked client-side).
+  Future<void> removeMember(String ledgerId, String userId) async {
+    try {
+      await _dio.post('/api/ledgers/$ledgerId/members/$userId/remove');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
+  /// Self-service — any active member except this ledger's own Admin
+  /// (an Admin leaving would orphan the ledger; backend rejects it).
+  Future<void> leaveLedger(String ledgerId) async {
+    try {
+      await _dio.post('/api/ledgers/$ledgerId/leave');
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<PageResponse<LedgerDirectoryEntryResponse>> getDirectory({
     String? search,
     DirectorySort orderBy = DirectorySort.newest,

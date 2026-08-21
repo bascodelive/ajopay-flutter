@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/api_exception.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_feedback.dart';
 import '../../../../core/widgets/app_backdrop.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../account/application/account_controller.dart';
 import '../../application/ledger_controller.dart';
 import '../../data/models/ledger_models.dart';
 
@@ -22,6 +24,7 @@ class LedgerMembersScreen extends ConsumerStatefulWidget {
 class _LedgerMembersScreenState extends ConsumerState<LedgerMembersScreen>
     with SingleTickerProviderStateMixin {
   TabController? _tabController;
+  bool _isLeaving = false;
 
   @override
   void dispose() {
@@ -29,10 +32,59 @@ class _LedgerMembersScreenState extends ConsumerState<LedgerMembersScreen>
     super.dispose();
   }
 
+  Future<void> _leave(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Leave this ledger?'),
+        content: const Text(
+          "You'll lose access to its circle, contributions, and messages. "
+          "You can request to rejoin later, but the ledger's Admin will "
+          "need to approve it again.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AjopayColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Leave'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    setState(() => _isLeaving = true);
+    final ok = await ref
+        .read(ledgerControllerProvider.notifier)
+        .leaveLedger(widget.ledgerId);
+
+    if (!context.mounted) return;
+    setState(() => _isLeaving = false);
+
+    if (ok) {
+      AppFeedback.showSuccess(context, "You've left this ledger");
+      // Nothing left to show for this ledger from this account's
+      // perspective — go back further than just this screen.
+      context.go('/');
+    } else {
+      final message = ref.read(ledgerControllerProvider.notifier).lastError;
+      AppFeedback.showError(context, message ?? 'Could not leave this ledger.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ledgerAsync = ref.watch(ledgerDetailProvider(widget.ledgerId));
     final isAdmin = ledgerAsync.valueOrNull?.callerRole == 'ADMIN';
+    final myUserId = ref.watch(accountControllerProvider).valueOrNull?.id;
 
     // Only Admins get a Pending tab at all — a plain member has no access
     // to that endpoint server-side (403), so there's nothing useful to
@@ -55,6 +107,24 @@ class _LedgerMembersScreenState extends ConsumerState<LedgerMembersScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Members'),
+        // The Admin never gets this — leaving would orphan the ledger
+        // (backend rejects it outright; this hides the dead-end action
+        // rather than showing a button that always fails).
+        actions: [
+          if (ledgerAsync.hasValue && !isAdmin)
+            IconButton(
+              tooltip: 'Leave ledger',
+              icon: _isLeaving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.exit_to_app),
+              onPressed: _isLeaving ? null : () => _leave(context),
+            ),
+        ],
         bottom: tabCount > 1
             ? TabBar(
                 controller: _tabController,
@@ -82,11 +152,19 @@ class _LedgerMembersScreenState extends ConsumerState<LedgerMembersScreen>
             ? TabBarView(
                 controller: _tabController,
                 children: [
-                  _ActiveMembersView(ledgerId: widget.ledgerId),
+                  _ActiveMembersView(
+                    ledgerId: widget.ledgerId,
+                    isAdmin: isAdmin,
+                    myUserId: myUserId,
+                  ),
                   _PendingMembersView(ledgerId: widget.ledgerId),
                 ],
               )
-            : _ActiveMembersView(ledgerId: widget.ledgerId),
+            : _ActiveMembersView(
+                ledgerId: widget.ledgerId,
+                isAdmin: isAdmin,
+                myUserId: myUserId,
+              ),
       ),
     );
   }
@@ -118,9 +196,60 @@ class _CountBadge extends StatelessWidget {
 }
 
 class _ActiveMembersView extends ConsumerWidget {
-  const _ActiveMembersView({required this.ledgerId});
+  const _ActiveMembersView({
+    required this.ledgerId,
+    required this.isAdmin,
+    required this.myUserId,
+  });
 
   final String ledgerId;
+  final bool isAdmin;
+  final String? myUserId;
+
+  Future<void> _remove(
+    BuildContext context,
+    WidgetRef ref,
+    LedgerMemberResponse member,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Remove this member?'),
+        content: Text(
+          '${member.fullName} will lose access to this ledger. They can '
+          'request to rejoin later, and you\'ll need to approve it again.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AjopayColors.error,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    final ok = await ref
+        .read(ledgerControllerProvider.notifier)
+        .removeMember(ledgerId, member.userId);
+    if (!context.mounted) return;
+
+    if (ok) {
+      AppFeedback.showSuccess(context, '${member.fullName} removed');
+    } else {
+      final message = ref.read(ledgerControllerProvider.notifier).lastError;
+      AppFeedback.showError(context, message ?? 'Could not remove this member.');
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -163,7 +292,21 @@ class _ActiveMembersView extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           itemCount: members.length,
           separatorBuilder: (context, _) => const SizedBox(height: 8),
-          itemBuilder: (context, index) => _MemberTile(member: members[index]),
+          itemBuilder: (context, index) {
+            final member = members[index];
+            final isSelf = myUserId != null && member.userId == myUserId;
+            // Can remove when: caller is Admin, this row isn't the
+            // caller's own (use Leave for that — the AppBar action
+            // above), and this row isn't itself the Admin (backend
+            // rejects that anyway; hidden here rather than shown as a
+            // dead-end button).
+            final canRemove = isAdmin && !isSelf && member.role != 'ADMIN';
+            return _MemberTile(
+              member: member,
+              canRemove: canRemove,
+              onRemove: canRemove ? () => _remove(context, ref, member) : null,
+            );
+          },
         ),
       ),
     );
@@ -337,9 +480,15 @@ class _PendingMembersView extends ConsumerWidget {
 }
 
 class _MemberTile extends StatelessWidget {
-  const _MemberTile({required this.member});
+  const _MemberTile({
+    required this.member,
+    required this.canRemove,
+    this.onRemove,
+  });
 
   final LedgerMemberResponse member;
+  final bool canRemove;
+  final VoidCallback? onRemove;
 
   String get _initials {
     final parts = member.fullName.trim().split(RegExp(r'\s+'));
@@ -367,19 +516,33 @@ class _MemberTile extends StatelessWidget {
         ),
         title: Text(member.fullName),
         subtitle: Text(isActive ? 'Active member' : 'Removed'),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: AjopayColors.primaryTint,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            member.role,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AjopayColors.primaryDark,
-                  fontWeight: FontWeight.w700,
-                ),
-          ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AjopayColors.primaryTint,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                member.role,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AjopayColors.primaryDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ),
+            if (canRemove) ...[
+              const SizedBox(width: 4),
+              IconButton(
+                tooltip: 'Remove',
+                icon: const Icon(Icons.person_remove_outlined,
+                    color: AjopayColors.error, size: 20),
+                onPressed: onRemove,
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -395,10 +558,6 @@ class _PendingMemberTile extends StatefulWidget {
 
   final LedgerMemberResponse member;
 
-  // Future<void> Function(), not VoidCallback — this widget needs to
-  // await the actual request to know when to re-enable itself. The old
-  // VoidCallback version fired-and-forgot, which is exactly why the
-  // buttons stayed tappable through the whole in-flight window.
   final Future<void> Function() onApprove;
   final Future<void> Function() onReject;
 
@@ -407,12 +566,6 @@ class _PendingMemberTile extends StatefulWidget {
 }
 
 class _PendingMemberTileState extends State<_PendingMemberTile> {
-  // One shared flag, not separate approve/reject flags — only one
-  // action can ever be legitimately in flight for a given pending
-  // request at a time, and disabling BOTH buttons the moment either is
-  // tapped is the correct behavior (tapping Decline while Approve is
-  // still resolving makes no more sense than a second tap on Approve
-  // itself).
   bool _isActing = false;
 
   String get _initials {
@@ -427,12 +580,6 @@ class _PendingMemberTileState extends State<_PendingMemberTile> {
     if (_isActing) return;
     setState(() => _isActing = true);
     await action();
-    // No `mounted` check needed before this setState: the tile is
-    // removed from the pending list the moment the parent's provider
-    // invalidates on success, but on FAILURE this exact tile stays
-    // mounted and needs to re-enable itself — that's the whole point.
-    // If it ever WAS unmounted mid-request, this setState is a no-op
-    // Flutter itself guards against, not something to hand-guard here.
     if (mounted) setState(() => _isActing = false);
   }
 

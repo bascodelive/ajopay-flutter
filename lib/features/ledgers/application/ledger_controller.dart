@@ -172,6 +172,41 @@ class LedgerController extends _$LedgerController {
     }
   }
 
+  /// ADMIN action — removes an active member. Invalidates the member
+  /// list so the removed row disappears immediately (the backend query
+  /// behind it is ACTIVE-only, so it just stops appearing, not shown as
+  /// "Removed" in place).
+  Future<bool> removeMember(String ledgerId, String userId) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      await repository.removeMember(ledgerId, userId);
+      ref.invalidate(ledgerMembersProvider(ledgerId));
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
+  /// Self-service — the caller leaves this ledger. Invalidates
+  /// myLedgersProvider too, alongside the member list — same "screen
+  /// triggers this, not buried in a rarely-hit path" reasoning as
+  /// chooseKeptLedger above, since leaving should disappear from the
+  /// caller's own ledger list immediately, not just this ledger's
+  /// member list.
+  Future<bool> leaveLedger(String ledgerId) async {
+    final repository = ref.read(ledgerRepositoryProvider);
+    try {
+      await repository.leaveLedger(ledgerId);
+      ref.invalidate(ledgerMembersProvider(ledgerId));
+      ref.invalidate(myLedgersProvider);
+      return true;
+    } on ApiException catch (e) {
+      _lastError = e.message;
+      return false;
+    }
+  }
+
   /// Any registered user with at least one active ledger membership
   /// somewhere — upserts the caller's own 1-5 star rating on ANY
   /// ledger, membership in that specific ledger not required. Rejected
