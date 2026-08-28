@@ -37,6 +37,22 @@ class ContributionRepository {
     }
   }
 
+  /// Any active member — fetches one contribution by id. Added
+  /// specifically so a tapped CONTRIBUTION_DUE notification can deep-
+  /// link: the notification only carries the contribution's id and
+  /// ledgerId, not the full object the detail screen's route expects
+  /// via `extra`.
+  Future<ContributionResponse> getById(String ledgerId, String contributionId) async {
+    try {
+      final response =
+          await _dio.get('/api/ledgers/$ledgerId/contributions/$contributionId');
+      return ContributionResponse.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiException.fromDioException(e);
+    }
+  }
+
   Future<PageResponse<ContributionResponse>> listOwnForLedger(
     String ledgerId, {
     int page = 0,

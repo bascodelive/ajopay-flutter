@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/brand_underline.dart';
 import '../../../../core/widgets/app_backdrop.dart';
 import '../../../../core/widgets/app_primary_button.dart';
+import '../../../notifications/application/notification_controller.dart';
 import '../../../subscriptions/application/subscription_controller.dart';
 import '../../data/models/ledger_models.dart';
 import '../../application/ledger_controller.dart';
@@ -20,10 +21,6 @@ class LedgerHomeScreen extends ConsumerWidget {
     final isPremium =
         ref.watch(subscriptionControllerProvider).valueOrNull?.isPremium ??
             false;
-    // Fails open on loading/error — a transient hiccup fetching the
-    // limit shouldn't block someone from even opening the sheet; the
-    // backend's own enforceGroupLimit is still the real gate regardless
-    // of what this client-side check shows.
     final limit = limitAsync.valueOrNull;
     final isAtLimit = limit?.isAtLimit ?? false;
 
@@ -31,13 +28,7 @@ class LedgerHomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Ajopay'),
         actions: [
-          // Gated on purpose — a brand-new, zero-ledger account gets a
-          // 403 from the backend on /directory (see LedgerService's
-          // membership gate), so this icon simply doesn't exist for
-          // that account rather than existing as a dead-end tap. Mirrors
-          // the same "must already belong to at least one ledger" rule
-          // the backend enforces, rather than letting the client offer
-          // something the server will just reject.
+          const _NotificationBellIcon(),
           ledgersAsync.maybeWhen(
             data: (ledgers) => ledgers.isEmpty
                 ? const SizedBox.shrink()
@@ -55,9 +46,6 @@ class LedgerHomeScreen extends ConsumerWidget {
         ],
       ),
       body: AppBackdrop(
-        // A long ledger list scrolls well past a short gradient fade, so
-        // this screen's fade is shorter than a form screen's — otherwise
-        // it would just look like a flat color by the time anyone scrolls.
         stops: const [0.0, 0.15],
         child: ledgersAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -114,11 +102,6 @@ class LedgerHomeScreen extends ConsumerWidget {
     );
   }
 
-  /// Shown instead of the Create/Join sheet once the caller is at their
-  /// tier's active-ledger limit — explains why, and only offers an
-  /// Upgrade path if there's actually a higher tier to upgrade TO. A
-  /// Premium caller already at THEIR cap has nothing to upgrade into,
-  /// so that case is purely informational, no CTA.
   void _showLimitReachedSheet(
     BuildContext context,
     bool isPremium,
@@ -238,6 +221,55 @@ class LedgerHomeScreen extends ConsumerWidget {
   }
 }
 
+/// The one new piece — an unread-count badge over a bell icon. Its own
+/// ConsumerWidget rather than inlined in the AppBar's actions list, so
+/// watching unreadNotificationCountProvider doesn't force the whole
+/// AppBar (and everything else in LedgerHomeScreen's build) to rebuild
+/// on every count change.
+class _NotificationBellIcon extends ConsumerWidget {
+  const _NotificationBellIcon();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount =
+        ref.watch(unreadNotificationCountProvider).valueOrNull ?? 0;
+
+    return IconButton(
+      tooltip: 'Notifications',
+      onPressed: () => context.push('/notifications'),
+      icon: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          const Icon(Icons.notifications_outlined),
+          if (unreadCount > 0)
+            Positioned(
+              right: -4,
+              top: -4,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                constraints: const BoxConstraints(minWidth: 16),
+                decoration: BoxDecoration(
+                  color: AjopayColors.gold,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  unreadCount > 99 ? '99+' : '$unreadCount',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _EmptyState extends StatelessWidget {
   const _EmptyState({required this.onRefresh});
 
@@ -318,12 +350,6 @@ class _LedgerCard extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Same rounded-icon language as the new Directory screen's
-              // tiles, so a ledger reads as the same kind of "object"
-              // whether the caller's browsing their own list or the
-              // public directory. Locked swaps the savings icon for a
-              // lock, gray instead of Primary Tint — a glance should
-              // tell locked apart from ordinary ACTIVE/SUSPENDED status.
               Container(
                 width: 44,
                 height: 44,
@@ -413,12 +439,6 @@ class _LedgerCard extends ConsumerWidget {
       ),
     );
 
-    // Desaturated, not just dimmed — a plain Opacity() on a still-green
-    // icon/badge still reads as "this ledger, slightly faded," which
-    // isn't a strong enough signal next to normal cards in the same
-    // list. Grayscale is the "this is unavailable" signal every OS uses
-    // for disabled UI; cheap here since this list is realistically a
-    // handful of items, not a hot scroll path.
     if (!locked) return card;
     return ColorFiltered(
       colorFilter: const ColorFilter.matrix(<double>[
@@ -512,11 +532,6 @@ class _RoleBadge extends StatelessWidget {
   }
 }
 
-/// Shown when a locked ledger's card is tapped. Explains why (in the
-/// same words the backend's LedgerAccessLockedException already uses,
-/// so nothing here can drift out of sync with the real 403 message a
-/// stray write attempt would show), and offers the two real ways out:
-/// renew, or make THIS ledger the one that stays free.
 class _LockedLedgerSheet extends ConsumerStatefulWidget {
   const _LockedLedgerSheet({required this.ledger});
 

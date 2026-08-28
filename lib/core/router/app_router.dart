@@ -35,6 +35,7 @@ import '../../features/ledgers/presentation/screens/ledger_reviews_screen.dart';
 import '../../features/messages/presentation/screens/private_message_thread_screen.dart';
 import '../../features/subscriptions/presentation/screens/subscription_screen.dart';
 import '../../features/help/presentation/screens/help_screen.dart';
+import '../../features/notifications/presentation/screens/notification_list_screen.dart';
 import '../../features/circles/presentation/screens/transfer_offers_screen.dart';
 
 /// go_router needs a Listenable to know when to re-run `redirect` — Riverpod
@@ -126,6 +127,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/subscription',
         builder: (context, state) => const SubscriptionScreen(),
+      ),
+      // Protected — Notifications. Same reasoning as /subscription above:
+      // reached from the top-level bell icon (LedgerHomeScreen), not
+      // owned by any one feature's own navigation flow.
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationListScreen(),
       ),
       // Protected — Phase 3.
       GoRoute(
